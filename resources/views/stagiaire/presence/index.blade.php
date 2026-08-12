@@ -8,6 +8,24 @@
             <p class="text-slate-500 text-sm">Marquez votre présence et gérez vos permissions</p>
         </div>
 
+        <!-- Juste après le titre -->
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-5" data-aos="fade-up">
+            <p class="text-white-700 text-sm">
+                <i class="fas fa-clock mr-2"></i>
+                Horaires de travail configurés : <strong>{{ \Carbon\Carbon::parse($heureDebut)->format('H:i') }}</strong> –
+                <strong>{{ \Carbon\Carbon::parse($heureFin)->format('H:i') }}</strong>
+            </p>
+            <p class="text-white-600 text-xs mt-1">
+                <span class="inline-block mr-3"><span class="text-blue-600">●</span> Présent avant
+                    {{ \Carbon\Carbon::parse($heureDebut)->format('H:i') }}</span>
+                <span class="inline-block mr-3"><span class="text-amber-600">●</span> Retard entre
+                    {{ \Carbon\Carbon::parse($heureDebut)->format('H:i') }} et
+                    {{ \Carbon\Carbon::parse($heureFin)->format('H:i') }}</span>
+                <span class="inline-block"><span class="text-red-600">●</span> Absent après
+                    {{ \Carbon\Carbon::parse($heureFin)->format('H:i') }}</span>
+            </p>
+        </div>
+
         <!-- Marquage présence du jour -->
         <div class="card p-6 border-l-4 {{ $peutMarquer ? 'border-green-400' : 'border-slate-300' }}" data-aos="fade-up">
             <div class="flex items-center gap-4 flex-wrap">
@@ -17,7 +35,8 @@
                         class="fas fa-{{ $peutMarquer ? 'user-check' : 'check-double' }} text-{{ $peutMarquer ? 'green' : 'slate' }}-600 text-2xl"></i>
                 </div>
                 <div class="flex-1">
-                    <h3 class="font-bold text-slate-800 text-lg">Aujourd'hui — {{ now()->translatedFormat('l d F Y') }}</h3>
+                    <h3 class="font-bold text-slate-800 text-lg">Aujourd'hui — {{ now()->translatedFormat('l d F Y') }}
+                    </h3>
                     @if ($presenceAujourdhui)
                         <p class="text-green-600 font-semibold text-sm mt-1">
                             <i class="fas fa-check-circle mr-1"></i>
@@ -175,7 +194,7 @@
         </div>
 
         <!-- Historique présences -->
-        <div class="card overflow-hidden" data-aos="fade-up">
+        <div class="card overflow-hidden" {{-- data-aos="fade-up" --}}>
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
                 <h3 class="font-bold text-slate-800 text-lg"><i class="fas fa-history text-amber-500 mr-2"></i>Mon
                     historique de présence</h3>

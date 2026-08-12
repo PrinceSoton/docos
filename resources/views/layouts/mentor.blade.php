@@ -145,7 +145,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-            <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+            {{-- <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
                 <div
                     class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center flex-shrink-0">
                     @if (Auth::user()->photo)
@@ -160,7 +160,7 @@
                     <p class="text-white font-semibold text-sm truncate">{{ Auth::user()->nom_complet }}</p>
                     <p class="text-emerald-300 text-xs">Tuteur/Mentor</p>
                 </div>
-            </div>
+            </div> --}}
             <nav class="flex-1 py-4 overflow-y-auto">
                 <a href="{{ route('mentor.dashboard') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.dashboard') ? 'active' : '' }}">
@@ -237,8 +237,11 @@
                             <span
                                 class="text-white text-xs font-bold">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
                         </div>
-                        <span
-                            class="text-slate-700 font-medium text-sm hidden md:block">{{ Auth::user()->prenom }}</span>
+                        <span class="text-slate-700 font-medium text-sm hidden md:block">
+                            <p>{{ Auth::user()->nom_complet }}</p>
+                            <p class="text-indigo-300 text-xs">Mentor</p>
+
+                        </span>
                     </a>
                 </div>
             </header>

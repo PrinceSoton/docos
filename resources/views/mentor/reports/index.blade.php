@@ -57,7 +57,7 @@
                                 </td>
                                 <td class="px-5 py-4">
                                     <span
-                                        class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 capitalize">{{ $rapport->type }}</span>
+                                        class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 capitalize">{{ $rapport->type_affiche }}</span>
                                 </td>
                                 <td class="px-5 py-4 text-slate-500 text-sm">{{ $rapport->project?->titre ?: '—' }}</td>
                                 <td class="px-5 py-4 text-center">

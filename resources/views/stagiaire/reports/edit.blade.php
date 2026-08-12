@@ -32,6 +32,13 @@
                             @endforeach
                         </select>
                     </div>
+                    <div id="type_autre_div"
+                        style="{{ $report->type == 'autre' && $report->type_autre ? '' : 'display:none;' }}" class="mt-3">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Précisez le type *</label>
+                        <input type="text" name="type_autre" value="{{ old('type_autre', $report->type_autre) }}"
+                            class="w-full ..." placeholder="Ex: Rapport technique...">
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Projet lié</label>
                         <select name="project_id"

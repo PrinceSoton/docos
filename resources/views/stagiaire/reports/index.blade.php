@@ -9,7 +9,7 @@
                 <p class="text-slate-500 text-sm">{{ $rapports->total() }} rapport(s) déposé(s)</p>
             </div>
             <a href="{{ route('stagiaire.reports.create') }}"
-                class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                class="flex items-center gap-2 {{-- bg-gradient-to-rfrom-indigo-600to-purple-600 --}} bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <i class="fas fa-plus"></i>Nouveau rapport
             </a>
         </div>
@@ -44,7 +44,7 @@
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <div>
                                 <h3 class="font-bold text-slate-800">{{ $rapport->titre }}</h3>
-                                <p class="text-slate-400 text-xs mt-0.5 capitalize">{{ $rapport->type }}</p>
+                                {{-- <pclass="text-slate-400text-xsmt-0.5capitalize">$rapport->type </p> --}}
                             </div>
                             @php $sl = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
                             <span

@@ -11,11 +11,18 @@ class Report extends Model
 
     protected $fillable = [
         'stagiaire_id', 'project_id', 'titre', 'description',
-        'fichier', 'type', 'statut', 'note',
+        'fichier', 'type', 'type_autre', 'statut', 'note',
         'commentaire_mentor', 'valide_par', 'valide_le',
     ];
 
     protected $casts = ['valide_le' => 'datetime'];
+
+    public function getTypeAfficheAttribute(): string
+    {
+        return $this->type === 'autre' && $this->type_autre
+            ? $this->type_autre
+            : $this->type;
+    }
 
     public function stagiaire()
     {

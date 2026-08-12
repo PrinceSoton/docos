@@ -2,10 +2,10 @@
 @section('titre', 'Profil Stagiaire')
 @section('breadcrumb', 'Stagiaires > Profil')
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-5">
+    <div class="max-w-5xl mx-auto space-y-5" data-aos="fade-up">
         <!-- En-tête -->
         <div class="card p-0 overflow-hidden" data-aos="fade-up">
-            <div class="h-28 bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600"></div>
+            <div class="h-28 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
             <div class="px-8 pb-6">
                 <div class="flex items-end gap-5 -mt-12 flex-wrap">
                     <div
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Progression globale tâches -->
-        <div class="card p-6" data-aos="fade-up">
+        <div class="card p-6" {{-- data-aos="fade-up" --}}>
             <div class="flex justify-between mb-2">
                 <h3 class="text-slate-800 font-bold text-lg"><i class="fas fa-tasks text-emerald-500 mr-2"></i>Progression
                     des tâches</h3>
@@ -101,7 +101,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- Projets -->
-            <div class="card p-6" data-aos="fade-right">
+            <div class="card p-6" {{-- data-aos="fade-right" --}}>
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i
                         class="fas fa-project-diagram text-blue-500 mr-2"></i>Projets ({{ $stagiaire->projects->count() }})
                 </h3>
@@ -127,7 +127,7 @@
             </div>
 
             <!-- Rapports récents -->
-            <div class="card p-6" data-aos="fade-left">
+            <div class="card p-6" {{-- data-aos="fade-left" --}}>
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-slate-800 font-bold text-lg"><i
                             class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports ({{ $stats['rapports'] }})</h3>

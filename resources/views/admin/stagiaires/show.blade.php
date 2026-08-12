@@ -5,12 +5,12 @@
     <div class="max-w-5xl mx-auto space-y-5">
         <!-- En-tête -->
         <div class="card p-0 overflow-hidden" data-aos="fade-up">
-            <div class="h-28 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500"></div>
+            <div class="h-28 bg-indigo-500{{-- from-indigo-500  via-purple-600{{-- to-pink-500 --}}"></div>
             <div class="px-8 pb-6">
                 <div class="flex items-end gap-5 -mt-12 flex-wrap">
                     <div
                         class="w-24 h-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0
-                    bg-gradient-to-br from-indigo-400 to-purple-500">
+                    bg-indigo-500">
                         @if ($stagiaire->user->photo)
                             <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" class="w-full h-full object-cover">
                         @else
@@ -68,25 +68,25 @@
                         <p class="text-slate-700 font-semibold text-sm mt-1">{{ $stagiaire->mentor?->nom_complet ?: '—' }}
                         </p>
                     </div>
-                    <div class="bg-slate-50 rounded-xl p-4">
+                    <div class="bg-indigo-50 rounded-xl p-4">
                         <p class="text-xs text-slate-400 uppercase font-medium">Durée de stage</p>
                         <p class="text-indigo-700 font-bold text-sm mt-1">{{ $stagiaire->dureeStageDays() }} jours</p>
                     </div>
                     <div class="bg-indigo-50 rounded-xl p-4">
-                        <p class="text-xs text-indigo-400 uppercase font-medium">Début</p>
+                        <p class="text-xs text-slate-400 uppercase font-medium">Début</p>
                         <p class="text-indigo-700 font-bold text-sm mt-1">{{ $stagiaire->date_debut->format('d/m/Y') }}</p>
                     </div>
-                    <div class="bg-purple-50 rounded-xl p-4">
-                        <p class="text-xs text-purple-400 uppercase font-medium">Fin</p>
+                    <div class="bg-indigo-50 rounded-xl p-4">
+                        <p class="text-xs text-slate-400 uppercase font-medium">Fin</p>
                         <p class="text-purple-700 font-bold text-sm mt-1">{{ $stagiaire->date_fin->format('d/m/Y') }}</p>
                     </div>
-                    <div class="bg-green-50 rounded-xl p-4">
-                        <p class="text-xs text-green-400 uppercase font-medium">Présences</p>
+                    <div class="bg-indigo-50 rounded-xl p-4">
+                        <p class="text-xs text-slate-400 uppercase font-medium">Présences</p>
                         <p class="text-green-700 font-bold text-sm mt-1">
                             {{ $stagiaire->presences->where('statut', 'present')->count() }} jours</p>
                     </div>
-                    <div class="bg-red-50 rounded-xl p-4">
-                        <p class="text-xs text-red-400 uppercase font-medium">Absences</p>
+                    <div class="bg-indigo-50 rounded-xl p-4">
+                        <p class="text-xs text-slate-400 uppercase font-medium">Absences</p>
                         <p class="text-red-700 font-bold text-sm mt-1">
                             {{ $stagiaire->presences->where('statut', 'absent')->count() }} jours</p>
                     </div>
@@ -96,7 +96,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- Projets -->
-            <div class="card p-6" data-aos="fade-right">
+            <div class="card p-6" {{-- data-aos="fade-right" --}}>
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i
                         class="fas fa-project-diagram text-indigo-500 mr-2"></i>Projets
                     ({{ $stagiaire->projects->count() }})</h3>
@@ -120,7 +120,7 @@
             </div>
 
             <!-- Rapports -->
-            <div class="card p-6" data-aos="fade-left">
+            <div class="card p-6" {{-- data-aos="fade-left" --}}>
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i
                         class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports ({{ $stagiaire->reports->count() }})</h3>
                 @forelse($stagiaire->reports->take(5) as $rapport)
@@ -146,7 +146,7 @@
             </div>
 
             <!-- Attestations -->
-            <div class="card p-6" data-aos="fade-right">
+            <div class="card p-6" {{-- data-aos="fade-right" --}}>
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i
                         class="fas fa-certificate text-amber-500 mr-2"></i>Attestations
                     ({{ $stagiaire->attestations->count() }})</h3>
@@ -178,7 +178,7 @@
             </div>
 
             <!-- Tâches -->
-            <div class="card p-6" data-aos="fade-left">
+            <div class="card p-6" {{-- data-aos="fade-left" --}}>
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-tasks text-emerald-500 mr-2"></i>Tâches
                     ({{ $stagiaire->tasks->count() }})</h3>
                 @php

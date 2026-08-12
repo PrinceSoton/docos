@@ -36,7 +36,7 @@
                 </button>
                 @if (request('stagiaire_id'))
                     <a href="{{ route('admin.presences.show', request('stagiaire_id')) }}"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
                         <i class="fas fa-eye mr-2"></i>Fiche complète
                     </a>
                 @endif

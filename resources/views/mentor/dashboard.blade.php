@@ -9,8 +9,8 @@
             <div class="absolute right-0 top-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
             <div class="absolute left-0 bottom-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
             <div class="relative z-10">
-                <p class="text-emerald-200 text-sm font-medium mb-1">{{ now()->translatedFormat('l d F Y') }}</p>
-                <h2 class="text-white font-black text-3xl mb-2">Bonjour, {{ Auth::user()->prenom }} 👋</h2>
+                {{-- <pclass="text-emerald-200text-smfont-mediummb-1">now()->translatedFormat('ldFY') </p> --}}
+                <h2 class="text-white font-black text-3xl mb-2">Bienvenue, {{ Auth::user()->prenom }} </h2>
                 <p class="text-emerald-200">Vous encadrez <span class="text-white font-bold">{{ $stats['stagiaires'] }}</span>
                     stagiaire(s) actuellement</p>
             </div>

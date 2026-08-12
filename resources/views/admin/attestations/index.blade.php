@@ -49,7 +49,7 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                             {{ strtoupper(substr($att->stagiaire->user->prenom ?? '', 0, 1)) }}
                                         </div>
                                         <div>

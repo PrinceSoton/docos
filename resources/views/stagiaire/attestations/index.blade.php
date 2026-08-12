@@ -9,7 +9,7 @@
                 <p class="text-slate-500 text-sm">Suivi de vos demandes officielles</p>
             </div>
             <a href="{{ route('stagiaire.attestations.request') }}"
-                class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                class="flex items-center gap-2 {{-- bg-gradient-to-rfrom-amber-500to-orange-500 --}} bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <i class="fas fa-plus"></i>Nouvelle demande
             </a>
         </div>

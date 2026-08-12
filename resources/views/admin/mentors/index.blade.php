@@ -14,7 +14,7 @@
                     <i class="fas fa-link"></i>Affecter un stagiaire
                 </a>
                 <a href="{{ route('admin.mentors.create') }}"
-                    class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    class="flex items-center gap-2  bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
                     <i class="fas fa-plus"></i>Nouveau mentor
                 </a>
             </div>

@@ -27,26 +27,32 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'titre'      => 'required|string|max:200',
-            'description'=> 'nullable|string',
-            'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-            'project_id' => 'nullable|exists:projects,id',
-            'fichier'    => 'required|file|max:20480',
-        ]);
+         $rules = [
+        'titre'      => 'required|string|max:200',
+        'description'=> 'nullable|string',
+        'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
+        'project_id' => 'nullable|exists:projects,id',
+        'fichier'    => 'required|file|max:20480',
+    ];
+    $request->validate($rules);
 
-        $stagiaire = Auth::user()->stagiaire;
-        $chemin    = $request->file('fichier')->store('rapports', 'public');
+    // Validation conditionnelle pour type_autre
+    $data = $request->only('titre', 'description', 'type', 'project_id');
+    if ($request->type === 'autre') {
+        $request->validate(['type_autre' => 'required|string|max:255']);
+        $data['type_autre'] = $request->type_autre;
+    } else {
+        $data['type_autre'] = null;
+    }
 
-        Report::create([
-            'stagiaire_id' => $stagiaire->id,
-            'project_id'   => $request->project_id,
-            'titre'        => $request->titre,
-            'description'  => $request->description,
-            'type'         => $request->type,
-            'fichier'      => $chemin,
-            'statut'       => 'soumis',
-        ]);
+    $stagiaire = Auth::user()->stagiaire;
+    $chemin = $request->file('fichier')->store('rapports', 'public');
+
+    Report::create(array_merge($data, [
+        'stagiaire_id' => $stagiaire->id,
+        'fichier'      => $chemin,
+        'statut'       => 'soumis',
+    ]));
 
         return redirect()->route('stagiaire.reports.index')->with('succes', 'Rapport déposé avec succès.');
     }
@@ -69,28 +75,36 @@ class ReportController extends Controller
     }
 
     public function update(Request $request, Report $report)
-    {
-        $stagiaire = Auth::user()->stagiaire;
-        abort_if($report->stagiaire_id !== $stagiaire->id, 403);
-        abort_if($report->statut !== 'soumis', 403, 'Rapport non modifiable.');
+{
+    $stagiaire = Auth::user()->stagiaire;
+    abort_if($report->stagiaire_id !== $stagiaire->id, 403);
+    abort_if($report->statut !== 'soumis', 403, 'Rapport non modifiable.');
 
-        $request->validate([
-            'titre'      => 'required|string|max:200',
-            'description'=> 'nullable|string',
-            'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-            'project_id' => 'nullable|exists:projects,id',
-            'fichier'    => 'nullable|file|max:20480',
-        ]);
+    $rules = [
+        'titre'      => 'required|string|max:200',
+        'description'=> 'nullable|string',
+        'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
+        'project_id' => 'nullable|exists:projects,id',
+        'fichier'    => 'nullable|file|max:20480',
+    ];
+    $request->validate($rules);
 
-        $donnees = $request->only('titre', 'description', 'type', 'project_id');
-        if ($request->hasFile('fichier')) {
-            Storage::disk('public')->delete($report->fichier);
-            $donnees['fichier'] = $request->file('fichier')->store('rapports', 'public');
-        }
-
-        $report->update($donnees);
-        return redirect()->route('stagiaire.reports.index')->with('succes', 'Rapport mis à jour.');
+    $data = $request->only('titre', 'description', 'type', 'project_id');
+    if ($request->type === 'autre') {
+        $request->validate(['type_autre' => 'required|string|max:255']);
+        $data['type_autre'] = $request->type_autre;
+    } else {
+        $data['type_autre'] = null;
     }
+
+    if ($request->hasFile('fichier')) {
+        Storage::disk('public')->delete($report->fichier);
+        $data['fichier'] = $request->file('fichier')->store('rapports', 'public');
+    }
+
+    $report->update($data);
+    return redirect()->route('stagiaire.reports.index')->with('succes', 'Rapport mis à jour.');
+}
 
     public function destroy(Report $report)
     {

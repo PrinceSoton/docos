@@ -10,7 +10,7 @@
                     <h2 class="text-slate-800 font-black text-2xl">{{ $report->titre }}</h2>
                     <div class="flex items-center gap-3 mt-2 flex-wrap">
                         <span
-                            class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type }}</span>
+                            class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type_affiche }}</span>
                         @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
                         <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$report->statut] ?? '' }}">
                             {{ ucfirst(str_replace('_', ' ', $report->statut)) }}

@@ -25,13 +25,20 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Type de rapport *</label>
-                        <select name="type" required
+                        <select name="type" id="type_select" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
                             @foreach (['journalier' => 'Journalier', 'hebdomadaire' => 'Hebdomadaire', 'mensuel' => 'Mensuel', 'final' => 'Final', 'autre' => 'Autre'] as $v => $l)
                                 <option value="{{ $v }}" {{ old('type') === $v ? 'selected' : '' }}>
                                     {{ $l }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div id="type_autre_div" style="{{ old('type') == 'autre' ? '' : 'display:none;' }}" class="mt-3">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Précisez le type *</label>
+                        <input type="text" name="type_autre" value="{{ old('type_autre') }}"
+                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm"
+                            placeholder="Ex: Rapport technique, Bilan mi-parcours...">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Projet lié</label>
@@ -100,6 +107,14 @@
                 showFile(e.dataTransfer.files[0].name);
             }
         });
+
+        document.getElementById('type_select').addEventListener('change', function() {
+            var div = document.getElementById('type_autre_div');
+            div.style.display = this.value === 'autre' ? 'block' : 'none';
+        });
+
+
+
         fi.addEventListener('change', function() {
             if (this.files[0]) showFile(this.files[0].name);
         });

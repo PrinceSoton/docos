@@ -92,7 +92,7 @@
         @endif
 
         <!-- Tableau présences -->
-        <div class="card overflow-hidden" data-aos="fade-up">
+        <div class="card overflow-hidden" {{-- data-aos="fade-up" --}}>
             <div class="px-5 py-4 border-b border-slate-100">
                 <h3 class="font-bold text-slate-800">Historique présences ({{ $presences->total() }})</h3>
             </div>

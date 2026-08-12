@@ -5,7 +5,7 @@
     <div class="space-y-5">
         <div class="flex items-center justify-between flex-wrap gap-4" data-aos="fade-down">
             <div>
-                <h2 class="text-slate-800 font-bold text-2xl">Calendrier & Jours non travaillés</h2>
+                <h2 class="text-slate-800 font-bold text-2xl">Calendrier & Jours de séjours </h2>
                 <p class="text-slate-500 text-sm">Gérez les jours fériés et la configuration des jours de travail</p>
             </div>
             <a href="{{ route('admin.calendars.create') }}"
@@ -65,7 +65,7 @@
         </div>
 
         <!-- Tableau jours spéciaux -->
-        <div class="card overflow-hidden" data-aos="fade-up">
+        <div class="card overflow-hidden" {{-- data-aos="fade-up" --}}>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gradient-to-r from-slate-50 to-slate-100">

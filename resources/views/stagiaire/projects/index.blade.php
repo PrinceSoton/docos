@@ -49,10 +49,11 @@
                         <div class="mb-4">
                             <div class="flex justify-between text-xs text-slate-500 mb-1">
                                 <span>Progression</span>
-                                <span class="font-bold text-amber-600">{{ $projet->progressionPourcent() }}%</span>
+                                <span
+                                    class="font-bold {{-- text-amber-600 --}}  text-emerald-600">{{ $projet->progressionPourcent() }}%</span>
                             </div>
                             <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-2.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+                                <div class="h-2.5 {{-- bg-gradient-to-rfrom-amber-400to-orange-500 --}} bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"
                                     style="width:{{ $projet->progressionPourcent() }}%"></div>
                             </div>
                         </div>
@@ -66,7 +67,7 @@
                         </div>
 
                         <a href="{{ route('stagiaire.projects.show', $projet) }}"
-                            class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">
+                            class="w-full flex items-center justify-center gap-2 {{-- bg-gradient-to-rfrom-amber-500to-orange-500 --}} bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm">
                             <i class="fas fa-eye"></i>Voir le détail
                         </a>
                     </div>

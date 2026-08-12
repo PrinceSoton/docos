@@ -23,8 +23,10 @@
                     </div>
                     <div>
                         <p class="font-bold text-slate-800">{{ $report->stagiaire->user->nom_complet ?? '—' }}</p>
-                        <p class="text-slate-500 text-sm capitalize">{{ $report->type }} • Déposé le
-                            {{ $report->created_at->format('d/m/Y') }}</p>
+                        <p class="text-slate-500 text-sm">
+                            Type : <span class="capitalize">{{ $report->type_affiche }}</span>
+                            • Déposé le {{ $report->created_at->format('d/m/Y') }}
+                        </p>
                     </div>
                     <a href="{{ route('mentor.reports.telecharger', $report) }}" download
                         class="ml-auto flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl text-xs font-medium transition">

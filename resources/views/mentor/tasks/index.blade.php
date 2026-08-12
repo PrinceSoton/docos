@@ -21,7 +21,7 @@
         </div>
 
         @forelse($projets as $projet)
-            <div class="card p-5" data-aos="fade-up">
+            <div class="card p-5"> {{-- data-aos="fade-up" --}}
                 <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
                     <div>
                         <h3 class="text-slate-800 font-bold text-lg">

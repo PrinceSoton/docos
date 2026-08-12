@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Presence;
 use App\Models\Permission;
 use App\Models\Calendar;
+use App\Models\ConfigJoursTravail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,15 @@ class PresenceController extends Controller
         $presenceAujourdhui = Presence::where('stagiaire_id', $stagiaire->id)->whereDate('date', today())->first();
         $peutMarquer = Calendar::estJourTravaille(now()) && !$presenceAujourdhui;
 
-        return view('stagiaire.presence.index', compact('presences', 'permissions', 'presenceAujourdhui', 'peutMarquer'));
+        // Récupérer la configuration des horaires pour affichage
+        $config = ConfigJoursTravail::first();
+        $heureDebut = $config ? $config->heure_debut : '09:00:00';
+        $heureFin   = $config ? $config->heure_fin : '18:15:00';
+
+        return view('stagiaire.presence.index', compact(
+            'presences', 'permissions', 'presenceAujourdhui', 'peutMarquer',
+            'heureDebut', 'heureFin'
+        ));
     }
 
     public function marquer(Request $request)
@@ -31,13 +40,34 @@ class PresenceController extends Controller
         abort_unless(Calendar::estJourTravaille(now()), 403, 'Pas de marquage ce jour.');
 
         // Éviter le double marquage
-        $existant = Presence::where('stagiaire_id', $stagiaire->id)->whereDate('date', today())->first();
-        if ($existant) return back()->with('erreur', 'Présence déjà marquée aujourd\'hui.');
+        $existant = Presence::where('stagiaire_id', $stagiaire->id)
+            ->whereDate('date', today())
+            ->first();
 
-        $config       = \App\Models\ConfigJoursTravail::first();
-        $heureDebut   = $config ? $config->heure_debut : '09:00:00';
+        if ($existant) {
+            return back()->with('erreur', 'Présence déjà marquée aujourd\'hui.');
+        }
+
+        // Récupérer la configuration des horaires
+        $config = ConfigJoursTravail::first();
+        if (!$config) {
+            $heureDebut = '09:00:00';
+            $heureFin   = '18:15:00';
+        } else {
+            $heureDebut = $config->heure_debut;
+            $heureFin   = $config->heure_fin;
+        }
+
         $heureArrivee = now()->format('H:i:s');
-        $statut       = $heureArrivee > $heureDebut ? 'retard' : 'present';
+
+        // Déterminer le statut selon les règles
+        if ($heureArrivee <= $heureDebut) {
+            $statut = 'present';
+        } elseif ($heureArrivee > $heureDebut && $heureArrivee <= $heureFin) {
+            $statut = 'retard';
+        } else { // après l'heure de fin
+            $statut = 'absent';
+        }
 
         $request->validate([
             'motif'        => 'nullable|string|max:500',

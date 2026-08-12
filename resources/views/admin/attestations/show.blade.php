@@ -98,6 +98,18 @@
                         class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all hover:-translate-y-0.5">
                         <i class="fas fa-upload"></i>Envoyer le document
                     </a>
+
+                    <!-- Bouton Supprimer -->
+                    <form action="{{ route('admin.attestations.destroy', $attestation) }}" method="POST"
+                        id="del-att-{{ $attestation->id }}" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button"
+                            class="btn-delete flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium transition hover:shadow-lg"
+                            data-form="del-att-{{ $attestation->id }}">
+                            <i class="fas fa-trash"></i>Rejeter & Supprimer
+                        </button>
+                    </form>
                 @endif
                 @if ($attestation->fichier)
                     <a href="{{ route('admin.attestations.telecharger', $attestation) }}"
@@ -105,6 +117,7 @@
                         <i class="fas fa-download"></i>Télécharger
                     </a>
                 @endif
+
                 <a href="{{ route('admin.attestations.index') }}"
                     class="flex items-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition ml-auto">
                     <i class="fas fa-arrow-left"></i>Retour

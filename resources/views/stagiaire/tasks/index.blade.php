@@ -16,7 +16,7 @@
             @endphp
             <div class="flex items-center gap-3 min-w-48">
                 <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-3 bg-gradient-to-r from-amber-400 to-green-500 rounded-full transition-all duration-1000"
+                    <div class="h-3 {{-- bg-gradient-to-rfrom-amber-400to-green-500 --}} bg-gradient-to-r from-green-500 to-emerald-600 rounded-full transition-all duration-1000"
                         style="width:{{ $pctT }}%"></div>
                 </div>
                 <span class="font-bold text-slate-700 text-sm">{{ $pctT }}%</span>

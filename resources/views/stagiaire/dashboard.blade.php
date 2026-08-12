@@ -12,7 +12,7 @@
             </div>
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                    <p class="text-amber-300 text-sm font-medium mb-1">{{ now()->translatedFormat('l d F Y') }}</p>
+                    {{-- <p class="text-amber-300text-smfont-mediummb-1">now()->translatedFormat('ldFY') </p>}} --}}
                     <h2 class="text-white font-black text-3xl mb-2">Bienvenue, {{ Auth::user()->prenom }} </h2>
                     <p class="text-slate-300">Matricule : <span
                             class="font-mono font-bold text-amber-400">{{ $stagiaire->matricule }}</span></p>
