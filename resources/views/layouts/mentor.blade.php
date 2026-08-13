@@ -126,7 +126,7 @@
                 class="w-16 h-16 rounded-full border-4 border-emerald-100 spin border-t-emerald-600 absolute inset-0 m-auto">
             </div>
             <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="w-12 h-12 object-contain mx-auto rounded-xl relative z-10 mt-2">
+                class="relative rounded-3xl shadow-2xl w-12 h-12 object-contain mx-auto {{-- rounded-xlrelative --}} z-10 mt-2">
         </div>
         <p class="text-emerald-700 font-bold text-xl mt-4">DOCOS</p>
         <p class="text-slate-400 text-sm">Espace Mentor</p>
@@ -139,7 +139,7 @@
                     class="w-10 h-10 rounded-xl object-contain flex-shrink-0">
                 <div class="sidebar-logo-text">
                     <p class="text-white font-bold text-lg">DOCOS</p>
-                    <p class="text-emerald-300 text-xs">Mentor</p>
+                    {{-- <pclass="text-emerald-300text-xs">Mentor</p> --}}
                 </div>
                 <button id="toggleSidebar" class="ml-auto text-white/60 hover:text-white">
                     <i class="fas fa-bars"></i>

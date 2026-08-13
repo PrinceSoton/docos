@@ -181,7 +181,7 @@
             <div class="w-20 h-20 rounded-full border-4 border-indigo-100 spin border-t-indigo-600 absolute inset-0">
             </div>
             <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="w-16 h-16 object-contain mx-auto rounded-xl relative z-10 mt-2">
+                class="relative rounded-3xl shadow-2xl w-16 h-16 object-contain mx-auto {{-- rounded-xl relative  z-10 mt-2 --}}">
         </div>
         <p class="text-indigo-700 font-bold text-xl mt-4">DOCOS</p>
         <p class="text-slate-400 text-sm">Administration</p>
@@ -193,7 +193,7 @@
             <!-- Logo -->
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
                 <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                    class="w-10 h-10 rounded-xl object-contain flex-shrink-0">
+                    class=" w-10 h-10 rounded-xl object-contain flex-shrink-0">
                 <div class="sidebar-logo-text">
                     <p class="text-white font-bold text-lg leading-none">DOCOS</p>
                     {{--  <p class="text-indigo-300 text-xs">Espace Administration</p> --}}

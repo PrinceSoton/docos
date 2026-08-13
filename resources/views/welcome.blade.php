@@ -170,7 +170,8 @@
     <!-- Loader -->
     <div id="loader" class="loader">
         <div class="text-center">
-            <img src="{{ asset('logo.png') }}" alt="DOCOS" class="w-64 mb-8 floating">
+            <img src="{{ asset('logo.png') }}" alt="DOCOS"
+                class="relative rounded-3xl shadow-2xl w-64 mb-8 floating">
             <div class="flex space-x-2 justify-center">
                 <div class="w-3 h-3 bg-white rounded-full animate-bounce"></div>
                 <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
@@ -184,7 +185,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center space-x-4">
-                    <img src="{{ asset('logo.png') }}" alt="DOCOS" class="h-12">
+                    <img src="{{ asset('logo.png') }}" alt="DOCOS" class="relative rounded-3xl shadow-2xl h-12">
                     <span class="text-2xl font-bold gradient-text">DOCOS</span>
                 </div>
                 <a href="{{ route('login') }}"
@@ -211,11 +212,11 @@
                     <div class="flex flex-wrap gap-4">
                         <a href="{{ route('login') }}"
                             class="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all">
-                            Commencer Maintenant
+                            Débuter une expérience
                         </a>
                         <a href="#features"
                             class="glass-effect text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all">
-                            Découvrir Plus
+                            Découvrir ->
                         </a>
                     </div>
                 </div>
@@ -306,7 +307,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 gradient-bg">
+    {{-- <section class="py-20 gradient-bg">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="zoom-in">
             <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Prêt à Commencer ?</h2>
             <p class="text-xl text-white/90 mb-8">Rejoignez-nous et gérez vos stagiaires de manière professionnelle</p>
@@ -315,12 +316,13 @@
                 Accéder à la Plateforme
             </a>
         </div>
-    </section>
+    </section> --}}
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <img src="{{ asset('logo.png') }}" alt="DOCOS" class="h-16 mx-auto mb-4">
+            <img src="{{ asset('logo.png') }}" alt="DOCOS"
+                class="relative rounded-3xl shadow-2xl h-16 mx-auto mb-4">
             <p class="text-gray-400">© {{ date('Y') }} DOCOS. Tous droits réservés.</p>
         </div>
     </footer>

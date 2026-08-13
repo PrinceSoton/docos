@@ -158,7 +158,7 @@
         <!-- Actions rapides -->
         <div class="card p-6" {{--  data-aos="fade-up" --}}>
             <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-bolt text-amber-500 mr-2"></i>Raccourci pour
-                la créationdes modules
+                la création des modules
             </h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 @foreach ([[route('stagiaire.presence.index'), 'fas fa-user-check', 'bg-green-50 text-green-700 hover:bg-green-100', 'Marquer présence'], [route('stagiaire.reports.create'), 'fas fa-file-upload', 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100', 'Déposer rapport'], [route('stagiaire.attestations.request'), 'fas fa-certificate', 'bg-amber-50 text-amber-700 hover:bg-amber-100', 'Attestation'], [route('stagiaire.tasks.index'), 'fas fa-tasks', 'bg-purple-50 text-purple-700 hover:bg-purple-100', 'Mes tâches']] as [$route, $icon, $cls, $label])
