@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\BienvenueStagiaire;
+use App\Mail\BienvenueMentor;
 use Illuminate\Support\Facades\Mail;
 
 class UserManagementController extends Controller
@@ -50,6 +51,7 @@ class UserManagementController extends Controller
 
             if ($request->role === 'mentor') {
                 Mentor::create(['user_id' => $user->id]);
+                Mail::to($request->email)->send(new BienvenueMentor($request->only('nom', 'prenom', 'email'), $request->password));
             }
 
             if ($request->role === 'stagiaire') {
@@ -60,12 +62,13 @@ class UserManagementController extends Controller
                     'date_fin'   => now()->addMonths(6),
                     'statut'     => 'en_cours',
                 ]);
+                Mail::to($request->email)->send(new BienvenueStagiaire($request->only('nom', 'prenom', 'email'), $request->password));
             }
 
 
-            $user = User::create($donnees);
+            //$user = User::create($donnees);
 
-            Mail::to($request->email)->send(new BienvenueStagiaire($request->only('nom', 'prenom', 'email'), $request->password));
+            //Mail::to($request->email)->send(new BienvenueStagiaire($request->only('nom', 'prenom', 'email'), $request->password));
 
             return redirect()->route('admin.users.index')->with('succes', 'Utilisateur créé avec succès.');
         }
@@ -113,9 +116,19 @@ class UserManagementController extends Controller
 
         public function destroy(User $user)
         {
-            if ($user->photo) Storage::disk('public')->delete($user->photo);
-            $user->delete();
-            return redirect()->route('admin.users.index')->with('succes', 'Utilisateur supprimé.');
+            // Supprimer les relations avant de supprimer l'utilisateur
+    if ($user->stagiaire) {
+        $user->stagiaire->delete();
+    }
+    if ($user->mentor) {
+        $user->mentor->delete();
+    }
+    if ($user->photo) {
+        Storage::disk('public')->delete($user->photo);
+    }
+    $user->delete();
+
+    return redirect()->route('admin.users.index')->with('succes', 'Utilisateur supprimé.');
         }
 
         public function toggleActif(User $user)
