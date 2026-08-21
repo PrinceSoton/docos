@@ -14,17 +14,19 @@ class PresenceController extends Controller
     {
         $stagiaires = Stagiaire::with('user')->where('statut', 'en_cours')->get();
         $stagiaire  = null;
-        $presences  = collect();
+        $query = Presence::with('stagiaire.user');
 
         if ($request->filled('stagiaire_id')) {
             $stagiaire = Stagiaire::with('user')->findOrFail($request->stagiaire_id);
-            $query = Presence::where('stagiaire_id', $stagiaire->id);
-            if ($request->filled('mois')) {
-                $query->whereMonth('date', date('m', strtotime($request->mois)))
-                      ->whereYear('date', date('Y', strtotime($request->mois)));
-            }
-            $presences = $query->orderBy('date', 'desc')->paginate(30);
+            $query->where('stagiaire_id', $stagiaire->id);
         }
+
+        if ($request->filled('mois')) {
+            $query->whereMonth('date', date('m', strtotime($request->mois)))
+                  ->whereYear('date', date('Y', strtotime($request->mois)));
+        }
+
+        $presences = $query->orderBy('date', 'desc')->paginate(30)->withQueryString();
 
         return view('admin.presences.index', compact('stagiaires', 'stagiaire', 'presences'));
     }

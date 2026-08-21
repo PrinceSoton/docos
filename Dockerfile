@@ -1,57 +1,47 @@
-FROM php:8.2-apache
+# --- Builder for frontend assets ---
+FROM node:18-alpine AS node_builder
+WORKDIR /app
+COPY package*.json ./
+COPY vite.config.js postcss.config.js tailwind.config.js ./
+COPY resources ./resources
+RUN npm ci --silent && npm run build
 
-# Installer les dépendances système nécessaires à Laravel et Vite
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    curl \
-    unzip \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libsqlite3-0 \
-    sqlite3 \
-    libsqlite3-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libicu-dev \
-    libxslt1-dev \
-    ca-certificates \
+# --- Composer stage: install PHP deps ---
+FROM composer:2 AS composer_builder
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts --no-progress
+COPY . .
+RUN composer dump-autoload --optimize
+
+# --- Production image (PHP-FPM + Nginx) ---
+FROM php:8.2-fpm-alpine
+
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf \
+    && echo "nameserver 1.1.1.1" >> /etc/resolv.conf \
+    && apk add --no-cache nginx bash libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev zlib icu-dev oniguruma-dev curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath gd intl zip \
-    && a2enmod rewrite headers \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl \
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/html
 
-# Copier les dépendances PHP et Node pour un build plus rapide
-COPY composer.json composer.lock* ./
-COPY package*.json ./
+# Copy application code and dependencies
+COPY --from=composer_builder /app /var/www/html
+# Copy built frontend assets
+COPY --from=node_builder /app/public/build /var/www/html/public/build
 
-RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts --optimize-autoloader \
-    && npm install --no-fund --no-audit
-
-# Copier le code source
-COPY . .
-
-# Configuration Laravel
-RUN cp -n .env.example .env \
-    && php artisan key:generate --force \
-    && php artisan storage:link || true \
-    && npm run build \
-    && mkdir -p storage/framework/{cache,sessions,views,testing} bootstrap/cache database \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
-
-# Apache pointe vers le dossier public de Laravel
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf \
-    && sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf
+# Nginx config and entrypoint
+COPY nginx/default.conf /etc/nginx/http.d/default.conf
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && mkdir -p /run/nginx \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+ENV APP_ENV=production \
+    APP_DEBUG=false
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

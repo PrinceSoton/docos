@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Stagiaire extends Model
 {
@@ -23,9 +24,38 @@ class Stagiaire extends Model
     // Génération automatique du matricule
     public static function genererMatricule(): string
     {
-        $annee = date('Y');
-        $dernier = self::whereYear('created_at', $annee)->count() + 1;
-        return 'STG-' . $annee . '-' . str_pad($dernier, 2, '0', STR_PAD_LEFT);
+        $annee = (int) date('Y');
+
+        return DB::transaction(function () use ($annee): string {
+            // 1. Verrouiller la ligne pour mise à jour exclusive
+            $sequence = MatriculeSequence::where('annee', $annee)
+                ->lockForUpdate()
+                ->first();
+
+            // 2. Si la séquence n’existe pas, l’initialiser avec le dernier matricule utilisé
+            if (!$sequence) {
+                $max = self::whereYear('created_at', $annee)
+                    ->get()
+                    ->map(function ($s) use ($annee) {
+                        preg_match('/STG-' . $annee . '-(\d+)/', $s->matricule, $matches);
+                        return isset($matches[1]) ? (int)$matches[1] : 0;
+                    })
+                    ->max() ?? 0;
+
+                $sequence = MatriculeSequence::create([
+                    'annee'   => $annee,
+                    'dernier_numero' => $max,
+                ]);
+            }
+
+            // 3. Incrémenter le compteur
+            $sequence->increment('dernier_numero');
+            $sequence->refresh(); // ← maintenant sur une instance de modèle, OK
+
+            $numero = $sequence->dernier_numero;
+
+            return 'STG-' . $annee . '-' . str_pad((string) $numero, 2, '0', STR_PAD_LEFT);
+        });
     }
 
     public function user()
