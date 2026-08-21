@@ -1,0 +1,15 @@
+[Unit]
+Description=Nextmux application via Docker Compose
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/nextmux/docos
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up --no-build
+ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
