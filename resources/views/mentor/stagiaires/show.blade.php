@@ -2,25 +2,26 @@
 @section('titre', 'Profil Stagiaire')
 @section('breadcrumb', 'Stagiaires > Profil')
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-5" data-aos="fade-up">
+    <div class="max-w-5xl mx-auto px-4 sm:px-0 space-y-5" data-aos="fade-up">
         <!-- En-tête -->
-        <div class="card p-0 overflow-hidden" data-aos="fade-up">
+        <div class="card p-0 overflow-hidden">
             <div class="h-28 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
-            <div class="px-8 pb-6">
-                <div class="flex items-end gap-5 -mt-12 flex-wrap">
+            <div class="px-4 sm:px-8 pb-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-5 -mt-12 flex-wrap">
                     <div
-                        class="w-24 h-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0
-                    bg-gradient-to-br from-emerald-400 to-teal-500">
+                        class="w-24 h-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-400 to-teal-500">
                         @if ($stagiaire->user->photo)
-                            <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" class="w-full h-full object-cover">
+                            <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" class="w-full h-full object-cover"
+                                loading="lazy">
                         @else
                             <span
                                 class="text-white font-black text-3xl">{{ strtoupper(substr($stagiaire->user->prenom, 0, 1)) }}</span>
                         @endif
                     </div>
-                    <div class="flex-1 mt-14">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <h2 class="text-slate-800 font-black text-2xl">{{ $stagiaire->user->nom_complet }}</h2>
+                    <div class="flex-1 mt-14 sm:mt-0">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h2 class="text-slate-800 font-black text-xl sm:text-2xl">{{ $stagiaire->user->nom_complet }}
+                            </h2>
                             <span
                                 class="font-mono text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg font-bold">{{ $stagiaire->matricule }}</span>
                             <span
@@ -39,8 +40,7 @@
                     @endif
                 </div>
 
-                <!-- Infos stage -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
                     <div class="bg-slate-50 rounded-xl p-4">
                         <p class="text-xs text-slate-400 uppercase font-medium">École</p>
                         <p class="text-slate-700 font-semibold text-sm mt-1">{{ $stagiaire->ecole ?: '—' }}</p>
@@ -77,8 +77,8 @@
             @endforeach
         </div>
 
-        <!-- Progression globale tâches -->
-        <div class="card p-6" {{-- data-aos="fade-up" --}}>
+        <!-- Progression tâches -->
+        <div class="card p-5 sm:p-6">
             <div class="flex justify-between mb-2">
                 <h3 class="text-slate-800 font-bold text-lg"><i class="fas fa-tasks text-emerald-500 mr-2"></i>Progression
                     des tâches</h3>
@@ -101,7 +101,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- Projets -->
-            <div class="card p-6" {{-- data-aos="fade-right" --}}>
+            <div class="card p-5 sm:p-6">
                 <h3 class="text-slate-800 font-bold text-lg mb-4"><i
                         class="fas fa-project-diagram text-blue-500 mr-2"></i>Projets ({{ $stagiaire->projects->count() }})
                 </h3>
@@ -126,8 +126,8 @@
                 @endforelse
             </div>
 
-            <!-- Rapports récents -->
-            <div class="card p-6" {{-- data-aos="fade-left" --}}>
+            <!-- Rapports -->
+            <div class="card p-5 sm:p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-slate-800 font-bold text-lg"><i
                             class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports ({{ $stats['rapports'] }})</h3>
@@ -145,9 +145,7 @@
                         </div>
                         @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600']; @endphp
                         <span
-                            class="text-xs px-2 py-1 rounded-full {{ $sc[$rapport->statut] ?? 'bg-slate-100 text-slate-600' }}">
-                            {{ ucfirst($rapport->statut) }}
-                        </span>
+                            class="text-xs px-2 py-1 rounded-full {{ $sc[$rapport->statut] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($rapport->statut) }}</span>
                     </div>
                 @empty
                     <p class="text-slate-400 text-sm text-center py-6">Aucun rapport</p>

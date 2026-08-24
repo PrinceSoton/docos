@@ -2,19 +2,19 @@
 @section('titre', 'Rapports')
 @section('breadcrumb', 'Mentor > Rapports')
 @section('content')
-    <div class="space-y-5">
-        <div class="flex items-center justify-between flex-wrap gap-4" data-aos="fade-down">
+    <div class="space-y-4 sm:space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
             <div>
-                <h2 class="text-slate-800 font-bold text-2xl">Rapports des stagiaires</h2>
-                <p class="text-slate-500 text-sm">{{ $rapports->total() }} rapport(s) reçu(s)</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Rapports des stagiaires</h2>
+                <p class="text-sm text-slate-500">{{ $rapports->total() }} rapport(s) reçu(s)</p>
             </div>
         </div>
 
-        <div class="card p-4 flex flex-wrap gap-3" data-aos="fade-up">
+        <div class="card p-4 flex flex-col sm:flex-row gap-3" data-aos="fade-up">
             <input type="text" id="search" placeholder="Titre, stagiaire, type..."
-                class="flex-1 min-w-48 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm">
+                class="flex-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm">
             <select id="filterStatut"
-                class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-400">
+                class="w-full sm:w-auto border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-400">
                 <option value="">Tous statuts</option>
                 <option value="soumis">À évaluer</option>
                 <option value="valide">Validé</option>
@@ -28,23 +28,26 @@
                 <table class="w-full text-sm">
                     <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                         <tr>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Rapport</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Stagiaire</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Type</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Projet</th>
-                            <th class="px-5 py-4 text-center font-semibold text-slate-600">Note</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Date</th>
-                            <th class="px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Rapport</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Stagiaire</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Type</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden sm:table-cell">Projet
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600 hidden sm:table-cell">Note
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden md:table-cell">Date
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50" id="rapportTable">
                         @forelse($rapports as $rapport)
                             <tr class="hover:bg-slate-50 transition rapport-row" data-statut="{{ $rapport->statut }}">
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <p class="font-semibold text-slate-800">{{ $rapport->titre }}</p>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center gap-2">
                                         <div
                                             class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -55,30 +58,27 @@
                                             class="text-slate-700 font-medium text-sm">{{ $rapport->stagiaire->user->nom_complet ?? '—' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <span
                                         class="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 capitalize">{{ $rapport->type_affiche }}</span>
                                 </td>
-                                <td class="px-5 py-4 text-slate-500 text-sm">{{ $rapport->project?->titre ?: '—' }}</td>
-                                <td class="px-5 py-4 text-center">
+                                <td class="px-4 sm:px-5 py-4 text-slate-500 text-sm hidden sm:table-cell">
+                                    {{ $rapport->project?->titre ?: '—' }}</td>
+                                <td class="px-4 sm:px-5 py-4 text-center hidden sm:table-cell">
                                     @if ($rapport->note !== null)
                                         <span
-                                            class="font-bold text-{{ $rapport->note >= 14 ? 'green' : ($rapport->note >= 10 ? 'amber' : 'red') }}-600">
-                                            {{ $rapport->note }}/20
-                                        </span>
+                                            class="font-bold text-{{ $rapport->note >= 14 ? 'green' : ($rapport->note >= 10 ? 'amber' : 'red') }}-600">{{ $rapport->note }}/20</span>
                                     @else<span class="text-slate-300">—</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
                                     <span
-                                        class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$rapport->statut] ?? '' }}">
-                                        {{ ucfirst(str_replace('_', ' ', $rapport->statut)) }}
-                                    </span>
+                                        class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$rapport->statut] ?? '' }}">{{ ucfirst(str_replace('_', ' ', $rapport->statut)) }}</span>
                                 </td>
-                                <td class="px-5 py-4 text-slate-400 text-xs">{{ $rapport->created_at->format('d/m/Y') }}
-                                </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4 text-slate-400 text-xs hidden md:table-cell">
+                                    {{ $rapport->created_at->format('d/m/Y') }}</td>
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('mentor.reports.telecharger', $rapport) }}"
                                             class="w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center transition"
@@ -108,7 +108,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-5 py-4 border-t border-slate-100">{{ $rapports->links() }}</div>
+            <div class="px-4 sm:px-5 py-4 border-t border-slate-100">{{ $rapports->links() }}</div>
         </div>
     </div>
 @endsection

@@ -2,8 +2,8 @@
 @section('titre', 'Nouvelle tâche')
 @section('breadcrumb', 'Tâches > Créer')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-plus-circle text-emerald-600"></i>
@@ -34,9 +34,8 @@
                             <option value="">Sélectionner un stagiaire</option>
                             @foreach ($stagiaires as $stag)
                                 <option value="{{ $stag->id }}"
-                                    {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>
-                                    {{ $stag->user->nom_complet }} — {{ $stag->matricule }}
-                                </option>
+                                    {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>{{ $stag->user->nom_complet }}
+                                    — {{ $stag->matricule }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -92,13 +91,13 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 pt-2">
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button type="submit"
                         class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
                         <i class="fas fa-save mr-2"></i>Créer la tâche
                     </button>
                     <a href="{{ route('mentor.tasks.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
+                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>

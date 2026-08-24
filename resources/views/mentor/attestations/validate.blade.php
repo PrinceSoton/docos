@@ -2,8 +2,8 @@
 @section('titre', 'Valider la demande')
 @section('breadcrumb', 'Attestations > Validation')
 @section('content')
-    <div class="max-w-xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-check-circle text-emerald-600"></i>
@@ -17,7 +17,7 @@
 
             <!-- Résumé -->
             <div class="p-4 bg-slate-50 rounded-2xl mb-5">
-                <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div>
                         <p class="text-slate-400 text-xs">Stagiaire</p>
                         <p class="font-semibold text-slate-800">{{ $attestation->stagiaire->user->nom_complet ?? '—' }}</p>
@@ -46,13 +46,11 @@
             <form action="{{ route('mentor.attestations.doValidate', $attestation) }}" method="POST" class="space-y-5">
                 @csrf @method('PUT')
 
-                <!-- Décision -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-3">Votre décision *</label>
                     <div class="grid grid-cols-2 gap-3">
                         <label
-                            class="flex flex-col items-center gap-2 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-green-400
-                        {{ old('statut') === 'valide_mentor' ? 'border-green-400 bg-green-50' : 'border-slate-200' }}"
+                            class="flex flex-col items-center gap-2 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-green-400 {{ old('statut') === 'valide_mentor' ? 'border-green-400 bg-green-50' : 'border-slate-200' }}"
                             id="labelValide">
                             <input type="radio" name="statut" value="valide_mentor"
                                 {{ old('statut') === 'valide_mentor' ? 'checked' : '' }} class="sr-only" required
@@ -62,8 +60,7 @@
                             <span class="text-slate-400 text-xs text-center">Transmettre à l'administration</span>
                         </label>
                         <label
-                            class="flex flex-col items-center gap-2 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-red-400
-                        {{ old('statut') === 'refuse' ? 'border-red-400 bg-red-50' : 'border-slate-200' }}"
+                            class="flex flex-col items-center gap-2 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-red-400 {{ old('statut') === 'refuse' ? 'border-red-400 bg-red-50' : 'border-slate-200' }}"
                             id="labelRefuse">
                             <input type="radio" name="statut" value="refuse"
                                 {{ old('statut') === 'refuse' ? 'checked' : '' }} class="sr-only" id="radioRefuse">
@@ -81,13 +78,13 @@
                         placeholder="Expliquez votre décision au stagiaire...">{{ old('commentaire') }}</textarea>
                 </div>
 
-                <div class="flex gap-3 pt-2">
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button type="submit"
                         class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
                         <i class="fas fa-check mr-2"></i>Confirmer ma décision
                     </button>
                     <a href="{{ route('mentor.attestations.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
+                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>

@@ -2,13 +2,13 @@
 @section('titre', $project->titre)
 @section('breadcrumb', 'Projet > Détail')
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-5">
+    <div class="max-w-5xl mx-auto px-4 sm:px-0 space-y-4 sm:space-y-5">
         <!-- En-tête projet -->
-        <div class="card p-6" data-aos="fade-down">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
+        <div class="card p-5 sm:p-6" data-aos="fade-down">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
                 <div>
-                    <h2 class="text-slate-800 font-black text-2xl">{{ $project->titre }}</h2>
-                    <div class="flex items-center gap-2 mt-2 flex-wrap">
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">{{ $project->titre }}</h2>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                         @php $sc = ['en_attente'=>'bg-slate-100 text-slate-600','en_cours'=>'bg-blue-100 text-blue-700','termine'=>'bg-green-100 text-green-700','suspendu'=>'bg-red-100 text-red-600']; @endphp
                         <span
                             class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$project->statut] ?? '' }}">{{ ucfirst(str_replace('_', ' ', $project->statut)) }}</span>
@@ -23,13 +23,12 @@
                     <p class="text-slate-400 text-xs mt-2">
                         <i
                             class="fas fa-chalkboard-teacher mr-1 text-emerald-500"></i>{{ $project->mentor->nom_complet ?? '—' }}
-                        •
-                        {{ $project->date_debut->format('d/m/Y') }} →
+                        • {{ $project->date_debut->format('d/m/Y') }} →
                         {{ $project->date_fin?->format('d/m/Y') ?? 'Indéfini' }}
                     </p>
                 </div>
-                <div class="text-right">
-                    <p class="text-3xl font-black text-amber-600">{{ $project->progressionPourcent() }}%</p>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-2xl sm:text-3xl font-black text-amber-600">{{ $project->progressionPourcent() }}%</p>
                     <p class="text-slate-400 text-xs">terminé</p>
                 </div>
             </div>
@@ -39,8 +38,8 @@
             </div>
         </div>
 
-        <!-- Kanban mes tâches -->
-        <div class="card p-5" data-aos="fade-up">
+        <!-- Kanban -->
+        <div class="card p-4 sm:p-5" data-aos="fade-up">
             <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-tasks text-amber-500 mr-2"></i>Mes tâches
                 dans ce projet</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -76,10 +75,10 @@
             </div>
         </div>
 
-        <!-- Mes rapports liés -->
+        <!-- Rapports liés -->
         @php $rapportsLies = $project->reports->where('stagiaire_id', Auth::user()->stagiaire->id ?? 0); @endphp
         @if ($rapportsLies->count() > 0)
-            <div class="card p-6" data-aos="fade-up">
+            <div class="card p-5 sm:p-6" data-aos="fade-up">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-slate-800 font-bold text-lg"><i class="fas fa-file-alt text-purple-500 mr-2"></i>Mes
                         rapports liés</h3>
@@ -88,11 +87,12 @@
                 </div>
                 <div class="space-y-2">
                     @foreach ($rapportsLies as $rapport)
-                        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-purple-50 transition">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-purple-50 transition">
                             <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-file-alt text-purple-500 text-xs"></i>
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <p class="font-medium text-slate-800 text-sm">{{ $rapport->titre }}</p>
                                 <p class="text-slate-400 text-xs">{{ $rapport->created_at->format('d/m/Y') }}</p>
                             </div>

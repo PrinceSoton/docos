@@ -2,8 +2,8 @@
 @section('titre', 'Détail présence')
 @section('breadcrumb', 'Présence > Détail')
 @section('content')
-    <div class="max-w-xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
                 @php $sc = ['present' => ['bg-green-100', 'text-green-600', 'user-check'], 'retard' => ['bg-amber-100', 'text-amber-600', 'clock'], 'absent' => ['bg-red-100', 'text-red-600', 'user-times']]; @endphp
                 <div

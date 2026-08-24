@@ -2,14 +2,12 @@
 @section('titre', 'Mon rapport')
 @section('breadcrumb', 'Rapports > Détail')
 @section('content')
-    <div class="max-w-3xl mx-auto space-y-5">
-        <div class="card p-6" data-aos="fade-up">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-5">
+    <div class="max-w-3xl mx-auto px-4 sm:px-0 space-y-5">
+        <div class="card p-5 sm:p-6" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-5">
                 <div>
-                    <h2 class="text-slate-800 font-black text-2xl">{{ $report->titre }}</h2>
-                    <div class="flex items-center gap-3 mt-2 flex-wrap">
-                        {{-- <span
-                            class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type }}</span> --}}
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">{{ $report->titre }}</h2>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                         <span
                             class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type_affiche }}</span>
                         @php $sl = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
@@ -25,7 +23,7 @@
                     </div>
                     <p class="text-slate-400 text-xs mt-1">Déposé le {{ $report->created_at->format('d/m/Y à H:i') }}</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <a href="{{ route('stagiaire.reports.telecharger', $report) }}" download
                         class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition">
                         <i class="fas fa-download"></i>Télécharger
@@ -55,9 +53,8 @@
 
             @if ($report->commentaire_mentor)
                 <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 mb-4">
-                    <p class="text-xs text-amber-500 uppercase font-medium mb-1">
-                        <i class="fas fa-comment mr-1"></i>Commentaire de mon mentor
-                    </p>
+                    <p class="text-xs text-amber-500 uppercase font-medium mb-1"><i
+                            class="fas fa-comment mr-1"></i>Commentaire de mon mentor</p>
                     <p class="text-slate-700 text-sm">{{ $report->commentaire_mentor }}</p>
                     @if ($report->valide_par)
                         <p class="text-slate-400 text-xs mt-1">Par {{ $report->validePar->nom_complet }} —
@@ -68,7 +65,7 @@
         </div>
 
         <!-- Commentaires -->
-        <div class="card p-6" data-aos="fade-up">
+        <div class="card p-5 sm:p-6" data-aos="fade-up">
             <h3 class="text-slate-800 font-bold text-lg mb-4">
                 <i class="fas fa-comments text-indigo-500 mr-2"></i>Commentaires ({{ $report->comments->count() }})
             </h3>

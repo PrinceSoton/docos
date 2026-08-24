@@ -1,18 +1,17 @@
 @extends('layouts.mentor')
 @section('titre', 'Tableau de bord Mentor')
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
 
-        <!-- Bienvenue -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-8 text-white relative overflow-hidden"
+        <!-- Bannière bienvenue -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden"
             data-aos="fade-down">
-            <div class="absolute right-0 top-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
+            <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
             <div class="absolute left-0 bottom-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
             <div class="relative z-10">
-                {{-- <pclass="text-emerald-200text-smfont-mediummb-1">now()->translatedFormat('ldFY') </p> --}}
-                <h2 class="text-white font-black text-3xl mb-2">Bienvenue, {{ Auth::user()->prenom }} </h2>
-                <p class="text-emerald-200">Vous encadrez <span class="text-white font-bold">{{ $stats['stagiaires'] }}</span>
-                    stagiaire(s) actuellement</p>
+                <h2 class="text-2xl sm:text-3xl font-black mb-2">Bienvenue, {{ Auth::user()->prenom }} 👋</h2>
+                <p class="text-emerald-200 text-sm sm:text-base">Vous encadrez <span
+                        class="text-white font-bold">{{ $stats['stagiaires'] }}</span> stagiaire(s) actuellement</p>
             </div>
         </div>
 
@@ -23,18 +22,17 @@
                     data-aos="fade-up" data-aos-delay="{{ $i * 80 }}">
                     <div class="absolute right-2 top-2 opacity-20"><i class="{{ $icon }} text-3xl"></i></div>
                     <p class="text-white/80 text-xs font-medium leading-tight">{{ $label }}</p>
-                    <p class="text-white font-black text-3xl mt-1">{{ $val }}</p>
+                    <p class="text-white font-black text-2xl sm:text-3xl mt-1">{{ $val }}</p>
                 </div>
             @endforeach
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Avancement stagiaires -->
-            <div class="card p-6" data-aos="fade-right">
+            <div class="card p-5 sm:p-6" data-aos="fade-right">
                 <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-slate-800 font-bold text-lg">
-                        <i class="fas fa-chart-line text-emerald-500 mr-2"></i>Avancement de mes stagiaires
-                    </h3>
+                    <h3 class="text-slate-800 font-bold text-lg"><i
+                            class="fas fa-chart-line text-emerald-500 mr-2"></i>Avancement de mes stagiaires</h3>
                     <a href="{{ route('mentor.stagiaires.index') }}" class="text-emerald-600 text-sm hover:underline">Voir
                         tous →</a>
                 </div>
@@ -42,10 +40,10 @@
                     <div class="mb-5 last:mb-0">
                         <div class="flex items-center gap-3 mb-2">
                             <div
-                                class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0">
+                                class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 @if ($stag->user->photo)
                                     <img src="{{ asset('storage/' . $stag->user->photo) }}"
-                                        class="w-full h-full rounded-xl object-cover">
+                                        class="w-full h-full rounded-xl object-cover" loading="lazy">
                                 @else
                                     <span
                                         class="text-white font-bold text-sm">{{ strtoupper(substr($stag->user->prenom, 0, 1)) }}</span>
@@ -60,8 +58,7 @@
                             </div>
                         </div>
                         <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden ml-12">
-                            <div class="h-2.5 rounded-full transition-all duration-1000
-                        {{ $stag->progression >= 75 ? 'bg-gradient-to-r from-emerald-400 to-green-500' : ($stag->progression >= 40 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-pink-400') }}"
+                            <div class="h-2.5 rounded-full transition-all duration-1000 {{ $stag->progression >= 75 ? 'bg-gradient-to-r from-emerald-400 to-green-500' : ($stag->progression >= 40 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-pink-400') }}"
                                 style="width:{{ $stag->progression }}%"></div>
                         </div>
                     </div>
@@ -75,7 +72,7 @@
 
             <div class="space-y-5">
                 <!-- Rapports à évaluer -->
-                <div class="card p-6" data-aos="fade-left">
+                <div class="card p-5 sm:p-6" data-aos="fade-left">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-slate-800 font-bold"><i class="fas fa-file-alt text-amber-500 mr-2"></i>Rapports à
                             évaluer</h3>
@@ -83,7 +80,8 @@
                             tous →</a>
                     </div>
                     @forelse($rapportsRecents as $rapport)
-                        <div class="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
                             <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-file-alt text-amber-600 text-xs"></i>
                             </div>
@@ -92,9 +90,7 @@
                                 <p class="text-slate-400 text-xs">{{ $rapport->stagiaire->user->nom_complet ?? '—' }}</p>
                             </div>
                             <a href="{{ route('mentor.reports.show', $rapport) }}"
-                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1 rounded-lg font-medium transition">
-                                Évaluer
-                            </a>
+                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1 rounded-lg font-medium transition">Évaluer</a>
                         </div>
                     @empty
                         <p class="text-slate-400 text-sm text-center py-4">Aucun rapport en attente</p>
@@ -102,7 +98,7 @@
                 </div>
 
                 <!-- Permissions en attente -->
-                <div class="card p-6" data-aos="fade-left" data-aos-delay="100">
+                <div class="card p-5 sm:p-6" data-aos="fade-left" data-aos-delay="100">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-slate-800 font-bold"><i
                                 class="fas fa-calendar-check text-purple-500 mr-2"></i>Permissions à valider</h3>
@@ -111,7 +107,7 @@
                     </div>
                     @forelse($permissionsEnAttente as $perm)
                         <div class="p-3 bg-purple-50 rounded-xl mb-2 last:mb-0">
-                            <div class="flex items-center justify-between gap-2">
+                            <div class="flex flex-col sm:flex-row items-start justify-between gap-3">
                                 <div>
                                     <p class="text-slate-800 font-semibold text-sm">
                                         {{ $perm->stagiaire->user->nom_complet ?? '—' }}</p>
@@ -151,10 +147,8 @@
         </div>
 
         <!-- Actions rapides -->
-        <div class="card p-6"> {{-- data-aos="fade-up" --}}
-            <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-bolt text-amber-500 mr-2"></i>Raccourci pour
-                la création des modules
-            </h3>
+        <div class="card p-5 sm:p-6">
+            <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-bolt text-amber-500 mr-2"></i>Raccourcis</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 @foreach ([[route('mentor.projects.create'), 'fas fa-plus-circle', 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100', 'Créer un projet'], [route('mentor.tasks.create'), 'fas fa-tasks', 'bg-blue-50 text-blue-700 hover:bg-blue-100', 'Créer une tâche'], [route('mentor.reports.index'), 'fas fa-file-alt', 'bg-amber-50 text-amber-700 hover:bg-amber-100', 'Voir les rapports'], [route('mentor.stagiaires.index'), 'fas fa-user-graduate', 'bg-purple-50 text-purple-700 hover:bg-purple-100', 'Mes stagiaires']] as [$route, $icon, $cls, $label])
                     <a href="{{ $route }}"

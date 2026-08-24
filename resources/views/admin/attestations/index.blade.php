@@ -2,25 +2,25 @@
 @section('titre', 'Attestations & Conventions')
 @section('breadcrumb', 'Suivi > Attestations')
 @section('content')
-    <div class="space-y-5">
-        <div class="flex items-center justify-between flex-wrap gap-4" data-aos="fade-down">
+    <div class="space-y-4 sm:space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
             <div>
-                <h2 class="text-slate-800 font-bold text-2xl">Attestations & Conventions</h2>
-                <p class="text-slate-500 text-sm">{{ $attestations->total() }} demande(s) au total</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Attestations & Conventions</h2>
+                <p class="text-sm text-slate-500">{{ $attestations->total() }} demande(s) au total</p>
             </div>
         </div>
 
-        <div class="card p-4 flex flex-wrap gap-3" data-aos="fade-up">
+        <div class="card p-4 flex flex-col sm:flex-row gap-3" data-aos="fade-up">
             <input type="text" id="search" placeholder="Rechercher stagiaire, type, statut..."
-                class="flex-1 min-w-48 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition">
+                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm">
             <select id="filterType"
-                class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition">
+                class="w-full sm:w-auto border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm">
                 <option value="">Tous types</option>
                 <option value="attestation">Attestation</option>
                 <option value="convention">Convention</option>
             </select>
             <select id="filterStatut"
-                class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition">
+                class="w-full sm:w-auto border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm">
                 <option value="">Tous statuts</option>
                 <option value="en_attente">En attente</option>
                 <option value="valide_mentor">Validé mentor</option>
@@ -34,41 +34,41 @@
                 <table class="w-full text-sm">
                     <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                         <tr>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Stagiaire</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Type</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Demandé le</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Validé mentor</th>
-                            <th class="px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Stagiaire</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Type</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden md:table-cell">
+                                Demandé le</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden lg:table-cell">Validé
+                                mentor</th>
+                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50" id="attTable">
                         @forelse($attestations as $att)
                             <tr class="hover:bg-slate-50 transition att-row" data-type="{{ $att->type }}"
                                 data-statut="{{ $att->statut }}">
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
                                             class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                             {{ strtoupper(substr($att->stagiaire->user->prenom ?? '', 0, 1)) }}
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-slate-800">
+                                            <p class="font-semibold text-slate-800 text-sm">
                                                 {{ $att->stagiaire->user->nom_complet ?? '—' }}</p>
                                             <p class="text-slate-400 text-xs">{{ $att->stagiaire->matricule ?? '' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <span
-                                        class="px-3 py-1 rounded-full text-xs font-semibold capitalize
-                                {{ $att->type === 'attestation' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' }}">
+                                        class="px-3 py-1 rounded-full text-xs font-semibold capitalize {{ $att->type === 'attestation' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' }}">
                                         <i
-                                            class="fas fa-{{ $att->type === 'attestation' ? 'certificate' : 'file-contract' }} mr-1"></i>
-                                        {{ $att->type }}
+                                            class="fas fa-{{ $att->type === 'attestation' ? 'certificate' : 'file-contract' }} mr-1"></i>{{ $att->type }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     @php
                                         $badges = [
                                             'en_attente' => 'bg-amber-100 text-amber-700',
@@ -90,12 +90,11 @@
                                         {{ $labels[$att->statut] ?? $att->statut }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4 text-slate-500 text-xs">{{ $att->created_at->format('d/m/Y H:i') }}
-                                </td>
-                                <td class="px-5 py-4 text-xs text-slate-500">
-                                    {{ $att->valide_le_mentor ? $att->valide_le_mentor->format('d/m/Y') : '—' }}
-                                </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4 text-slate-500 text-xs hidden md:table-cell">
+                                    {{ $att->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="px-4 sm:px-5 py-4 text-xs text-slate-500 hidden lg:table-cell">
+                                    {{ $att->valide_le_mentor ? $att->valide_le_mentor->format('d/m/Y') : '—' }}</td>
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('admin.attestations.show', $att) }}"
                                             class="w-8 h-8 bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-700 rounded-lg flex items-center justify-center transition">
@@ -129,8 +128,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-16">
-                                    <i class="fas fa-certificate text-5xl text-slate-200 mb-3"></i>
+                                <td colspan="6" class="text-center py-16"><i
+                                        class="fas fa-certificate text-5xl text-slate-200 mb-3"></i>
                                     <p class="text-slate-400">Aucune demande d'attestation</p>
                                 </td>
                             </tr>
@@ -138,7 +137,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-5 py-4 border-t border-slate-100">{{ $attestations->links() }}</div>
+            <div class="px-4 sm:px-5 py-4 border-t border-slate-100">{{ $attestations->links() }}</div>
         </div>
     </div>
 @endsection

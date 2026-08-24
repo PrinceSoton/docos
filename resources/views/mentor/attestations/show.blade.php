@@ -2,9 +2,9 @@
 @section('titre', 'Demande attestation')
 @section('breadcrumb', 'Attestations > Détail')
 @section('content')
-    <div class="max-w-2xl mx-auto space-y-5">
-        <div class="card p-8" data-aos="fade-up">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0 space-y-5">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
                         <i class="fas fa-certificate text-amber-600 text-xl"></i>
@@ -36,7 +36,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="p-4 bg-slate-50 rounded-xl">
                     <p class="text-xs text-slate-400 uppercase font-medium">Type</p>
                     <p class="font-bold text-slate-800 capitalize mt-1">{{ $attestation->type }}</p>
@@ -71,15 +71,15 @@
                 </div>
             @endif
 
-            <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100">
+            <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-5 border-t border-slate-100">
                 @if ($attestation->statut === 'en_attente')
                     <a href="{{ route('mentor.attestations.validate', $attestation) }}"
-                        class="flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-emerald-600 transition hover:shadow-md">
+                        class="flex items-center justify-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-emerald-600 transition hover:shadow-md w-full sm:w-auto">
                         <i class="fas fa-check"></i>Valider / Refuser
                     </a>
                 @endif
                 <a href="{{ route('mentor.attestations.index') }}"
-                    class="flex items-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition ml-auto">
+                    class="flex items-center justify-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition w-full sm:w-auto sm:ml-auto">
                     <i class="fas fa-arrow-left"></i>Retour
                 </a>
             </div>

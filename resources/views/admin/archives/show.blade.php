@@ -2,16 +2,16 @@
 @section('titre', 'Archive')
 @section('breadcrumb', 'Archives > Détail')
 @section('content')
-    <div class="max-w-3xl mx-auto space-y-5">
-        <div class="card p-8" data-aos="fade-up">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+    <div class="max-w-3xl mx-auto px-4 sm:px-0 space-y-5">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
                         <i class="fas fa-archive text-indigo-600 text-xl"></i>
                     </div>
                     <div>
                         <h2 class="text-slate-800 font-bold text-xl">{{ $archive->titre }}</h2>
-                        <div class="flex items-center gap-2 mt-1">
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
                             <span
                                 class="px-2 py-0.5 rounded-lg text-xs font-semibold {{ $archive->type === 'stagiaire' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600' }}">
                                 {{ ucfirst($archive->type) }}
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <a href="{{ route('admin.archives.edit', $archive) }}"
                         class="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-600 transition">
                         <i class="fas fa-edit"></i>Modifier
@@ -43,11 +43,10 @@
                 </div>
             @endif
 
-            <!-- Stagiaire lié -->
             @if ($archive->stagiaire)
                 <div class="p-5 bg-indigo-50 rounded-2xl mb-5">
                     <p class="text-xs text-indigo-400 uppercase font-medium mb-3">Stagiaire</p>
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div
                             class="w-10 h-10 rounded-xl bg-indigo-200 flex items-center justify-center font-bold text-indigo-700 flex-shrink-0">
                             {{ strtoupper(substr($archive->stagiaire->user->prenom ?? '', 0, 1)) }}
@@ -69,18 +68,16 @@
                 </div>
             @endif
 
-            <!-- Fichiers -->
             <div>
-                <h3 class="text-slate-800 font-bold text-lg mb-4">
-                    <i class="fas fa-paperclip text-amber-500 mr-2"></i>Fichiers ({{ $archive->fichiers->count() }})
-                </h3>
+                <h3 class="text-slate-800 font-bold text-lg mb-4"><i
+                        class="fas fa-paperclip text-amber-500 mr-2"></i>Fichiers ({{ $archive->fichiers->count() }})</h3>
                 @if ($archive->fichiers->isEmpty())
                     <p class="text-slate-400 text-sm text-center py-6">Aucun fichier dans cette archive</p>
                 @else
                     <div class="space-y-2">
                         @foreach ($archive->fichiers as $fichier)
                             <div
-                                class="flex items-center gap-4 p-4 bg-slate-50 hover:bg-indigo-50 rounded-xl transition group">
+                                class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 hover:bg-indigo-50 rounded-xl transition group">
                                 <div
                                     class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0">
                                     <i class="fas fa-file text-indigo-500"></i>

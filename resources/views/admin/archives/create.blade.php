@@ -2,8 +2,8 @@
 @section('titre', 'Nouvelle archive')
 @section('breadcrumb', 'Archives > Créer')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-archive text-indigo-600"></i>
@@ -18,10 +18,9 @@
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Type d'archive *</label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 xs:grid-cols-2 gap-3">
                         <label
-                            class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition hover:border-indigo-400
-                        {{ old('type', 'autre') === 'stagiaire' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200' }}">
+                            class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition hover:border-indigo-400 {{ old('type', 'autre') === 'stagiaire' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200' }}">
                             <input type="radio" name="type" value="stagiaire"
                                 {{ old('type') === 'stagiaire' ? 'checked' : '' }} class="text-indigo-600"
                                 id="typeStagiaire">
@@ -32,8 +31,7 @@
                             </div>
                         </label>
                         <label
-                            class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition hover:border-indigo-400
-                        {{ old('type', 'autre') === 'autre' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200' }}">
+                            class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition hover:border-indigo-400 {{ old('type', 'autre') === 'autre' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200' }}">
                             <input type="radio" name="type" value="autre"
                                 {{ old('type', 'autre') === 'autre' ? 'checked' : '' }} class="text-indigo-600"
                                 id="typeAutre">
@@ -75,10 +73,9 @@
 
                 <!-- Fichiers multiples -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-paperclip mr-1 text-indigo-500"></i>Fichiers
-                        <span class="text-slate-400 font-normal">(Tous formats, sans limite)</span>
-                    </label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2"><i
+                            class="fas fa-paperclip mr-1 text-indigo-500"></i>Fichiers <span
+                            class="text-slate-400 font-normal">(Tous formats, sans limite)</span></label>
                     <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-400 transition cursor-pointer"
                         id="dropZone">
                         <input type="file" name="fichiers[]" id="fichiersInput" multiple class="hidden">
@@ -89,15 +86,13 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3 pt-2">
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button type="submit"
                         class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
                         <i class="fas fa-save mr-2"></i>Créer l'archive
                     </button>
                     <a href="{{ route('admin.archives.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">
-                        Annuler
-                    </a>
+                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>
@@ -133,8 +128,8 @@
             list.innerHTML = '';
             Array.from(fi.files).forEach(f => {
                 list.innerHTML += `<div class="flex items-center gap-2 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
-                <i class="fas fa-file text-indigo-400"></i>${f.name} <span class="text-slate-400">${(f.size/1024).toFixed(1)}Ko</span>
-            </div>`;
+                    <i class="fas fa-file text-indigo-400"></i>${f.name} <span class="text-slate-400">${(f.size/1024).toFixed(1)}Ko</span>
+                </div>`;
             });
         }
     </script>

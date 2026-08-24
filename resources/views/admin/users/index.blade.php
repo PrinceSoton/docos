@@ -2,14 +2,14 @@
 @section('titre', 'Utilisateurs')
 @section('breadcrumb', 'Gestion > Utilisateurs')
 @section('content')
-    <div class="space-y-5">
-        <div class="flex items-center justify-between flex-wrap gap-4" data-aos="fade-down">
+    <div class="space-y-4 sm:space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
             <div>
-                <h2 class="text-slate-800 font-bold text-2xl">Utilisateurs</h2>
-                <p class="text-slate-500 text-sm">{{ $users->total() }} utilisateur(s) au total</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Utilisateurs</h2>
+                <p class="text-sm text-slate-500">{{ $users->total() }} utilisateur(s) au total</p>
             </div>
             <a href="{{ route('admin.users.create') }}"
-                class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <i class="fas fa-plus"></i>Nouvel utilisateur
             </a>
         </div>
@@ -21,28 +21,31 @@
 
         <div class="card overflow-hidden" data-aos="fade-up">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm" id="usersTable">
+                <table class="w-full text-sm">
                     <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                         <tr>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Utilisateur</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Email</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Rôle</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-5 py-4 text-left font-semibold text-slate-600">Créé le</th>
-                            <th class="px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Utilisateur</th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden sm:table-cell">Email
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden md:table-cell">Rôle
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden lg:table-cell">Statut
+                            </th>
+                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden xl:table-cell">Créé
+                                le</th>
+                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         @forelse($users as $user)
                             <tr class="table-row-hover transition user-row">
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0
-                                    {{ $user->role === 'admin' ? 'bg-gradient-to-br from-red-400 to-pink-500' : ($user->role === 'mentor' ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : 'bg-gradient-to-br from-indigo-400 to-purple-500') }}">
+                                            class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 {{ $user->role === 'admin' ? 'bg-gradient-to-br from-red-400 to-pink-500' : ($user->role === 'mentor' ? 'bg-gradient-to-br from-emerald-400 to-teal-500' : 'bg-gradient-to-br from-indigo-400 to-purple-500') }}">
                                             @if ($user->photo)
                                                 <img src="{{ asset('storage/' . $user->photo) }}"
-                                                    class="w-full h-full rounded-xl object-cover">
+                                                    class="w-full h-full rounded-xl object-cover" loading="lazy">
                                             @else
                                                 {{ strtoupper(substr($user->prenom, 0, 1)) }}
                                             @endif
@@ -53,15 +56,12 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-slate-600">{{ $user->email }}</td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4 text-slate-600 hidden sm:table-cell">{{ $user->email }}</td>
+                                <td class="px-4 sm:px-5 py-4 hidden md:table-cell">
                                     <span
-                                        class="px-3 py-1 rounded-full text-xs font-semibold
-                                {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : ($user->role === 'mentor' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700') }}">
-                                        {{ ucfirst($user->role) }}
-                                    </span>
+                                        class="px-3 py-1 rounded-full text-xs font-semibold {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : ($user->role === 'mentor' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700') }}">{{ ucfirst($user->role) }}</span>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4 hidden lg:table-cell">
                                     <form action="{{ route('admin.users.toggle', $user) }}" method="POST"
                                         class="no-loader">
                                         @csrf @method('PATCH')
@@ -71,8 +71,9 @@
                                         </button>
                                     </form>
                                 </td>
-                                <td class="px-5 py-4 text-slate-500 text-xs">{{ $user->created_at->format('d/m/Y') }}</td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 sm:px-5 py-4 text-slate-500 text-xs hidden xl:table-cell">
+                                    {{ $user->created_at->format('d/m/Y') }}</td>
+                                <td class="px-4 sm:px-5 py-4">
                                     <div class="flex items-center justify-center gap-2">
                                         <a href="{{ route('admin.users.show', $user) }}"
                                             class="w-8 h-8 bg-slate-100 hover:bg-indigo-100 text-slate-600 hover:text-indigo-700 rounded-lg flex items-center justify-center transition"
@@ -104,9 +105,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-5 py-4 border-t border-slate-100">
-                {{ $users->links() }}
-            </div>
+            <div class="px-4 sm:px-5 py-4 border-t border-slate-100">{{ $users->links() }}</div>
         </div>
     </div>
 @endsection

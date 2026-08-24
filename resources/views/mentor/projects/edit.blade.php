@@ -2,8 +2,8 @@
 @section('titre', 'Modifier projet')
 @section('breadcrumb', 'Projets > Modifier')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-edit text-amber-600"></i>
@@ -66,23 +66,24 @@
                     </label>
                     <div class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
                         @foreach ($stagiaires as $stag)
-                            <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white transition cursor-pointer">
+                            <label
+                                class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-2 rounded-lg hover:bg-white transition cursor-pointer">
                                 <input type="checkbox" name="stagiaires[]" value="{{ $stag->id }}"
                                     {{ $project->stagiaires->contains($stag->id) ? 'checked' : '' }}
-                                    class="w-4 h-4 text-emerald-600 rounded">
+                                    class="w-4 h-4 text-emerald-600 rounded mt-1 sm:mt-0">
                                 <span class="text-slate-700 text-sm font-medium">{{ $stag->user->nom_complet }}</span>
                                 <span class="text-slate-400 text-xs">{{ $stag->matricule }}</span>
                             </label>
                         @endforeach
                     </div>
                 </div>
-                <div class="flex gap-3 pt-2">
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button type="submit"
                         class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
                         <i class="fas fa-save mr-2"></i>Mettre à jour
                     </button>
                     <a href="{{ route('mentor.projects.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
+                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>

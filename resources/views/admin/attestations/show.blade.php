@@ -2,9 +2,9 @@
 @section('titre', 'Détail attestation')
 @section('breadcrumb', 'Attestations > Détail')
 @section('content')
-    <div class="max-w-2xl mx-auto space-y-5">
-        <div class="card p-8" data-aos="fade-up">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0 space-y-5">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
                         <i class="fas fa-certificate text-amber-600 text-xl"></i>
@@ -35,7 +35,6 @@
             </div>
 
             <div class="space-y-4">
-                <!-- Stagiaire -->
                 <div class="p-4 bg-indigo-50 rounded-2xl">
                     <p class="text-xs text-indigo-400 font-semibold uppercase mb-2">Stagiaire</p>
                     <div class="flex items-center gap-3">
@@ -51,7 +50,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="p-4 bg-slate-50 rounded-xl">
                         <p class="text-xs text-slate-400 uppercase font-medium">Type</p>
                         <p class="font-bold text-slate-800 capitalize mt-1">{{ $attestation->type }}</p>
@@ -91,19 +90,15 @@
                 @endif
             </div>
 
-            <!-- Actions -->
-            <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100 flex-wrap">
+            <div class="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100">
                 @if (in_array($attestation->statut, ['valide_mentor', 'approuve_admin']))
                     <a href="{{ route('admin.attestations.uploadForm', $attestation) }}"
                         class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all hover:-translate-y-0.5">
                         <i class="fas fa-upload"></i>Envoyer le document
                     </a>
-
-                    <!-- Bouton Supprimer -->
                     <form action="{{ route('admin.attestations.destroy', $attestation) }}" method="POST"
                         id="del-att-{{ $attestation->id }}" class="inline">
-                        @csrf
-                        @method('DELETE')
+                        @csrf @method('DELETE')
                         <button type="button"
                             class="btn-delete flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium transition hover:shadow-lg"
                             data-form="del-att-{{ $attestation->id }}">
@@ -117,7 +112,6 @@
                         <i class="fas fa-download"></i>Télécharger
                     </a>
                 @endif
-
                 <a href="{{ route('admin.attestations.index') }}"
                     class="flex items-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition ml-auto">
                     <i class="fas fa-arrow-left"></i>Retour

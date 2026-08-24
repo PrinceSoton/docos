@@ -7,10 +7,32 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('titre', 'Mentor') - DOCOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                screens: {
+                    'xs': '375px',
+                    'sm': '640px',
+                    'md': '768px',
+                    'lg': '1024px',
+                    'xl': '1280px',
+                    '2xl': '1536px',
+                },
+                extend: {
+                    spacing: {
+                        '18': '4.5rem',
+                        '88': '22rem',
+                        '120': '30rem'
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css" rel="stylesheet" />
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -21,7 +43,49 @@
         .sidebar {
             background: linear-gradient(180deg, #064e3b 0%, #065f46 50%, #047857 100%);
             min-height: 100vh;
-            transition: width .3s ease;
+            transition: width .3s ease, transform .3s ease;
+            overflow-y: auto;
+            z-index: 60;
+        }
+
+        /* Version collapsée (desktop) */
+        .sidebar.collapsed {
+            width: 72px;
+        }
+
+        .sidebar.collapsed .sidebar-label,
+        .sidebar.collapsed .sidebar-logo-text {
+            display: none;
+        }
+
+        /* Version mobile : menu latéral masqué */
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform .3s ease;
+                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 50;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
         }
 
         .sidebar-item {
@@ -42,6 +106,7 @@
         .glass {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .card {
@@ -93,19 +158,6 @@
             animation: fadeSlide .4s ease forwards;
         }
 
-        #sidebar.collapsed .sidebar-label,
-        .sidebar.collapsed .sidebar-logo-text {
-            display: none;
-        }
-
-        #sidebar {
-            width: 260px;
-        }
-
-        #sidebar.collapsed {
-            width: 72px;
-        }
-
         ::-webkit-scrollbar {
             width: 5px;
         }
@@ -114,100 +166,79 @@
             background: linear-gradient(#047857, #065f46);
             border-radius: 3px;
         }
+
+        /* Désactiver AOS sur petits écrans pour économiser les ressources */
+        @media (max-width: 640px) {
+            [data-aos] {
+                opacity: 1 !important;
+                transform: none !important;
+                pointer-events: auto !important;
+            }
+        }
     </style>
     @stack('styles')
 </head>
 
 <body class="bg-gray-50">
 
+    <!-- Loader -->
     <div class="loader-overlay" id="appLoader">
         <div class="relative mb-4">
             <div
                 class="w-16 h-16 rounded-full border-4 border-emerald-100 spin border-t-emerald-600 absolute inset-0 m-auto">
             </div>
             <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="relative rounded-3xl shadow-2xl w-12 h-12 object-contain mx-auto {{-- rounded-xlrelative --}} z-10 mt-2">
+                class="relative rounded-3xl shadow-2xl w-12 h-12 object-contain mx-auto z-10 mt-2" loading="lazy">
         </div>
         <p class="text-emerald-700 font-bold text-xl mt-4">DOCOS</p>
         <p class="text-slate-400 text-sm">Espace Mentor</p>
     </div>
 
     <div class="flex h-screen overflow-hidden">
-        <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col shadow-2xl z-50">
+        <!-- Overlay pour mobile -->
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col shadow-2xl">
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
                 <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                    class="w-10 h-10 rounded-xl object-contain flex-shrink-0">
+                    class="w-10 h-10 rounded-xl object-contain flex-shrink-0" loading="lazy">
                 <div class="sidebar-logo-text">
                     <p class="text-white font-bold text-lg">DOCOS</p>
-                    {{-- <pclass="text-emerald-300text-xs">Mentor</p> --}}
                 </div>
-                <button id="toggleSidebar" class="ml-auto text-white/60 hover:text-white">
+                <button id="toggleSidebarBtn" class="ml-auto text-white/60 hover:text-white hidden sm:block"
+                    aria-label="Réduire/agrandir la sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
+                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white block sm:hidden"
+                    aria-label="Fermer le menu" onclick="toggleSidebar(false)">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            {{-- <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
-                <div
-                    class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center flex-shrink-0">
-                    @if (Auth::user()->photo)
-                        <img src="{{ asset('storage/' . Auth::user()->photo) }}"
-                            class="w-full h-full rounded-full object-cover">
-                    @else
-                        <span
-                            class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
-                    @endif
-                </div>
-                <div class="sidebar-label">
-                    <p class="text-white font-semibold text-sm truncate">{{ Auth::user()->nom_complet }}</p>
-                    <p class="text-emerald-300 text-xs">Tuteur/Mentor</p>
-                </div>
-            </div> --}}
+
             <nav class="flex-1 py-4 overflow-y-auto">
-                <a href="{{ route('mentor.dashboard') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Tableau de bord</span>
-                </a>
-                <a href="{{ route('mentor.stagiaires.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.stagiaires.*') ? 'active' : '' }}">
-                    <i class="fas fa-user-graduate w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Mes Stagiaires</span>
-                </a>
-                <a href="{{ route('mentor.projects.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.projects.*') ? 'active' : '' }}">
-                    <i class="fas fa-project-diagram w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Projets</span>
-                </a>
-                <a href="{{ route('mentor.tasks.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.tasks.*') ? 'active' : '' }}">
-                    <i class="fas fa-tasks w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Tâches</span>
-                </a>
-                <a href="{{ route('mentor.reports.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.reports.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-alt w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Rapports</span>
-                </a>
-                <a href="{{ route('mentor.presences.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.presences.*') ? 'active' : '' }}">
-                    <i class="fas fa-clipboard-list w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Présences</span>
-                </a>
-                <a href="{{ route('mentor.attestations.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.attestations.*') ? 'active' : '' }}">
-                    <i class="fas fa-certificate w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Attestations</span>
-                </a>
-                <a href="{{ route('mentor.evenements.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('mentor.evenements.*') ? 'active' : '' }}">
-                    <i class="fas fa-bell w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Événements</span>
-                </a>
-                <a href="{{ route('documents.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white">
-                    <i class="fas fa-folder-open w-5 text-center flex-shrink-0"></i><span
-                        class="sidebar-label text-sm font-medium">Documents</span>
-                </a>
+                @php
+                    $routes = [
+                        ['mentor.dashboard', 'tachometer-alt', 'Tableau de bord'],
+                        ['mentor.stagiaires.index', 'user-graduate', 'Mes Stagiaires'],
+                        ['mentor.projects.index', 'project-diagram', 'Projets'],
+                        ['mentor.tasks.index', 'tasks', 'Tâches'],
+                        ['mentor.reports.index', 'file-alt', 'Rapports'],
+                        ['mentor.presences.index', 'clipboard-list', 'Présences'],
+                        ['mentor.attestations.index', 'certificate', 'Attestations'],
+                        ['mentor.evenements.index', 'bell', 'Événements'],
+                        ['documents.index', 'folder-open', 'Documents'],
+                    ];
+                @endphp
+                @foreach ($routes as [$route, $icon, $label])
+                    <a href="{{ route($route) }}"
+                        class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs($route) ? 'active' : '' }}">
+                        <i class="fas fa-{{ $icon }} w-5 text-center flex-shrink-0"></i>
+                        <span class="sidebar-label text-sm font-medium">{{ $label }}</span>
+                    </a>
+                @endforeach
             </nav>
+
             <div class="p-4 border-t border-white/10">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
@@ -220,16 +251,21 @@
             </div>
         </aside>
 
+        <!-- Contenu principal -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <header
-                class="glass border-b border-white/20 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
-                <div>
-                    <h1 class="text-slate-800 font-bold text-lg">@yield('titre', 'Tableau de bord')</h1>
-                    <p class="text-slate-400 text-xs">@yield('breadcrumb', 'Espace Mentor')</p>
+                class="glass border-b border-white/20 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button id="openSidebarBtn" class="block sm:hidden text-slate-700 hover:text-emerald-600 text-xl"
+                        aria-label="Ouvrir le menu" onclick="toggleSidebar(true)">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-slate-800 font-bold text-lg sm:text-xl">@yield('titre', 'Tableau de bord')</h1>
+                        <p class="text-slate-400 text-xs">@yield('breadcrumb', 'Espace Mentor')</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    {{-- <span
-                        class="hidden sm:block text-slate-500 text-sm">{{ now()->translatedFormat('l d F Y') }}</span> --}}
                     <a href="{{ route('profile.index') }}"
                         class="flex items-center gap-2 hover:bg-emerald-50 px-3 py-2 rounded-xl transition">
                         <div
@@ -240,12 +276,12 @@
                         <span class="text-slate-700 font-medium text-sm hidden md:block">
                             <p>{{ Auth::user()->nom_complet }}</p>
                             <p class="text-indigo-300 text-xs">Mentor</p>
-
                         </span>
                     </a>
                 </div>
             </header>
-            <main class="flex-1 overflow-y-auto p-6">
+
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 @if ($errors->any())
                     <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                         <ul class="list-disc list-inside text-red-600 text-sm">
@@ -260,11 +296,14 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
+
     <script>
+        // ---- Loader ----
         window.addEventListener('load', () => {
             gsap.to('#appLoader', {
                 opacity: 0,
@@ -275,13 +314,47 @@
                 }
             });
         });
+
+        // ---- AOS (désactivé sur mobile) ----
+        const isMobile = window.innerWidth < 640;
         AOS.init({
             duration: 600,
-            once: true
+            once: true,
+            disable: isMobile ? true : false,
         });
-        document.getElementById('toggleSidebar')?.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('collapsed');
+
+        // ---- Toggle sidebar (mobile et desktop) ----
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 768) {
+                if (open === undefined) {
+                    const isOpen = sidebar.classList.contains('open');
+                    sidebar.classList.toggle('open', !isOpen);
+                    overlay.classList.toggle('active', !isOpen);
+                } else {
+                    sidebar.classList.toggle('open', open);
+                    overlay.classList.toggle('active', open);
+                }
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        document.getElementById('openSidebarBtn')?.addEventListener('click', () => toggleSidebar(true));
+        document.getElementById('closeSidebarBtn')?.addEventListener('click', () => toggleSidebar(false));
+        document.getElementById('toggleSidebarBtn')?.addEventListener('click', () => toggleSidebar());
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
         });
+
+        // ---- Alertes SweetAlert ----
         @if (session('succes'))
             Swal.fire({
                 icon: 'success',
@@ -304,6 +377,8 @@
                 showConfirmButton: false
             });
         @endif
+
+        // ---- Suppression avec confirmation ----
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();

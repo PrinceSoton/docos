@@ -2,31 +2,26 @@
 @section('titre', 'Rapport')
 @section('breadcrumb', 'Rapports > Détail')
 @section('content')
-    <div class="max-w-4xl mx-auto space-y-5">
-        <!-- En-tête rapport -->
-        <div class="card p-6" data-aos="fade-up">
-            <div class="flex items-start justify-between flex-wrap gap-4 mb-5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-0 space-y-5">
+        <div class="card p-5 sm:p-6" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-5">
                 <div>
-                    <h2 class="text-slate-800 font-black text-2xl">{{ $report->titre }}</h2>
-                    <div class="flex items-center gap-3 mt-2 flex-wrap">
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">{{ $report->titre }}</h2>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                         <span
                             class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type_affiche }}</span>
                         @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$report->statut] ?? '' }}">
-                            {{ ucfirst(str_replace('_', ' ', $report->statut)) }}
-                        </span>
+                        <span
+                            class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$report->statut] ?? '' }}">{{ ucfirst(str_replace('_', ' ', $report->statut)) }}</span>
                         @if ($report->note !== null)
                             <span
-                                class="font-bold text-{{ $report->note >= 14 ? 'green' : ($report->note >= 10 ? 'amber' : 'red') }}-600 text-sm">
-                                Note : {{ $report->note }}/20
-                            </span>
+                                class="font-bold text-{{ $report->note >= 14 ? 'green' : ($report->note >= 10 ? 'amber' : 'red') }}-600 text-sm">Note
+                                : {{ $report->note }}/20</span>
                         @endif
                     </div>
-                    <p class="text-slate-400 text-sm mt-1">
-                        Déposé le {{ $report->created_at->format('d/m/Y à H:i') }}
-                    </p>
+                    <p class="text-slate-400 text-sm mt-1">Déposé le {{ $report->created_at->format('d/m/Y à H:i') }}</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <a href="{{ route('mentor.reports.telecharger', $report) }}"
                         class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition hover:shadow-md">
                         <i class="fas fa-download"></i>Télécharger
@@ -40,7 +35,7 @@
                 </div>
             </div>
 
-            <!-- Info stagiaire + projet -->
+            <!-- Infos stagiaire + projet -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-emerald-50 rounded-2xl">
                     <p class="text-xs text-emerald-400 uppercase font-medium mb-2">Stagiaire</p>
@@ -66,14 +61,14 @@
             </div>
 
             @if ($report->description)
-                <div class="mt-4 p-4 bg-slate-50 rounded-xl">
+                <div class="p-4 bg-slate-50 rounded-xl mt-4">
                     <p class="text-xs text-slate-400 uppercase font-medium mb-1">Description</p>
                     <p class="text-slate-700 text-sm">{{ $report->description }}</p>
                 </div>
             @endif
 
             @if ($report->commentaire_mentor)
-                <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 mt-4">
                     <p class="text-xs text-amber-500 uppercase font-medium mb-1"><i class="fas fa-comment mr-1"></i>Mon
                         commentaire</p>
                     <p class="text-slate-700 text-sm">{{ $report->commentaire_mentor }}</p>
@@ -82,15 +77,13 @@
         </div>
 
         <!-- Commentaires -->
-        <div class="card p-6" data-aos="fade-up">
-            <h3 class="text-slate-800 font-bold text-lg mb-4">
-                <i class="fas fa-comments text-emerald-500 mr-2"></i>Commentaires ({{ $report->comments->count() }})
-            </h3>
+        <div class="card p-5 sm:p-6" data-aos="fade-up">
+            <h3 class="text-slate-800 font-bold text-lg mb-4"><i
+                    class="fas fa-comments text-emerald-500 mr-2"></i>Commentaires ({{ $report->comments->count() }})</h3>
 
-            <!-- Ajouter commentaire -->
             <form action="{{ route('mentor.reports.commenter', $report) }}" method="POST" class="mb-5">
                 @csrf
-                <div class="flex gap-3">
+                <div class="flex flex-col sm:flex-row gap-3">
                     <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0">
                         <span
                             class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
@@ -107,7 +100,6 @@
                 </div>
             </form>
 
-            <!-- Liste commentaires -->
             <div class="space-y-3">
                 @forelse($report->comments as $comment)
                     <div class="flex gap-3 {{ $comment->user_id === Auth::id() ? '' : 'flex-row-reverse' }}">
@@ -116,7 +108,7 @@
                             <span
                                 class="text-white font-bold text-xs">{{ strtoupper(substr($comment->user->prenom ?? '', 0, 1)) }}</span>
                         </div>
-                        <div class="flex-1 {{ $comment->user_id === Auth::id() ? '' : 'text-right' }}">
+                        <div class="{{ $comment->user_id === Auth::id() ? '' : 'text-right' }} flex-1">
                             <div
                                 class="inline-block max-w-xs {{ $comment->user_id === Auth::id() ? 'bg-emerald-50' : 'bg-slate-50' }} rounded-2xl px-4 py-3">
                                 <p class="text-slate-500 text-xs font-medium mb-1">{{ $comment->user->nom_complet ?? '—' }}

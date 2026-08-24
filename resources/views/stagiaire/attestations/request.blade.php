@@ -1,28 +1,28 @@
 @extends('layouts.stagiaire')
-@section('titre', 'Demande d\'attestation')
+@section('titre', "Demande d'attestation")
 @section('breadcrumb', 'Attestations > Demande')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
+    <div class="max-w-2xl mx-auto px-4 sm:px-0">
+        <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-certificate text-amber-600"></i>
                 </div>
                 <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Demande officielle</h2>
-                    <p class="text-slate-400 text-sm">Attestation de stage ou convention de stage</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Demande officielle</h2>
+                    <p class="text-sm text-slate-400">Attestation de stage ou convention de stage</p>
                 </div>
             </div>
 
-            <!-- Info processus -->
+            <!-- Processus -->
             <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 mb-6">
                 <p class="text-sm text-blue-700 font-medium mb-2"><i class="fas fa-info-circle mr-1"></i>Processus de
                     validation</p>
-                <div class="flex items-center gap-2 text-xs text-blue-600">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-blue-600">
                     <span class="bg-blue-200 px-2 py-1 rounded-lg">1. Votre demande</span>
-                    <i class="fas fa-arrow-right"></i>
+                    <i class="fas fa-arrow-right hidden xs:inline"></i>
                     <span class="bg-blue-200 px-2 py-1 rounded-lg">2. Validation mentor</span>
-                    <i class="fas fa-arrow-right"></i>
+                    <i class="fas fa-arrow-right hidden xs:inline"></i>
                     <span class="bg-blue-200 px-2 py-1 rounded-lg">3. Envoi admin</span>
                 </div>
             </div>
@@ -32,10 +32,10 @@
                 <!-- Choix du type -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-3">Type de document *</label>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 xs:grid-cols-2 gap-4">
                         <label
-                            class="flex flex-col items-center gap-3 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-blue-400
-                        {{ $attestationExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
+                            class="flex flex-col items-center gap-3 p-4 sm:p-5 border-2 rounded-2xl cursor-pointer transition hover:border-blue-400
+                            {{ $attestationExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
                             <input type="radio" name="type" value="attestation"
                                 {{ $attestationExiste ? 'disabled' : '' }} class="sr-only" required>
                             <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -52,8 +52,8 @@
                             </div>
                         </label>
                         <label
-                            class="flex flex-col items-center gap-3 p-5 border-2 rounded-2xl cursor-pointer transition hover:border-purple-400
-                        {{ $conventionExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
+                            class="flex flex-col items-center gap-3 p-4 sm:p-5 border-2 rounded-2xl cursor-pointer transition hover:border-purple-400
+                            {{ $conventionExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
                             <input type="radio" name="type" value="convention"
                                 {{ $conventionExiste ? 'disabled' : '' }} class="sr-only">
                             <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -79,11 +79,11 @@
                 </div>
 
                 @if (!$attestationExiste || !$conventionExiste)
-                    <!-- Informations du stagiaire -->
+                    <!-- Infos stagiaire -->
                     <div class="p-5 bg-slate-50 rounded-2xl">
                         <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Vos informations de
                             stage</p>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             <div>
                                 <p class="text-slate-400 text-xs">Matricule</p>
                                 <p class="font-bold text-slate-800 font-mono">{{ $stagiaire->matricule }}</p>
@@ -117,7 +117,7 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                        class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold text-sm sm:text-base hover:shadow-lg hover:-translate-y-0.5 transition-all">
                         <i class="fas fa-paper-plane mr-2"></i>Soumettre ma demande
                     </button>
                 @endif
