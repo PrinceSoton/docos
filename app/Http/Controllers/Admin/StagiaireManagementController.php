@@ -17,13 +17,21 @@ class StagiaireManagementController extends Controller
     public function index()
     {
         $stagiaires = Stagiaire::with('user', 'mentor')->latest()->paginate(15);
+
+        // Calcul des jours restants pour chaque stagiaire de la liste
+        $stagiaires->getCollection()->transform(function ($stagiaire) {
+            $fin = $stagiaire->date_fin;
+            $stagiaire->jours_restants = now()->lessThan($fin) ? (int) now()->diffInDays($fin) : 0;
+            return $stagiaire;
+        });
+
         return view('admin.stagiaires.index', compact('stagiaires'));
     }
 
     public function create()
     {
         $mentors = Mentor::with('user')->get();
-       return view('admin.stagiaires.create', compact('mentors'));
+        return view('admin.stagiaires.create', compact('mentors'));
     }
 
     public function store(Request $request)
@@ -80,8 +88,7 @@ class StagiaireManagementController extends Controller
             'statut'       => 'en_cours',
         ]);
 
-         Mail::to($request->email)->send(new BienvenueStagiaire($request->only('nom', 'prenom', 'email'), $request->password));
-
+        Mail::to($request->email)->send(new BienvenueStagiaire($request->only('nom', 'prenom', 'email'), $request->password));
 
         return redirect()->route('admin.stagiaires.index')->with('succes', 'Stagiaire créé avec succès.');
     }
@@ -89,6 +96,11 @@ class StagiaireManagementController extends Controller
     public function show(Stagiaire $stagiaire)
     {
         $stagiaire->load('user', 'mentor', 'presences', 'reports', 'projects', 'tasks', 'attestations');
+
+        // Calcul des jours restants pour la vue détails
+        $fin = $stagiaire->date_fin;
+        $stagiaire->jours_restants = now()->lessThan($fin) ? (int) now()->diffInDays($fin) : 0;
+
         return view('admin.stagiaires.show', compact('stagiaire'));
     }
 
@@ -144,7 +156,4 @@ class StagiaireManagementController extends Controller
         $stagiaire->user->delete();
         return redirect()->route('admin.stagiaires.index')->with('succes', 'Stagiaire supprimé.');
     }
-
-
-
 }

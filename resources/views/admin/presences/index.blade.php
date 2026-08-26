@@ -11,6 +11,7 @@
         <div class="card p-5" data-aos="fade-up">
             <form action="{{ route('admin.presences.index') }}" method="GET"
                 class="flex flex-wrap gap-3 items-end no-loader">
+                <!-- Sélection du stagiaire -->
                 <div class="flex-1 min-w-48 w-full sm:w-auto">
                     <label class="block text-xs font-medium text-slate-600 mb-1">Stagiaire</label>
                     <select name="stagiaire_id"
@@ -18,26 +19,52 @@
                         <option value="">Tous les stagiaires</option>
                         @foreach ($stagiaires as $stag)
                             <option value="{{ $stag->id }}"
-                                {{ request('stagiaire_id') == $stag->id ? 'selected' : '' }}>{{ $stag->user->nom_complet }}
-                                — {{ $stag->matricule }}</option>
+                                {{ request('stagiaire_id') == $stag->id ? 'selected' : '' }}>
+                                {{ $stag->user->nom_complet }} — {{ $stag->matricule }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
+
+                <!-- Filtre par jour -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Jour</label>
+                    <input type="date" name="date" value="{{ request('date') }}"
+                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-auto">
+                </div>
+
+                <!-- Filtre par mois -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Mois</label>
                     <input type="month" name="mois" value="{{ request('mois', date('Y-m')) }}"
-                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition">
+                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-auto">
                 </div>
-                <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
-                    <i class="fas fa-search mr-2"></i>Filtrer
-                </button>
-                @if (request('stagiaire_id'))
-                    <a href="{{ route('admin.presences.show', request('stagiaire_id')) }}"
+
+                <!-- Filtre par année -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Année</label>
+                    <input type="number" name="annee" value="{{ request('annee') }}" min="2000"
+                        max="{{ date('Y') }}" placeholder="Ex: 2025"
+                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-32">
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
-                        <i class="fas fa-eye mr-2"></i>Fiche complète
+                        <i class="fas fa-search mr-2"></i>Filtrer
+                    </button>
+                    <a href="{{ route('admin.presences.index') }}"
+                        class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-2.5 rounded-xl font-medium transition-all">
+                        <i class="fas fa-undo mr-2"></i>Réinitialiser
                     </a>
-                @endif
+                    @if (request('stagiaire_id'))
+                        <a href="{{ route('admin.presences.show', request('stagiaire_id')) }}"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
+                            <i class="fas fa-eye mr-2"></i>Fiche complète
+                        </a>
+                    @endif
+                </div>
             </form>
         </div>
 
@@ -66,6 +93,13 @@
                             Présences de {{ $stagiaire->user->nom_complet }}
                         @else
                             Toutes les présences
+                        @endif
+                        @if (request('date'))
+                            — le {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d/m/Y') }}
+                        @elseif(request('mois'))
+                            — {{ \Carbon\Carbon::parse(request('mois'))->translatedFormat('F Y') }}
+                        @elseif(request('annee'))
+                            — Année {{ request('annee') }}
                         @endif
                     </h3>
                     <input type="text" id="search" placeholder="Rechercher..."
@@ -142,7 +176,7 @@
         @else
             <div class="card p-8 sm:p-12 text-center" data-aos="fade-up">
                 <i class="fas fa-clipboard-list text-4xl sm:text-5xl text-slate-200 mb-4"></i>
-                <p class="text-slate-400">Sélectionnez un stagiaire pour voir ses présences</p>
+                <p class="text-slate-400">Aucune présence trouvée pour les critères sélectionnés</p>
             </div>
         @endif
     </div>

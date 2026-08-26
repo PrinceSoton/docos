@@ -13,7 +13,7 @@
 
             <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl sm:text-3xl font-black mb-1">Bienvenue, {{ Auth::user()->prenom }} 👋</h2>
+                    <h2 class="text-2xl sm:text-3xl font-black mb-1">Bienvenue, {{ Auth::user()->prenom }} </h2>
                     <p class="text-slate-300 text-sm sm:text-base">
                         Matricule : <span class="font-mono font-bold text-amber-400">{{ $stagiaire->matricule }}</span>
                     </p>

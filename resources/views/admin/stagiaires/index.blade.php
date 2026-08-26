@@ -79,7 +79,8 @@
                                     <p class="text-slate-700 text-xs font-medium">{{ $stag->date_debut->format('d/m/Y') }}
                                     </p>
                                     <p class="text-slate-400 text-xs">→ {{ $stag->date_fin->format('d/m/Y') }}</p>
-                                    <p class="text-indigo-500 text-xs font-semibold">{{ $stag->dureeStageDays() }}j</p>
+                                    <p class="text-indigo-500 text-xs font-semibold"> {{ $stag->jours_restants }}j restants
+                                    </p>
                                 </td>
                                 <td class="px-4 sm:px-5 py-4 text-center">
                                     <span
