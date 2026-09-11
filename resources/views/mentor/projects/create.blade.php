@@ -13,12 +13,14 @@
                     <p class="text-slate-400 text-sm">Créez et assignez un projet à vos stagiaires</p>
                 </div>
             </div>
+
             <form action="{{ route('mentor.projects.store') }}" method="POST" class="space-y-5">
                 @csrf
+
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Titre du projet *</label>
                     <input type="text" name="titre" value="{{ old('titre') }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition text-sm">
+                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
                 </div>
 
                 <div>
@@ -32,22 +34,20 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
                         <select name="statut" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
-                            <option value="en_attente" {{ old('statut') === 'en_attente' ? 'selected' : '' }}>En attente
-                            </option>
-                            <option value="en_cours" {{ old('statut') === 'en_cours' ? 'selected' : '' }}>En cours</option>
-                            <option value="termine" {{ old('statut') === 'termine' ? 'selected' : '' }}>Terminé</option>
-                            <option value="suspendu" {{ old('statut') === 'suspendu' ? 'selected' : '' }}>Suspendu</option>
+                            @foreach (['en_attente' => 'En attente', 'en_cours' => 'En cours', 'termine' => 'Terminé', 'suspendu' => 'Suspendu'] as $v => $l)
+                                <option value="{{ $v }}" {{ old('statut') === $v ? 'selected' : '' }}>
+                                    {{ $l }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Priorité *</label>
                         <select name="priorite" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
-                            <option value="faible" {{ old('priorite') === 'faible' ? 'selected' : '' }}>Faible</option>
-                            <option value="normale" {{ old('priorite', 'normale') === 'normale' ? 'selected' : '' }}>Normale
-                            </option>
-                            <option value="haute" {{ old('priorite') === 'haute' ? 'selected' : '' }}>Haute</option>
-                            <option value="urgente" {{ old('priorite') === 'urgente' ? 'selected' : '' }}>Urgente</option>
+                            @foreach (['faible' => 'Faible', 'normale' => 'Normale', 'haute' => 'Haute', 'urgente' => 'Urgente'] as $v => $l)
+                                <option value="{{ $v }}"
+                                    {{ old('priorite', 'normale') === $v ? 'selected' : '' }}>{{ $l }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
@@ -65,11 +65,10 @@
                 <!-- Stagiaires -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-user-graduate mr-1 text-emerald-500"></i>Assigner des stagiaires * (un ou
-                        plusieurs)
+                        <i class="fas fa-user-graduate mr-1 text-emerald-500"></i>Assigner des stagiaires * (vos stagiaires)
                     </label>
                     <div class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
-                        @foreach ($stagiaires as $stag)
+                        @forelse ($stagiaires as $stag)
                             <label
                                 class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-2 rounded-lg hover:bg-white transition cursor-pointer">
                                 <input type="checkbox" name="stagiaires[]" value="{{ $stag->id }}"
@@ -84,10 +83,40 @@
                                     <span class="text-slate-400 text-xs">{{ $stag->matricule }}</span>
                                 </div>
                             </label>
-                        @endforeach
-                        @if ($stagiaires->isEmpty())
+                        @empty
                             <p class="text-slate-400 text-sm text-center py-3">Aucun stagiaire assigné</p>
-                        @endif
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- Collaborateurs (invitations) -->
+                <div class="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <label class="block text-xs text-emerald-600 font-semibold uppercase tracking-wide mb-2">
+                        <i class="fas fa-users mr-1"></i>Inviter des mentors à collaborer (optionnel)
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">
+                        Les mentors invités auront les mêmes droits sur ce projet : ajouter leurs stagiaires, créer,
+                        modifier et supprimer des tâches.
+                    </p>
+
+                    <div class="space-y-2 max-h-48 overflow-y-auto p-3 bg-white rounded-xl border border-emerald-100">
+                        @forelse ($autresMentors as $m)
+                            <label
+                                class="flex items-center gap-3 p-2 rounded-lg hover:bg-emerald-50 transition cursor-pointer">
+                                <input type="checkbox" name="collaborateurs[]" value="{{ $m->id }}"
+                                    {{ in_array($m->id, (array) old('collaborateurs', [])) ? 'checked' : '' }}
+                                    class="w-4 h-4 text-emerald-600 rounded">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-7 h-7 rounded-lg bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                                        {{ strtoupper(substr($m->nom_complet, 0, 1)) }}
+                                    </div>
+                                    <span class="text-slate-700 text-sm font-medium">{{ $m->nom_complet }}</span>
+                                </div>
+                            </label>
+                        @empty
+                            <p class="text-slate-400 text-sm text-center py-3">Aucun autre mentor disponible</p>
+                        @endforelse
                     </div>
                 </div>
 

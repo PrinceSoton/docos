@@ -12,12 +12,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'nom', 'prenom', 'email', 'telephone',
-        'photo', 'password', 'role', 'actif',
+        'photo', 'password', 'role', 'actif', 'password_changed_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected $casts = ['actif' => 'boolean'];
+    protected $casts = [
+        'actif'               => 'boolean',
+        'password_changed_at' => 'datetime',
+    ];
 
     public function getNomCompletAttribute(): string
     {
@@ -57,6 +60,12 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /** Présences marquées manuellement par cet utilisateur (admin ou mentor) */
+    public function presencesMarquees()
+    {
+        return $this->hasMany(Presence::class, 'marque_par');
     }
 
     public function isAdmin(): bool

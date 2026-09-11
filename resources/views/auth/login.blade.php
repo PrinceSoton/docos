@@ -83,6 +83,13 @@
                         <i class="fas fa-sign-in-alt"></i>
                         <span id="loginBtnText">Se connecter</span>
                     </button>
+                    <!-- Après le bouton de connexion, avant la fin de la carte -->
+                    <div class="text-center mt-4">
+                        <a href="{{ route('password.request') }}"
+                            class="text-indigo-300 hover:text-white text-sm transition">
+                            <i class="fas fa-key mr-1"></i>Mot de passe oublié ?
+                        </a>
+                    </div>
                 </form>
             </div>
 

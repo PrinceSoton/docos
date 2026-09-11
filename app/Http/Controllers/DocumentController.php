@@ -57,10 +57,23 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')->with('succes', 'Document ajouté avec succès.');
     }
 
+    /**
+     * Affiche le détail du document avec un visualiseur intégré.
+     * Pour les fichiers texte, lit le contenu et le passe à la vue.
+     */
     public function show(Document $document)
     {
         $this->autoriser($document);
-        return view('documents.show', compact('document'));
+        $extension = strtolower($document->type_fichier);
+        $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
+        $contenuTexte = null;
+        if (in_array($extension, $texteExtensions)) {
+            $chemin = storage_path('app/public/' . $document->fichier);
+            if (file_exists($chemin)) {
+                $contenuTexte = file_get_contents($chemin);
+            }
+        }
+        return view('documents.show', compact('document', 'contenuTexte'));
     }
 
     public function edit(Document $document)
@@ -108,6 +121,9 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')->with('succes', 'Document supprimé.');
     }
 
+    /**
+     * Télécharge le document (force le téléchargement).
+     */
     public function telecharger(Document $document)
     {
         $this->autoriser($document);
@@ -116,6 +132,20 @@ class DocumentController extends Controller
         return response()->download($chemin);
     }
 
+    /**
+     * Diffuse le fichier dans le navigateur (affichage en ligne) pour le visualiseur.
+     */
+    public function stream(Document $document)
+    {
+        $this->autoriser($document);
+        $chemin = storage_path('app/public/' . $document->fichier);
+        abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
+        return response()->file($chemin);
+    }
+
+    /**
+     * Vérifie que l'utilisateur courant a le droit d'accéder au document.
+     */
     private function autoriser(Document $document): void
     {
         $user = Auth::user();

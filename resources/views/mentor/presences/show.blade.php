@@ -19,10 +19,16 @@
                 <h2 class="text-slate-800 font-black text-xl sm:text-2xl">{{ $stagiaire->user->nom_complet }}</h2>
                 <p class="text-slate-500 text-sm">{{ $stagiaire->matricule }} • {{ $stagiaire->ecole ?: '—' }}</p>
             </div>
-            <a href="{{ route('mentor.stagiaires.show', $stagiaire) }}"
-                class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-sm font-medium transition">
-                <i class="fas fa-user mr-1"></i>Voir profil
-            </a>
+            <div class="flex gap-2 flex-wrap justify-center">
+                <a href="{{ route('mentor.presences.formMarquage', ['date' => now()->toDateString()]) }}"
+                    class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-lg text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <i class="fas fa-user-check mr-1"></i>Marquer
+                </a>
+                <a href="{{ route('mentor.stagiaires.show', $stagiaire) }}"
+                    class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <i class="fas fa-user mr-1"></i>Voir profil
+                </a>
+            </div>
         </div>
 
         <!-- Stats -->
@@ -102,9 +108,12 @@
                         <tr>
                             <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Date</th>
                             <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Heure</th>
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Départ</th>
                             <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden sm:table-cell">Motif
                             </th>
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden lg:table-cell">
+                                Marqué par</th>
                             <th class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
                         </tr>
                     </thead>
@@ -120,8 +129,20 @@
                                 </td>
                                 <td class="px-4 sm:px-5 py-3 font-mono text-slate-600 text-sm">
                                     {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
+                                <td class="px-4 sm:px-5 py-3 font-mono text-blue-600 text-sm">
+                                    {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
                                 <td class="px-4 sm:px-5 py-3 text-slate-500 text-xs hidden sm:table-cell">
                                     {{ $p->motif ?: '—' }}</td>
+                                <td class="px-4 sm:px-5 py-3 hidden lg:table-cell">
+                                    @if ($p->marquePar)
+                                        <span
+                                            class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg text-xs font-medium">
+                                            <i class="fas fa-user-edit"></i>{{ $p->marquePar->nom_complet }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 text-xs">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 sm:px-5 py-3 text-center">
                                     @if ($p->justificatif)
                                         <a href="{{ asset('storage/' . $p->justificatif) }}" download

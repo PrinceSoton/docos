@@ -14,14 +14,31 @@ class TaskController extends Controller
     public function index()
     {
         $projets = Project::with('tasks.stagiaire.user')
-            ->where('mentor_id', Auth::id())->get();
+            ->where(function ($q) {
+                $q->where('mentor_id', Auth::id())
+                  ->orWhereHas('mentors', fn($q2) => $q2->where('user_id', Auth::id()));
+            })
+            ->get();
+
         return view('mentor.tasks.index', compact('projets'));
     }
 
     public function create()
     {
-        $projets    = Project::where('mentor_id', Auth::id())->get();
-        $stagiaires = Stagiaire::with('user')->where('mentor_id', Auth::id())->get();
+        $projets = Project::where(function ($q) {
+            $q->where('mentor_id', Auth::id())
+              ->orWhereHas('mentors', fn($q2) => $q2->where('user_id', Auth::id()));
+        })->get();
+
+        $stagiaires = collect();
+
+        if (old('project_id')) {
+            $project = Project::find(old('project_id'));
+            if ($project && $project->hasAccess(Auth::user())) {
+                $stagiaires = $project->stagiaires()->with('user')->get();
+            }
+        }
+
         return view('mentor.tasks.create', compact('projets', 'stagiaires'));
     }
 
@@ -39,7 +56,12 @@ class TaskController extends Controller
         ]);
 
         $projet = Project::findOrFail($request->project_id);
-        abort_if($projet->mentor_id !== Auth::id(), 403);
+        abort_unless($projet->hasAccess(Auth::user()), 403);
+
+        // Vérifier que le stagiaire appartient au projet
+        if (!$projet->stagiaires()->where('stagiaire_id', $request->stagiaire_id)->exists()) {
+            return back()->withErrors(['stagiaire_id' => 'Ce stagiaire n\'est pas associé à ce projet.'])->withInput();
+        }
 
         Task::create($request->only('project_id', 'stagiaire_id', 'titre', 'description', 'statut', 'priorite', 'difficulte', 'date_echeance'));
 
@@ -48,15 +70,22 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        abort_if($task->project->mentor_id !== Auth::id(), 403);
-        $projets    = Project::where('mentor_id', Auth::id())->get();
-        $stagiaires = Stagiaire::with('user')->where('mentor_id', Auth::id())->get();
+        abort_unless($task->project->hasAccess(Auth::user()), 403);
+
+        $projets = Project::where(function ($q) {
+            $q->where('mentor_id', Auth::id())
+              ->orWhereHas('mentors', fn($q2) => $q2->where('user_id', Auth::id()));
+        })->get();
+
+        $stagiaires = $task->project->stagiaires()->with('user')->get();
+
         return view('mentor.tasks.edit', compact('task', 'projets', 'stagiaires'));
     }
 
     public function update(Request $request, Task $task)
     {
-        abort_if($task->project->mentor_id !== Auth::id(), 403);
+        abort_unless($task->project->hasAccess(Auth::user()), 403);
+
         $request->validate([
             'titre'        => 'required|string|max:200',
             'description'  => 'nullable|string',
@@ -67,13 +96,28 @@ class TaskController extends Controller
         ]);
 
         $task->update($request->only('titre', 'description', 'statut', 'priorite', 'difficulte', 'date_echeance'));
+
         return redirect()->route('mentor.tasks.index')->with('succes', 'Tâche mise à jour.');
     }
 
     public function destroy(Task $task)
     {
-        abort_if($task->project->mentor_id !== Auth::id(), 403);
+        abort_unless($task->project->hasAccess(Auth::user()), 403);
         $task->delete();
         return back()->with('succes', 'Tâche supprimée.');
+    }
+
+    /** API : récupérer les stagiaires d'un projet (accessible à tous les mentors du projet) */
+    public function getStagiairesByProject(Project $project)
+    {
+        abort_unless($project->hasAccess(Auth::user()), 403);
+
+        $stagiaires = $project->stagiaires()->with('user')->get();
+
+        return response()->json($stagiaires->map(fn($s) => [
+            'id'        => $s->id,
+            'nom'       => $s->user->nom_complet,
+            'matricule' => $s->matricule,
+        ]));
     }
 }

@@ -23,6 +23,11 @@
                     <p class="font-bold text-slate-800 mt-1">
                         {{ $presence->heure_arrivee ? substr($presence->heure_arrivee, 0, 5) : '—' }}</p>
                 </div>
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <p class="text-xs text-blue-400 uppercase font-medium">Heure de départ</p>
+                    <p class="font-bold text-slate-800 mt-1">
+                        {{ $presence->heure_depart ? substr($presence->heure_depart, 0, 5) : 'Non marqué' }}</p>
+                </div>
                 @if ($presence->motif)
                     <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
                         <p class="text-xs text-amber-400 uppercase font-medium">Motif</p>

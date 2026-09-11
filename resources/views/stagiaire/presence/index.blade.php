@@ -7,10 +7,10 @@
         <!-- En-tête -->
         <div data-aos="fade-down">
             <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Ma Présence</h2>
-            <p class="text-sm text-slate-500">Marquez votre présence et gérez vos permissions</p>
+            <p class="text-sm text-slate-500">Marquez votre arrivée et votre départ, gérez vos permissions</p>
         </div>
 
-        <!-- Bloc horaires de travail -->
+        <!-- Bloc horaires -->
         <div class="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4" data-aos="fade-up">
             <p class="text-sm text-slate-700">
                 <i class="fas fa-clock mr-2 text-green-600"></i>
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <!-- Marquage présence -->
+        <!-- Marquage ARRIVÉE -->
         <div class="card p-5 sm:p-6 border-l-4 {{ $peutMarquer ? 'border-green-400' : 'border-slate-300' }}"
             data-aos="fade-up">
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -38,18 +38,18 @@
                         class="fas fa-{{ $peutMarquer ? 'user-check' : 'check-double' }} text-{{ $peutMarquer ? 'green' : 'slate' }}-600 text-xl sm:text-2xl"></i>
                 </div>
                 <div class="flex-1">
-                    <h3 class="font-bold text-slate-800 text-base sm:text-lg">Aujourd'hui —
+                    <h3 class="font-bold text-slate-800 text-base sm:text-lg">Arrivée —
                         {{ now()->translatedFormat('l d F Y') }}</h3>
                     @if ($presenceAujourdhui)
                         <p class="text-green-600 font-semibold text-sm mt-1">
                             <i class="fas fa-check-circle mr-1"></i>
-                            Présence marquée : <span class="capitalize">{{ $presenceAujourdhui->statut }}</span>
+                            Arrivée enregistrée : <span class="capitalize">{{ $presenceAujourdhui->statut }}</span>
                             @if ($presenceAujourdhui->heure_arrivee)
                                 à {{ substr($presenceAujourdhui->heure_arrivee, 0, 5) }}
                             @endif
                         </p>
                     @elseif($peutMarquer)
-                        <p class="text-slate-500 text-sm mt-1">Vous n'avez pas encore marqué votre présence aujourd'hui</p>
+                        <p class="text-slate-500 text-sm mt-1">Vous n'avez pas encore marqué votre arrivée aujourd'hui</p>
                     @else
                         <p class="text-slate-400 text-sm mt-1">Pas de service aujourd'hui (jour non travaillé)</p>
                     @endif
@@ -57,11 +57,47 @@
                 @if ($peutMarquer)
                     <button onclick="marquerPresence()"
                         class="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-user-check"></i>Marquer ma présence
+                        <i class="fas fa-user-check"></i>Marquer mon arrivée
                     </button>
                 @endif
             </div>
         </div>
+
+        <!-- Marquage DÉPART -->
+        @if ($presenceAujourdhui)
+            <div class="card p-5 sm:p-6 border-l-4 {{ $peutMarquerDepart ? 'border-blue-400' : 'border-slate-300' }}"
+                data-aos="fade-up">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div
+                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl {{ $peutMarquerDepart ? 'bg-blue-100' : 'bg-slate-100' }} flex items-center justify-center flex-shrink-0">
+                        <i
+                            class="fas fa-{{ $presenceAujourdhui->heure_depart ? 'check-double' : 'sign-out-alt' }} text-{{ $peutMarquerDepart ? 'blue' : 'slate' }}-600 text-xl sm:text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-slate-800 text-base sm:text-lg">Départ</h3>
+                        @if ($presenceAujourdhui->heure_depart)
+                            <p class="text-blue-600 font-semibold text-sm mt-1">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Départ enregistré à {{ substr($presenceAujourdhui->heure_depart, 0, 5) }}
+                            </p>
+                        @elseif ($presenceAujourdhui->statut === 'absent')
+                            <p class="text-slate-400 text-sm mt-1">Aucun départ possible (absence).</p>
+                        @else
+                            <p class="text-slate-500 text-sm mt-1">Vous n'avez pas encore marqué votre départ.</p>
+                        @endif
+                    </div>
+                    @if ($peutMarquerDepart)
+                        <form action="{{ route('stagiaire.presence.depart') }}" method="POST" class="w-full sm:w-auto">
+                            @csrf
+                            <button type="submit"
+                                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                                <i class="fas fa-sign-out-alt"></i>Marquer mon départ
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <!-- Formulaire de présence -->
         @if ($peutMarquer)
@@ -85,12 +121,10 @@
                     <div class="flex flex-col sm:flex-row gap-3">
                         <button type="submit"
                             class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:-translate-y-0.5">
-                            <i class="fas fa-check mr-2"></i>Confirmer ma présence
+                            <i class="fas fa-check mr-2"></i>Confirmer mon arrivée
                         </button>
                         <button type="button" onclick="document.getElementById('presenceForm').style.display='none'"
-                            class="flex-1 sm:flex-none border border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50 transition">
-                            Annuler
-                        </button>
+                            class="flex-1 sm:flex-none border border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50 transition">Annuler</button>
                     </div>
                 </form>
             </div>
@@ -108,8 +142,7 @@
             </div>
             <p class="text-slate-400 text-sm mb-4">
                 <i class="fas fa-info-circle text-indigo-400 mr-1"></i>
-                Les demandes doivent être soumises <strong>au moins 24h à l'avance</strong> et seront validées par votre
-                mentor.
+                Les demandes doivent être soumises <strong>au moins 24h à l'avance</strong>.
             </p>
 
             <div id="permissionForm" style="display:none"
@@ -146,14 +179,11 @@
                             <i class="fas fa-paper-plane mr-2"></i>Envoyer la demande
                         </button>
                         <button type="button" onclick="togglePermission()"
-                            class="flex-1 sm:flex-none border border-slate-200 text-slate-600 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition">
-                            Annuler
-                        </button>
+                            class="flex-1 sm:flex-none border border-slate-200 text-slate-600 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition">Annuler</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Historique permissions -->
             @if ($permissions->count() > 0)
                 <div class="space-y-2">
                     @foreach ($permissions as $perm)
@@ -201,7 +231,6 @@
                     class="w-full sm:w-44 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-amber-400 transition">
             </div>
 
-            <!-- Mini stats -->
             @php
                 $nbPresent = \App\Models\Presence::where('stagiaire_id', Auth::user()->stagiaire->id)
                     ->where('statut', 'present')
@@ -234,10 +263,12 @@
                         <tr>
                             <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Date</th>
                             <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Heure</th>
-                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden sm:table-cell">Motif
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden sm:table-cell">
+                                Départ</th>
+                            <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden md:table-cell">Motif
                             </th>
-                            <th class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
+                            <th class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">Justif.</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50" id="presTable">
@@ -252,14 +283,16 @@
                                 </td>
                                 <td class="px-4 sm:px-5 py-3 font-mono text-slate-600">
                                     {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
+                                <td class="px-4 sm:px-5 py-3 font-mono text-blue-600 hidden sm:table-cell">
+                                    {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
                                 <td
-                                    class="px-4 sm:px-5 py-3 text-slate-500 text-xs max-w-xs truncate hidden sm:table-cell">
+                                    class="px-4 sm:px-5 py-3 text-slate-500 text-xs max-w-xs truncate hidden md:table-cell">
                                     {{ $p->motif ?: '—' }}</td>
                                 <td class="px-4 sm:px-5 py-3 text-center">
                                     @if ($p->justificatif)
                                         <a href="{{ route('stagiaire.presence.telechargerJustificatif', $p) }}" download
                                             class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-xs font-medium transition">
-                                            <i class="fas fa-download"></i><span class="hidden xs:inline">Fichier</span>
+                                            <i class="fas fa-download"></i>
                                         </a>
                                     @else<span class="text-slate-300">—</span>
                                     @endif
@@ -267,7 +300,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-12 text-slate-400">Aucune présence enregistrée
+                                <td colspan="6" class="text-center py-12 text-slate-400">Aucune présence enregistrée
                                 </td>
                             </tr>
                         @endforelse

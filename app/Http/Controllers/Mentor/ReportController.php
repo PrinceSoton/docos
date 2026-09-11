@@ -24,7 +24,33 @@ class ReportController extends Controller
         $stagiaire = $report->stagiaire;
         abort_if($stagiaire->mentor_id !== Auth::id(), 403);
         $report->load('stagiaire.user', 'project', 'comments.user', 'validePar');
-        return view('mentor.reports.show', compact('report'));
+
+        // Lecture du contenu pour les fichiers texte
+        $extension = strtolower(pathinfo($report->fichier, PATHINFO_EXTENSION));
+        $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
+        $contenuTexte = null;
+        if (in_array($extension, $texteExtensions)) {
+            $chemin = storage_path('app/public/' . $report->fichier);
+            if (file_exists($chemin)) {
+                $contenuTexte = file_get_contents($chemin);
+            }
+        }
+
+        return view('mentor.reports.show', compact('report', 'contenuTexte'));
+    }
+
+    /**
+     * Diffuse le fichier dans le navigateur (affichage en ligne).
+     */
+    public function stream(Report $report)
+    {
+        $user = Auth::user();
+        // Le mentor ne peut voir que les rapports de ses stagiaires
+        abort_if($report->stagiaire->mentor_id !== $user->id, 403);
+
+        $chemin = storage_path('app/public/' . $report->fichier);
+        abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
+        return response()->file($chemin);
     }
 
     public function evaluate(Report $report)

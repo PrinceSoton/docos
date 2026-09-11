@@ -20,10 +20,16 @@
                 <p class="text-slate-400 text-xs">Stage : {{ $stagiaire->date_debut->format('d/m/Y') }} →
                     {{ $stagiaire->date_fin->format('d/m/Y') }} ({{ $stagiaire->dureeStageDays() }} jours)</p>
             </div>
-            <a href="{{ route('admin.presences.index', ['stagiaire_id' => $stagiaire->id]) }}"
-                class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-sm font-medium transition">
-                <i class="fas fa-filter mr-1"></i>Filtrer par mois
-            </a>
+            <div class="flex gap-2 flex-wrap">
+                <a href="{{ route('admin.presences.formMarquage', ['date' => now()->toDateString()]) }}"
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-lg text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <i class="fas fa-user-check mr-1"></i>Marquer
+                </a>
+                <a href="{{ route('admin.presences.index', ['stagiaire_id' => $stagiaire->id]) }}"
+                    class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-sm font-medium transition">
+                    <i class="fas fa-filter mr-1"></i>Filtrer par mois
+                </a>
+            </div>
         </div>
 
         <!-- Stats -->
@@ -51,16 +57,9 @@
                                     {{ $perm->date_fin->format('d/m/Y') }}</p>
                                 <p class="text-slate-500 text-xs mt-0.5">{{ $perm->motif }}</p>
                             </div>
-                            @php
-                                $pb = [
-                                    'en_attente' => 'bg-amber-100 text-amber-700',
-                                    'valide' => 'bg-green-100 text-green-700',
-                                    'refuse' => 'bg-red-100 text-red-600',
-                                ];
-                            @endphp
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $pb[$perm->statut] ?? '' }}">
-                                {{ ucfirst($perm->statut) }}
-                            </span>
+                            @php $pb = ['en_attente'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','refuse'=>'bg-red-100 text-red-600']; @endphp
+                            <span
+                                class="px-3 py-1 rounded-full text-xs font-semibold {{ $pb[$perm->statut] ?? '' }}">{{ ucfirst($perm->statut) }}</span>
                             @if ($perm->justificatif)
                                 <a href="{{ asset('storage/' . $perm->justificatif) }}" download
                                     class="w-8 h-8 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg flex items-center justify-center transition">
@@ -84,8 +83,10 @@
                         <tr>
                             <th class="px-5 py-3 text-left font-semibold text-slate-600">Date</th>
                             <th class="px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Heure arrivée</th>
+                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
+                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Départ</th>
                             <th class="px-5 py-3 text-left font-semibold text-slate-600">Motif</th>
+                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Marqué par</th>
                             <th class="px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
                         </tr>
                     </thead>
@@ -101,7 +102,19 @@
                                 </td>
                                 <td class="px-5 py-3 text-slate-600 font-mono">
                                     {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
+                                <td class="px-5 py-3 text-blue-600 font-mono">
+                                    {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
                                 <td class="px-5 py-3 text-slate-500 text-xs max-w-xs truncate">{{ $p->motif ?: '—' }}</td>
+                                <td class="px-5 py-3">
+                                    @if ($p->marquePar)
+                                        <span
+                                            class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-xs font-medium">
+                                            <i class="fas fa-user-edit"></i>{{ $p->marquePar->nom_complet }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 text-xs">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-3 text-center">
                                     @if ($p->justificatif)
                                         <a href="{{ asset('storage/' . $p->justificatif) }}" download

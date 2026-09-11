@@ -30,20 +30,37 @@ use App\Http\Controllers\Stagiaire\ProjectController as StagProject;
 use App\Http\Controllers\Stagiaire\EvenementController as StagEvenement;
 use App\Http\Controllers\Stagiaire\AttestationController as StagAttestation;
 use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
 // ─── Page d'accueil ───────────────────────────────────────────────────────────
 Route::get('/', fn() => view('welcome'))->name('welcome');
+
+
 
 // ─── Authentification ─────────────────────────────────────────────────────────
 Route::get('/connexion', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('/connexion', [AuthenticatedSessionController::class, 'store']);
 Route::post('/deconnexion', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
+// ─── Réinitialisation du mot de passe (oublié) ─────────────────────────────
+Route::get('/mot-de-passe-oublie', [App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])
+    ->name('password.request');
+Route::post('/mot-de-passe-oublie', [App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])
+    ->name('password.email');
+Route::get('/reinitialiser-mot-de-passe/{token}', [App\Http\Controllers\Auth\NewPasswordController::class, 'create'])
+    ->name('password.reset');
+Route::post('/reinitialiser-mot-de-passe', [App\Http\Controllers\Auth\NewPasswordController::class, 'store'])
+    ->name('password.update');
+
+
+
+
 // ─── Routes authentifiées ─────────────────────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
     // Route du changement de mot de passe lors de la 1ère connexion
     Route::get('/password/change', [PasswordChangeController::class, 'show'])->name('password.change');
-    Route::post('/password/change', [PasswordChangeController::class, 'update'])->name('password.update');
+    Route::post('/password/change', [PasswordChangeController::class, 'update'])->name('password.change.update');
 
     // ─── Profil (tous rôles) ───────────────────────────────────────────────
     Route::prefix('profil')->name('profile.')->group(function () {
@@ -59,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/creer', [DocumentController::class, 'create'])->name('create');
         Route::post('/', [DocumentController::class, 'store'])->name('store');
         Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
+        Route::get('/{document}/stream', [DocumentController::class, 'stream'])->name('stream');
         Route::get('/{document}/modifier', [DocumentController::class, 'edit'])->name('edit');
         Route::put('/{document}', [DocumentController::class, 'update'])->name('update');
         Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('destroy');
@@ -112,6 +130,8 @@ Route::middleware(['auth'])->group(function () {
         // Présences
         Route::prefix('presences')->name('presences.')->group(function () {
             Route::get('/', [AdminPresence::class, 'index'])->name('index');
+            Route::get('/marquer', [AdminPresence::class, 'formMarquage'])->name('formMarquage');
+            Route::post('/marquer-lot', [AdminPresence::class, 'marquerLot'])->name('marquerLot');
             Route::get('/stagiaires/{stagiaire}', [AdminPresence::class, 'show'])->name('show');
         });
 
@@ -180,6 +200,8 @@ Route::middleware(['auth'])->group(function () {
         // Présences + Permissions
         Route::prefix('presences')->name('presences.')->group(function () {
             Route::get('/', [MentorPresence::class, 'index'])->name('index');
+            Route::get('/marquer', [MentorPresence::class, 'formMarquage'])->name('formMarquage');
+            Route::post('/marquer-lot', [MentorPresence::class, 'marquerLot'])->name('marquerLot');
             Route::get('/stagiaires/{stagiaire}', [MentorPresence::class, 'show'])->name('show');
             Route::patch('/permissions/{permission}/valider', [MentorPresence::class, 'validerPermission'])->name('validerPermission');
         });
@@ -193,6 +215,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{project}/modifier', [MentorProject::class, 'edit'])->name('edit');
             Route::put('/{project}', [MentorProject::class, 'update'])->name('update');
             Route::delete('/{project}', [MentorProject::class, 'destroy'])->name('destroy');
+            Route::post('/{project}/inviter', [MentorProject::class, 'invite'])->name('invite');
+            Route::delete('/{project}/collaborateurs/{user}', [MentorProject::class, 'removeCollaborator'])->name('removeCollaborator');
         });
 
         // Tâches
@@ -203,12 +227,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{task}/modifier', [MentorTask::class, 'edit'])->name('edit');
             Route::put('/{task}', [MentorTask::class, 'update'])->name('update');
             Route::delete('/{task}', [MentorTask::class, 'destroy'])->name('destroy');
+            Route::get('/projets/{project}/stagiaires', [MentorTask::class, 'getStagiairesByProject'])->name('getStagiaires');
         });
 
         // Rapports
         Route::prefix('rapports')->name('reports.')->group(function () {
             Route::get('/', [MentorReport::class, 'index'])->name('index');
             Route::get('/{report}', [MentorReport::class, 'show'])->name('show');
+            Route::get('/{report}/stream', [MentorReport::class, 'stream'])->name('stream');
             Route::get('/{report}/evaluer', [MentorReport::class, 'evaluate'])->name('evaluate');
             Route::put('/{report}/evaluer', [MentorReport::class, 'doEvaluate'])->name('doEvaluate');
             Route::post('/{report}/commenter', [MentorReport::class, 'commenter'])->name('commenter');
@@ -242,6 +268,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('presence')->name('presence.')->group(function () {
             Route::get('/', [StagPresence::class, 'index'])->name('index');
             Route::post('/marquer', [StagPresence::class, 'marquer'])->name('marquer');
+            Route::post('/depart', [StagPresence::class, 'marquerDepart'])->name('depart');
             Route::post('/permission', [StagPresence::class, 'demandePermission'])->name('demandePermission');
             Route::get('/{presence}', [StagPresence::class, 'show'])->name('show');
             Route::get('/{presence}/justificatif', [StagPresence::class, 'telechargerJustificatif'])->name('telechargerJustificatif');
@@ -253,6 +280,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/creer', [StagReport::class, 'create'])->name('create');
             Route::post('/', [StagReport::class, 'store'])->name('store');
             Route::get('/{report}', [StagReport::class, 'show'])->name('show');
+            Route::get('/{report}/stream', [StagReport::class, 'stream'])->name('stream');
             Route::get('/{report}/modifier', [StagReport::class, 'edit'])->name('edit');
             Route::put('/{report}', [StagReport::class, 'update'])->name('update');
             Route::delete('/{report}', [StagReport::class, 'destroy'])->name('destroy');

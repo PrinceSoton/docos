@@ -64,6 +64,87 @@
             @endif
         </div>
 
+        <!-- ============================================================ -->
+        <!-- VISUALISEUR INTÉGRÉ                                          -->
+        <!-- ============================================================ -->
+        <div class="card p-5 sm:p-6" data-aos="fade-up">
+            <h3 class="text-slate-800 font-bold text-lg mb-4">
+                <i class="fas fa-eye text-indigo-500 mr-2"></i>Aperçu du rapport
+            </h3>
+
+            @php
+                $ext = strtolower(pathinfo($report->fichier, PATHINFO_EXTENSION));
+                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'ico'];
+                $videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv', 'wmv'];
+                $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'wma'];
+                $pdfExtensions = ['pdf'];
+                $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
+                $officeExtensions = ['docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt'];
+                $streamUrl = route('stagiaire.reports.stream', $report);
+            @endphp
+
+            @if (in_array($ext, $pdfExtensions))
+                <!-- PDF -->
+                <div class="w-full rounded-xl overflow-hidden bg-slate-100" style="height: 600px;">
+                    <iframe src="{{ $streamUrl }}" class="w-full h-full border-0"
+                        style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
+                </div>
+            @elseif (in_array($ext, $imageExtensions))
+                <!-- Image -->
+                <div class="w-full rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center p-4">
+                    <img src="{{ $streamUrl }}" alt="{{ $report->titre }}"
+                        class="max-w-full max-h-[600px] object-contain rounded-lg shadow-sm" loading="lazy">
+                </div>
+            @elseif (in_array($ext, $videoExtensions))
+                <!-- Vidéo -->
+                <div class="w-full rounded-xl overflow-hidden bg-slate-900 p-2">
+                    <video controls class="w-full rounded-lg" style="max-height: 600px;" src="{{ $streamUrl }}">
+                        Votre navigateur ne supporte pas la lecture de vidéo.
+                    </video>
+                </div>
+            @elseif (in_array($ext, $audioExtensions))
+                <!-- Audio -->
+                <div class="w-full rounded-xl bg-slate-50 p-6 flex items-center justify-center">
+                    <audio controls class="w-full max-w-2xl" src="{{ $streamUrl }}">
+                        Votre navigateur ne supporte pas la lecture audio.
+                    </audio>
+                </div>
+            @elseif (in_array($ext, $texteExtensions) && isset($contenuTexte))
+                <!-- Fichier texte -->
+                <div class="w-full rounded-xl bg-slate-900 text-white p-4 overflow-auto" style="max-height: 600px;">
+                    <pre class="text-sm font-mono whitespace-pre-wrap break-words">{{ $contenuTexte }}</pre>
+                </div>
+            @elseif (in_array($ext, $officeExtensions))
+                <!-- Fichiers Office -->
+                @php
+                    $fileUrl = Storage::url($report->fichier);
+                    $encodedUrl = urlencode($fileUrl);
+                    $officeViewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src={$encodedUrl}";
+                @endphp
+                <div class="w-full rounded-xl overflow-hidden bg-slate-100" style="height: 600px;">
+                    <iframe src="{{ $officeViewerUrl }}" class="w-full h-full border-0"
+                        style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Aperçu généré via Microsoft Office Online. Assurez-vous que le fichier est accessible publiquement.
+                </p>
+            @else
+                <!-- Format non pris en charge -->
+                <div class="p-8 bg-amber-50 border border-amber-200 rounded-xl text-center">
+                    <i class="fas fa-file-alt text-4xl text-amber-400 mb-3"></i>
+                    <p class="text-amber-700 font-medium">Ce type de fichier ne peut pas être visualisé en ligne.</p>
+                    <p class="text-amber-600 text-sm mt-1">Extension :
+                        <strong>{{ strtoupper($ext) ?: 'inconnue' }}</strong>
+                    </p>
+                    <a href="{{ route('stagiaire.reports.telecharger', $report) }}"
+                        class="mt-4 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition">
+                        <i class="fas fa-download"></i>Télécharger le fichier
+                    </a>
+                </div>
+            @endif
+        </div>
+
         <!-- Commentaires -->
         <div class="card p-5 sm:p-6" data-aos="fade-up">
             <h3 class="text-slate-800 font-bold text-lg mb-4">

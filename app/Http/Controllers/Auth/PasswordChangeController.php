@@ -18,14 +18,17 @@ class PasswordChangeController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'current_password' => ['required', 'current_password'], // Validation du mot de passe
+            'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
         $user = Auth::user();
         $user->password = Hash::make($request->password);
-        $user->password_changed_at = now(); //Changement d'un nouveau mot de passe
+        $user->password_changed_at = now();
         $user->save();
+
+        // Ajout d'un message de succès (optionnel)
+        session()->flash('succes', 'Votre mot de passe a été changé avec succès.');
 
         return match($user->role) {
             'admin' => redirect()->route('admin.dashboard'),

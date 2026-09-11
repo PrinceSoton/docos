@@ -3,15 +3,20 @@
 @section('breadcrumb', 'Suivi > Présences')
 @section('content')
     <div class="space-y-4 sm:space-y-5">
-        <div data-aos="fade-down">
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Suivi des présences</h2>
-            <p class="text-sm text-slate-500">Historique complet de présence de chaque stagiaire</p>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
+            <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Suivi des présences</h2>
+                <p class="text-sm text-slate-500">Historique complet de présence de chaque stagiaire</p>
+            </div>
+            <a href="{{ route('admin.presences.formMarquage') }}"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                <i class="fas fa-user-check"></i>Marquer les présences
+            </a>
         </div>
 
         <div class="card p-5" data-aos="fade-up">
             <form action="{{ route('admin.presences.index') }}" method="GET"
                 class="flex flex-wrap gap-3 items-end no-loader">
-                <!-- Sélection du stagiaire -->
                 <div class="flex-1 min-w-48 w-full sm:w-auto">
                     <label class="block text-xs font-medium text-slate-600 mb-1">Stagiaire</label>
                     <select name="stagiaire_id"
@@ -26,21 +31,16 @@
                     </select>
                 </div>
 
-                <!-- Filtre par jour -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Jour</label>
                     <input type="date" name="date" value="{{ request('date') }}"
                         class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-auto">
                 </div>
-
-                <!-- Filtre par mois -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Mois</label>
                     <input type="month" name="mois" value="{{ request('mois', date('Y-m')) }}"
                         class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-auto">
                 </div>
-
-                <!-- Filtre par année -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1">Année</label>
                     <input type="number" name="annee" value="{{ request('annee') }}" min="2000"
@@ -48,7 +48,6 @@
                         class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition w-full sm:w-32">
                 </div>
 
-                <!-- Boutons d'action -->
                 <div class="flex flex-wrap gap-3">
                     <button type="submit"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
@@ -116,10 +115,12 @@
                                         Stagiaire</th>
                                 @endif
                                 <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden sm:table-cell">
-                                    Heure</th>
+                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
+                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Départ</th>
                                 <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden md:table-cell">
                                     Motif</th>
+                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden lg:table-cell">
+                                    Marqué par</th>
                                 <th class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
                             </tr>
                         </thead>
@@ -151,11 +152,23 @@
                                                 class="fas fa-{{ $si[$presence->statut] ?? '' }} mr-1"></i>{{ ucfirst($presence->statut) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 sm:px-5 py-3 text-slate-600 font-mono text-sm hidden sm:table-cell">
+                                    <td class="px-4 sm:px-5 py-3 text-slate-600 font-mono text-sm">
                                         {{ $presence->heure_arrivee ? substr($presence->heure_arrivee, 0, 5) : '—' }}</td>
+                                    <td class="px-4 sm:px-5 py-3 text-blue-600 font-mono text-sm">
+                                        {{ $presence->heure_depart ? substr($presence->heure_depart, 0, 5) : '—' }}</td>
                                     <td
                                         class="px-4 sm:px-5 py-3 text-slate-500 text-xs max-w-xs truncate hidden md:table-cell">
                                         {{ $presence->motif ?: '—' }}</td>
+                                    <td class="px-4 sm:px-5 py-3 hidden lg:table-cell">
+                                        @if ($presence->marquePar)
+                                            <span
+                                                class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-xs font-medium">
+                                                <i class="fas fa-user-edit"></i>{{ $presence->marquePar->nom_complet }}
+                                            </span>
+                                        @else
+                                            <span class="text-slate-400 text-xs">—</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 sm:px-5 py-3 text-center">
                                         @if ($presence->justificatif)
                                             <a href="{{ asset('storage/' . $presence->justificatif) }}" download

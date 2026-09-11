@@ -6,7 +6,7 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
             <div>
                 <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Mes Projets</h2>
-                <p class="text-sm text-slate-500">{{ $projets->total() }} projet(s) créé(s)</p>
+                <p class="text-sm text-slate-500">{{ $projets->total() }} projet(s)</p>
             </div>
             <a href="{{ route('mentor.projects.create') }}"
                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
@@ -14,7 +14,6 @@
             </a>
         </div>
 
-        <!-- Filtres -->
         <div class="card p-4 flex flex-col sm:flex-row gap-3" data-aos="fade-up">
             <input type="text" id="search" placeholder="Rechercher un projet..."
                 class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm">
@@ -28,7 +27,6 @@
             </select>
         </div>
 
-        <!-- Grille -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5" id="projetGrid">
             @forelse($projets as $projet)
                 <div class="card overflow-hidden projet-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -46,13 +44,33 @@
                                 {{ ucfirst(str_replace('_', ' ', $projet->statut)) }}
                             </span>
                         </div>
+
+                        @if (!$projet->isOwner(Auth::user()))
+                            <span
+                                class="inline-block mb-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-lg font-medium">
+                                <i class="fas fa-users mr-1"></i>Collaborateur
+                            </span>
+                        @endif
+
                         @if ($projet->description)
                             <p class="text-slate-500 text-sm line-clamp-2 mb-3">{{ $projet->description }}</p>
                         @endif
-                        <div class="flex flex-wrap items-center gap-1 mb-3">
-                            @foreach ($projet->stagiaires->take(3) as $stag)
+
+                        <!-- Mentors -->
+                        <div class="flex items-center gap-1 mb-3 flex-wrap">
+                            @foreach ($projet->mentors->take(3) as $mentor)
                                 <span
                                     class="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-xs font-medium">
+                                    <i class="fas fa-chalkboard-teacher text-xs"></i>{{ $mentor->prenom }}
+                                </span>
+                            @endforeach
+                        </div>
+
+                        <!-- Stagiaires -->
+                        <div class="flex items-center gap-1 mb-3 flex-wrap">
+                            @foreach ($projet->stagiaires->take(3) as $stag)
+                                <span
+                                    class="flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded-lg text-xs font-medium">
                                     <i class="fas fa-user-graduate text-xs"></i>{{ $stag->user->prenom ?? '' }}
                                 </span>
                             @endforeach
@@ -60,6 +78,7 @@
                                 <span class="text-slate-400 text-xs">+{{ $projet->stagiaires->count() - 3 }}</span>
                             @endif
                         </div>
+
                         <div class="mb-4">
                             <div class="flex justify-between text-xs text-slate-500 mb-1">
                                 <span>Progression
@@ -73,6 +92,7 @@
                                     style="width:{{ $projet->progressionPourcent() }}%"></div>
                             </div>
                         </div>
+
                         <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400 mb-4">
                             <span><i class="fas fa-calendar mr-1"></i>{{ $projet->date_debut->format('d/m/Y') }}</span>
                             @if ($projet->date_fin)
@@ -80,6 +100,7 @@
                                         class="fas fa-flag-checkered mr-1"></i>{{ $projet->date_fin->format('d/m/Y') }}</span>
                             @endif
                         </div>
+
                         <div class="flex gap-2">
                             <a href="{{ route('mentor.projects.show', $projet) }}"
                                 class="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-xl text-sm font-medium transition">
@@ -104,7 +125,7 @@
             @empty
                 <div class="col-span-1 sm:col-span-2 xl:col-span-3 card p-8 sm:p-16 text-center">
                     <i class="fas fa-project-diagram text-4xl sm:text-5xl text-slate-200 mb-4"></i>
-                    <p class="text-slate-400 mb-4">Aucun projet créé</p>
+                    <p class="text-slate-400 mb-4">Aucun projet</p>
                     <a href="{{ route('mentor.projects.create') }}"
                         class="inline-flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-emerald-600 transition">
                         <i class="fas fa-plus"></i>Créer un projet
@@ -115,6 +136,7 @@
         <div>{{ $projets->links() }}</div>
     </div>
 @endsection
+
 @push('scripts')
     <script>
         function filterProjets() {

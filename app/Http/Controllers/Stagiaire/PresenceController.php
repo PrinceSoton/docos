@@ -19,27 +19,30 @@ class PresenceController extends Controller
         $presences   = Presence::where('stagiaire_id', $stagiaire->id)->orderBy('date', 'desc')->paginate(30);
         $permissions = Permission::where('stagiaire_id', $stagiaire->id)->orderBy('date_debut', 'desc')->get();
         $presenceAujourdhui = Presence::where('stagiaire_id', $stagiaire->id)->whereDate('date', today())->first();
-        $peutMarquer = Calendar::estJourTravaille(now()) && !$presenceAujourdhui;
 
-        // Récupérer la configuration des horaires pour affichage
+        $peutMarquer       = Calendar::estJourTravaille(now()) && !$presenceAujourdhui;
+        $peutMarquerDepart = $presenceAujourdhui
+                             && !$presenceAujourdhui->heure_depart
+                             && $presenceAujourdhui->statut !== 'absent';
+
         $config = ConfigJoursTravail::first();
         $heureDebut = $config ? $config->heure_debut : '09:00:00';
         $heureFin   = $config ? $config->heure_fin : '18:15:00';
 
         return view('stagiaire.presence.index', compact(
-            'presences', 'permissions', 'presenceAujourdhui', 'peutMarquer',
+            'presences', 'permissions', 'presenceAujourdhui',
+            'peutMarquer', 'peutMarquerDepart',
             'heureDebut', 'heureFin'
         ));
     }
 
+    /** Marquage de l’arrivée */
     public function marquer(Request $request)
     {
         $stagiaire = Auth::user()->stagiaire;
 
-        // Vérifier si c'est un jour travaillé
         abort_unless(Calendar::estJourTravaille(now()), 403, 'Pas de marquage ce jour.');
 
-        // Éviter le double marquage
         $existant = Presence::where('stagiaire_id', $stagiaire->id)
             ->whereDate('date', today())
             ->first();
@@ -48,24 +51,17 @@ class PresenceController extends Controller
             return back()->with('erreur', 'Présence déjà marquée aujourd\'hui.');
         }
 
-        // Récupérer la configuration des horaires
         $config = ConfigJoursTravail::first();
-        if (!$config) {
-            $heureDebut = '09:00:00';
-            $heureFin   = '18:15:00';
-        } else {
-            $heureDebut = $config->heure_debut;
-            $heureFin   = $config->heure_fin;
-        }
+        $heureDebut = $config ? $config->heure_debut : '09:00:00';
+        $heureFin   = $config ? $config->heure_fin : '18:15:00';
 
         $heureArrivee = now()->format('H:i:s');
 
-        // Déterminer le statut selon les règles
         if ($heureArrivee <= $heureDebut) {
             $statut = 'present';
         } elseif ($heureArrivee > $heureDebut && $heureArrivee <= $heureFin) {
             $statut = 'retard';
-        } else { // après l'heure de fin
+        } else {
             $statut = 'absent';
         }
 
@@ -80,15 +76,44 @@ class PresenceController extends Controller
         }
 
         Presence::create([
-            'stagiaire_id' => $stagiaire->id,
-            'date'         => today(),
-            'statut'       => $statut,
-            'motif'        => $request->motif,
-            'justificatif' => $justificatif,
-            'heure_arrivee'=> $heureArrivee,
+            'stagiaire_id'  => $stagiaire->id,
+            'date'          => today(),
+            'statut'        => $statut,
+            'motif'         => $request->motif,
+            'justificatif'  => $justificatif,
+            'heure_arrivee' => $heureArrivee,
+            'heure_depart'  => null,
         ]);
 
         return back()->with('succes', 'Présence marquée : ' . $statut);
+    }
+
+    /** Marquage du départ */
+    public function marquerDepart(Request $request)
+    {
+        $stagiaire = Auth::user()->stagiaire;
+
+        $presence = Presence::where('stagiaire_id', $stagiaire->id)
+            ->whereDate('date', today())
+            ->first();
+
+        if (!$presence) {
+            return back()->with('erreur', 'Vous devez d\'abord marquer votre arrivée.');
+        }
+
+        if ($presence->heure_depart) {
+            return back()->with('erreur', 'Départ déjà marqué aujourd\'hui.');
+        }
+
+        if ($presence->statut === 'absent') {
+            return back()->with('erreur', 'Impossible de marquer un départ pour une absence.');
+        }
+
+        $presence->update([
+            'heure_depart' => now()->format('H:i:s'),
+        ]);
+
+        return back()->with('succes', 'Départ marqué à ' . substr($presence->heure_depart, 0, 5));
     }
 
     public function demandePermission(Request $request)

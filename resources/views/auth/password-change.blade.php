@@ -41,7 +41,8 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('password.update') }}" id="passwordForm" class="no-loader">
+                <!-- ⬇️ MODIFICATION ICI : action="{{ route('password.change.update') }}" -->
+                <form method="POST" action="{{ route('password.change.update') }}" id="passwordForm" class="no-loader">
                     @csrf
 
                     <!-- Mot de passe actuel -->

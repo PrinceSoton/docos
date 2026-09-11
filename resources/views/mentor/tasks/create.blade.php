@@ -29,14 +29,17 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Stagiaire *</label>
-                        <select name="stagiaire_id" required
+                        <select name="stagiaire_id" id="stagiaireSelect" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
-                            <option value="">Sélectionner un stagiaire</option>
-                            @foreach ($stagiaires as $stag)
-                                <option value="{{ $stag->id }}"
-                                    {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>{{ $stag->user->nom_complet }}
-                                    — {{ $stag->matricule }}</option>
-                            @endforeach
+                            <option value="">-- Sélectionner un stagiaire --</option>
+                            @if (old('project_id'))
+                                @foreach ($stagiaires as $stag)
+                                    <option value="{{ $stag->id }}"
+                                        {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>
+                                        {{ $stag->user->nom_complet }} — {{ $stag->matricule }}
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                 </div>
@@ -103,3 +106,54 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const projetSelect = document.getElementById('projetSelect');
+            const stagiaireSelect = document.getElementById('stagiaireSelect');
+
+            // Définir le template de la route avec un placeholder
+            const routeUrl = '{{ route('mentor.tasks.getStagiaires', ['project' => '__PROJECT__']) }}';
+
+            function loadStagiaires(projectId) {
+                stagiaireSelect.innerHTML = '<option value="">-- Sélectionner un stagiaire --</option>';
+                if (projectId) {
+                    // Remplacer le placeholder par l'ID du projet
+                    const url = routeUrl.replace('__PROJECT__', projectId);
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Erreur réseau');
+                            return response.json();
+                        })
+                        .then(data => {
+                            data.forEach(stagiaire => {
+                                const option = document.createElement('option');
+                                option.value = stagiaire.id;
+                                option.textContent = stagiaire.nom + ' — ' + stagiaire.matricule;
+                                stagiaireSelect.appendChild(option);
+                            });
+                            // Restaurer la valeur sélectionnée si existante (erreur de validation)
+                            const oldStagiaire = '{{ old('stagiaire_id') }}';
+                            if (oldStagiaire) {
+                                stagiaireSelect.value = oldStagiaire;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors du chargement des stagiaires:', error);
+                        });
+                }
+            }
+
+            projetSelect.addEventListener('change', function() {
+                loadStagiaires(this.value);
+            });
+
+            // Charger initialement si un projet est déjà sélectionné
+            const initialProject = projetSelect.value;
+            if (initialProject) {
+                loadStagiaires(initialProject);
+            }
+        });
+    </script>
+@endpush

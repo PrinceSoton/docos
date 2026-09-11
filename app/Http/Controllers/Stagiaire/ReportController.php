@@ -57,12 +57,48 @@ class ReportController extends Controller
         return redirect()->route('stagiaire.reports.index')->with('succes', 'Rapport déposé avec succès.');
     }
 
+    /**
+     * Affiche le détail du rapport avec visualiseur intégré.
+     */
     public function show(Report $report)
     {
         $stagiaire = Auth::user()->stagiaire;
         abort_if($report->stagiaire_id !== $stagiaire->id, 403);
         $report->load('project', 'comments.user', 'validePar');
-        return view('stagiaire.reports.show', compact('report'));
+
+        // Lecture du contenu pour les fichiers texte
+        $extension = strtolower(pathinfo($report->fichier, PATHINFO_EXTENSION));
+        $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
+        $contenuTexte = null;
+        if (in_array($extension, $texteExtensions)) {
+            $chemin = storage_path('app/public/' . $report->fichier);
+            if (file_exists($chemin)) {
+                $contenuTexte = file_get_contents($chemin);
+            }
+        }
+
+        return view('stagiaire.reports.show', compact('report', 'contenuTexte'));
+    }
+
+    /**
+     * Diffuse le fichier dans le navigateur (affichage en ligne).
+     */
+    public function stream(Report $report)
+    {
+        $user = Auth::user();
+        $stagiaire = Auth::user()->stagiaire;
+
+        // Vérification des droits : le stagiaire propriétaire, le mentor du stagiaire, ou l'admin
+        if (!$user->isAdmin() && !$user->isMentor()) {
+            abort_if($report->stagiaire_id !== $stagiaire->id, 403);
+        }
+        if ($user->isMentor()) {
+            abort_if($report->stagiaire->mentor_id !== $user->id, 403);
+        }
+
+        $chemin = storage_path('app/public/' . $report->fichier);
+        abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
+        return response()->file($chemin);
     }
 
     public function edit(Report $report)
