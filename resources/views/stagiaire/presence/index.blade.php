@@ -11,7 +11,7 @@
         </div>
 
         <!-- Bloc horaires -->
-        <div class="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4" data-aos="fade-up">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4" {{-- data-aos="fade-up" --}}>
             <p class="text-sm text-slate-700">
                 <i class="fas fa-clock mr-2 text-green-600"></i>
                 Horaires : <strong>{{ \Carbon\Carbon::parse($heureDebut)->format('H:i') }}</strong> –

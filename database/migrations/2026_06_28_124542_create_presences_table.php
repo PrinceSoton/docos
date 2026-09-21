@@ -16,9 +16,6 @@ return new class extends Migration
             $table->string('motif')->nullable();
             $table->string('justificatif')->nullable();
             $table->time('heure_arrivee')->nullable();
-            $table->time('heure_depart')->nullable();
-            // NOUVELLE COLONNE : qui a marqué la présence (null = automatique ou stagiaire)
-            $table->foreignId('marque_par')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->unique(['stagiaire_id', 'date']);
         });
@@ -44,4 +41,3 @@ return new class extends Migration
         Schema::dropIfExists('presences');
     }
 };
-

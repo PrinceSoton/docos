@@ -37,16 +37,6 @@ class Presence extends Model
     /*  Marquage manuel par Admin ou Mentor                                */
     /* ------------------------------------------------------------------ */
 
-    /**
-     * Marque ou corrige la présence d'un stagiaire.
-     * Toute la logique métier est centralisée ici.
-     *
-     * @param Stagiaire $stagiaire  Le stagiaire concerné
-     * @param Carbon    $date       La date à marquer
-     * @param string    $statut     'present' | 'retard' | 'absent'
-     * @param string|null $motif    Motif éventuel (obligatoire pour absent)
-     * @param int       $userId     ID de l'admin ou mentor qui marque
-     */
     public static function marquerParUtilisateur(
         Stagiaire $stagiaire,
         Carbon $date,
@@ -61,9 +51,6 @@ class Presence extends Model
         $config     = ConfigJoursTravail::first();
         $heureDebut = $config?->heure_debut ?? '09:00:00';
 
-        /* ---------------------------------------------------------- */
-        /*  Calcul de heure_arrivee selon statut                       */
-        /* ---------------------------------------------------------- */
         $heureArrivee = $existing?->heure_arrivee;
 
         if ($statut === 'absent') {
@@ -74,7 +61,6 @@ class Presence extends Model
                 : Carbon::parse($heureDebut)->addHour()->format('H:i:s');
         }
 
-        // Motif par défaut si absent et non fourni
         if ($statut === 'absent' && blank($motif)) {
             $motif = 'Absence marquée manuellement';
         }
@@ -95,7 +81,7 @@ class Presence extends Model
     }
 
     /* ------------------------------------------------------------------ */
-    /*  Synchronisation automatique (existante)                            */
+    /*  Synchronisation automatique                                        */
     /* ------------------------------------------------------------------ */
 
     public static function syncAbsencesForStagiaire(Stagiaire $stagiaire): void

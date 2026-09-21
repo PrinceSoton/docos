@@ -27,40 +27,13 @@ class User extends Authenticatable
         return $this->prenom . ' ' . $this->nom;
     }
 
-    public function stagiaire()
-    {
-        return $this->hasOne(Stagiaire::class);
-    }
-
-    public function mentor()
-    {
-        return $this->hasOne(Mentor::class);
-    }
-
-    public function documents()
-    {
-        return $this->hasMany(Document::class);
-    }
-
-    public function documentsPartages()
-    {
-        return $this->belongsToMany(Document::class, 'document_partage');
-    }
-
-    public function evenements()
-    {
-        return $this->hasMany(Evenement::class, 'cree_par');
-    }
-
-    public function evenementsRecus()
-    {
-        return $this->belongsToMany(Evenement::class, 'evenement_user');
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
+    public function stagiaire()      { return $this->hasOne(Stagiaire::class); }
+    public function mentor()         { return $this->hasOne(Mentor::class); }
+    public function documents()      { return $this->hasMany(Document::class); }
+    public function documentsPartages() { return $this->belongsToMany(Document::class, 'document_partage'); }
+    public function evenements()     { return $this->hasMany(Evenement::class, 'cree_par'); }
+    public function evenementsRecus(){ return $this->belongsToMany(Evenement::class, 'evenement_user'); }
+    public function comments()       { return $this->hasMany(Comment::class); }
 
     /** Présences marquées manuellement par cet utilisateur (admin ou mentor) */
     public function presencesMarquees()
@@ -68,18 +41,7 @@ class User extends Authenticatable
         return $this->hasMany(Presence::class, 'marque_par');
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isMentor(): bool
-    {
-        return $this->role === 'mentor';
-    }
-
-    public function isStagiaire(): bool
-    {
-        return $this->role === 'stagiaire';
-    }
+    public function isAdmin(): bool    { return $this->role === 'admin'; }
+    public function isMentor(): bool   { return $this->role === 'mentor'; }
+    public function isStagiaire(): bool { return $this->role === 'stagiaire'; }
 }
