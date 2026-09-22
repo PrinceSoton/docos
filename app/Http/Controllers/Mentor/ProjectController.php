@@ -50,10 +50,22 @@ class ProjectController extends Controller
             'statut'             => 'required|in:en_attente,en_cours,termine,suspendu',
             'priorite'           => 'required|in:faible,normale,haute,urgente',
             'stagiaires'         => 'required|array|min:1',
-            'stagiaires.*'       => 'exists:stagiaires,id',
+            'stagiaires.*'       => 'integer',
             'collaborateurs'     => 'nullable|array',
-            'collaborateurs.*'   => 'exists:users,id',
+            'collaborateurs.*'   => 'integer',
         ]);
+
+        $stagiaireIds = Stagiaire::where('mentor_id', Auth::id())
+            ->where('statut', 'en_cours')
+            ->whereIn('id', $request->stagiaires)
+            ->pluck('id');
+        abort_unless($stagiaireIds->count() === count(array_unique($request->stagiaires)), 403, 'Stagiaire non affecté à ce mentor.');
+
+        $collaborateurIds = User::where('role', 'mentor')
+            ->where('actif', true)
+            ->whereIn('id', $request->input('collaborateurs', []))
+            ->pluck('id')->all();
+        abort_unless(count($collaborateurIds) === count(array_unique($request->input('collaborateurs', []))), 403, 'Collaborateur invalide.');
 
         $projet = Project::create([
             'titre'       => $request->titre,
@@ -72,7 +84,7 @@ class ProjectController extends Controller
         ));
         $projet->mentors()->sync($mentorIds);
 
-        $projet->stagiaires()->sync($request->stagiaires);
+        $projet->stagiaires()->sync($stagiaireIds);
 
         return redirect()->route('mentor.projects.index')->with('succes', 'Projet créé avec succès.');
     }
@@ -119,7 +131,7 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project)
     {
-        abort_unless($project->hasAccess(Auth::user()), 403);
+        abort_unless($project->isOwner(Auth::user()), 403, 'Seul le créateur peut modifier ce projet.');
 
         $request->validate([
             'titre'        => 'required|string|max:200',
@@ -129,18 +141,24 @@ class ProjectController extends Controller
             'statut'       => 'required|in:en_attente,en_cours,termine,suspendu',
             'priorite'     => 'required|in:faible,normale,haute,urgente',
             'stagiaires'   => 'required|array|min:1',
-            'stagiaires.*' => 'exists:stagiaires,id',
+            'stagiaires.*' => 'integer',
         ]);
 
+        $stagiaireIds = Stagiaire::whereIn('mentor_id', $project->mentors()->pluck('users.id'))
+            ->where('statut', 'en_cours')
+            ->whereIn('id', $request->stagiaires)
+            ->pluck('id');
+        abort_unless($stagiaireIds->count() === count(array_unique($request->stagiaires)), 403, 'Stagiaire non affecté au projet.');
+
         $project->update($request->only('titre', 'description', 'date_debut', 'date_fin', 'statut', 'priorite'));
-        $project->stagiaires()->sync($request->stagiaires);
+        $project->stagiaires()->sync($stagiaireIds);
 
         return redirect()->route('mentor.projects.index')->with('succes', 'Projet mis à jour.');
     }
 
     public function destroy(Project $project)
     {
-        abort_unless($project->hasAccess(Auth::user()), 403);
+        abort_unless($project->isOwner(Auth::user()), 403, 'Seul le créateur peut supprimer ce projet.');
         $project->delete();
         return redirect()->route('mentor.projects.index')->with('succes', 'Projet supprimé.');
     }
@@ -148,7 +166,7 @@ class ProjectController extends Controller
     /** Inviter un mentor à collaborer */
     public function invite(Request $request, Project $project)
     {
-        abort_unless($project->hasAccess(Auth::user()), 403);
+        abort_unless($project->isOwner(Auth::user()), 403, 'Seul le créateur peut inviter un mentor.');
 
         $request->validate([
             'mentor_id' => 'required|exists:users,id',
@@ -156,6 +174,7 @@ class ProjectController extends Controller
 
         $mentor = User::where('id', $request->mentor_id)
             ->where('role', 'mentor')
+            ->where('actif', true)
             ->firstOrFail();
 
         if (!$project->mentors()->where('user_id', $mentor->id)->exists()) {
@@ -168,7 +187,7 @@ class ProjectController extends Controller
     /** Retirer un collaborateur (le créateur ne peut pas être retiré) */
     public function removeCollaborator(Project $project, User $user)
     {
-        abort_unless($project->hasAccess(Auth::user()), 403);
+        abort_unless($project->isOwner(Auth::user()) || $user->is(Auth::user()), 403);
 
         // Empêcher le retrait du créateur
         abort_if($project->mentor_id === $user->id, 403, 'Le créateur du projet ne peut pas être retiré.');

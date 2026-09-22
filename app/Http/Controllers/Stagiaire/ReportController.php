@@ -31,8 +31,8 @@ class ReportController extends Controller
         'titre'      => 'required|string|max:200',
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-        'project_id' => 'nullable|exists:projects,id',
-        'fichier'    => 'required|file|max:20480',
+        'project_id' => 'nullable|integer',
+        'fichier'    => 'required|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png|max:20480',
     ];
     $request->validate($rules);
 
@@ -46,7 +46,11 @@ class ReportController extends Controller
     }
 
     $stagiaire = Auth::user()->stagiaire;
-    $chemin = $request->file('fichier')->store('rapports', 'public');
+    if ($request->filled('project_id') && !$stagiaire->projects()->whereKey($request->project_id)->exists()) {
+        abort(403, 'Projet non accessible.');
+    }
+
+    $chemin = $request->file('fichier')->store('rapports', 'local');
 
     Report::create(array_merge($data, [
         'stagiaire_id' => $stagiaire->id,
@@ -71,7 +75,7 @@ class ReportController extends Controller
         $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
         $contenuTexte = null;
         if (in_array($extension, $texteExtensions)) {
-            $chemin = storage_path('app/public/' . $report->fichier);
+            $chemin = $this->cheminFichier($report->fichier);
             if (file_exists($chemin)) {
                 $contenuTexte = file_get_contents($chemin);
             }
@@ -96,7 +100,7 @@ class ReportController extends Controller
             abort_if($report->stagiaire->mentor_id !== $user->id, 403);
         }
 
-        $chemin = storage_path('app/public/' . $report->fichier);
+        $chemin = $this->cheminFichier($report->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->file($chemin);
     }
@@ -120,10 +124,14 @@ class ReportController extends Controller
         'titre'      => 'required|string|max:200',
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-        'project_id' => 'nullable|exists:projects,id',
-        'fichier'    => 'nullable|file|max:20480',
+        'project_id' => 'nullable|integer',
+        'fichier'    => 'nullable|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png|max:20480',
     ];
     $request->validate($rules);
+
+    if ($request->filled('project_id') && !$stagiaire->projects()->whereKey($request->project_id)->exists()) {
+        abort(403, 'Projet non accessible.');
+    }
 
     $data = $request->only('titre', 'description', 'type', 'project_id');
     if ($request->type === 'autre') {
@@ -134,8 +142,9 @@ class ReportController extends Controller
     }
 
     if ($request->hasFile('fichier')) {
+        Storage::disk('local')->delete($report->fichier);
         Storage::disk('public')->delete($report->fichier);
-        $data['fichier'] = $request->file('fichier')->store('rapports', 'public');
+        $data['fichier'] = $request->file('fichier')->store('rapports', 'local');
     }
 
     $report->update($data);
@@ -147,6 +156,7 @@ class ReportController extends Controller
         $stagiaire = Auth::user()->stagiaire;
         abort_if($report->stagiaire_id !== $stagiaire->id, 403);
         abort_if($report->statut !== 'soumis', 403, 'Rapport non supprimable.');
+        Storage::disk('local')->delete($report->fichier);
         Storage::disk('public')->delete($report->fichier);
         $report->delete();
         return redirect()->route('stagiaire.reports.index')->with('succes', 'Rapport supprimé.');
@@ -159,8 +169,20 @@ class ReportController extends Controller
         if (!$user->isAdmin() && !$user->isMentor()) {
             abort_if($report->stagiaire_id !== $stagiaire->id, 403);
         }
-        $chemin = storage_path('app/public/' . $report->fichier);
+        if ($user->isMentor() && $report->stagiaire->mentor_id !== $user->id) {
+            abort(403);
+        }
+        $chemin = $this->cheminFichier($report->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

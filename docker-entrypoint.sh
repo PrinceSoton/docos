@@ -10,12 +10,14 @@ if ! grep -q "^APP_KEY=" .env || [ -z "$(grep "^APP_KEY=" .env | cut -d= -f2)" ]
     php artisan key:generate --force
 fi
 
-# Vide cache & Migration
+# Vide cache
 php artisan config:clear
-php artisan migrate --force
 
-# Seed de l'utilisateur admin (si nécessaire)
-php artisan db:seed --class=Database\\Seeders\\UserSeeder --force
+# Les migrations et seeders sont déclenchés explicitement lors du déploiement.
+# Cela évite de recréer des comptes de démonstration à chaque redémarrage.
+if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
+    php artisan migrate --force
+fi
 
 chown -R www-data:www-data storage bootstrap/cache
 

@@ -8,6 +8,7 @@ use App\Models\Comment;
 use App\Models\Stagiaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -30,7 +31,7 @@ class ReportController extends Controller
         $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
         $contenuTexte = null;
         if (in_array($extension, $texteExtensions)) {
-            $chemin = storage_path('app/public/' . $report->fichier);
+            $chemin = $this->cheminFichier($report->fichier);
             if (file_exists($chemin)) {
                 $contenuTexte = file_get_contents($chemin);
             }
@@ -48,7 +49,7 @@ class ReportController extends Controller
         // Le mentor ne peut voir que les rapports de ses stagiaires
         abort_if($report->stagiaire->mentor_id !== $user->id, 403);
 
-        $chemin = storage_path('app/public/' . $report->fichier);
+        $chemin = $this->cheminFichier($report->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->file($chemin);
     }
@@ -94,8 +95,17 @@ class ReportController extends Controller
     public function telecharger(Report $report)
     {
         abort_if($report->stagiaire->mentor_id !== Auth::id(), 403);
-        $chemin = storage_path('app/public/' . $report->fichier);
+        $chemin = $this->cheminFichier($report->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

@@ -33,13 +33,13 @@ class DocumentController extends Controller
         $request->validate([
             'titre'       => 'required|string|max:200',
             'description' => 'nullable|string',
-            'fichier'     => 'required|file|max:51200',
+            'fichier'     => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
             'partage_tous'=> 'boolean',
             'partages'    => 'nullable|array',
             'partages.*'  => 'exists:users,id',
         ]);
 
-        $chemin = $request->file('fichier')->store('documents', 'public');
+        $chemin = $request->file('fichier')->store('documents', 'local');
         $doc = Document::create([
             'user_id'      => Auth::id(),
             'titre'        => $request->titre,
@@ -68,7 +68,7 @@ class DocumentController extends Controller
         $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
         $contenuTexte = null;
         if (in_array($extension, $texteExtensions)) {
-            $chemin = storage_path('app/public/' . $document->fichier);
+            $chemin = $this->cheminFichier($document->fichier);
             if (file_exists($chemin)) {
                 $contenuTexte = file_get_contents($chemin);
             }
@@ -90,7 +90,7 @@ class DocumentController extends Controller
         $request->validate([
             'titre'       => 'required|string|max:200',
             'description' => 'nullable|string',
-            'fichier'     => 'nullable|file|max:51200',
+            'fichier'     => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
             'partage_tous'=> 'boolean',
             'partages'    => 'nullable|array',
         ]);
@@ -98,8 +98,9 @@ class DocumentController extends Controller
         $donnees = $request->only('titre', 'description', 'partage_tous');
 
         if ($request->hasFile('fichier')) {
+            Storage::disk('local')->delete($document->fichier);
             Storage::disk('public')->delete($document->fichier);
-            $donnees['fichier']     = $request->file('fichier')->store('documents', 'public');
+            $donnees['fichier']     = $request->file('fichier')->store('documents', 'local');
             $donnees['type_fichier']= $request->file('fichier')->getClientOriginalExtension();
             $donnees['taille']      = $request->file('fichier')->getSize();
         }
@@ -116,6 +117,7 @@ class DocumentController extends Controller
     public function destroy(Document $document)
     {
         abort_if($document->user_id !== Auth::id() && !Auth::user()->isAdmin(), 403);
+        Storage::disk('local')->delete($document->fichier);
         Storage::disk('public')->delete($document->fichier);
         $document->delete();
         return redirect()->route('documents.index')->with('succes', 'Document supprimé.');
@@ -127,7 +129,7 @@ class DocumentController extends Controller
     public function telecharger(Document $document)
     {
         $this->autoriser($document);
-        $chemin = storage_path('app/public/' . $document->fichier);
+        $chemin = $this->cheminFichier($document->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
     }
@@ -138,7 +140,7 @@ class DocumentController extends Controller
     public function stream(Document $document)
     {
         $this->autoriser($document);
-        $chemin = storage_path('app/public/' . $document->fichier);
+        $chemin = $this->cheminFichier($document->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->file($chemin);
     }
@@ -151,5 +153,14 @@ class DocumentController extends Controller
         $user = Auth::user();
         if ($user->isAdmin()) return;
         abort_unless($document->estAccessiblePar($user), 403);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

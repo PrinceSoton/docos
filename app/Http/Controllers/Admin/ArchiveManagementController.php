@@ -33,7 +33,7 @@ class ArchiveManagementController extends Controller
             'titre'        => 'required|string|max:200',
             'description'  => 'nullable|string',
             'fichiers'     => 'nullable|array',
-            'fichiers.*'   => 'file|max:51200',
+            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
         ]);
 
         $archive = Archive::create([
@@ -46,7 +46,7 @@ class ArchiveManagementController extends Controller
 
         if ($request->hasFile('fichiers')) {
             foreach ($request->file('fichiers') as $fichier) {
-                $chemin = $fichier->store('archives', 'public');
+                $chemin = $fichier->store('archives', 'local');
                 ArchiveFichier::create([
                     'archive_id'   => $archive->id,
                     'nom_original' => $fichier->getClientOriginalName(),
@@ -79,14 +79,14 @@ class ArchiveManagementController extends Controller
             'titre'        => 'required|string|max:200',
             'description'  => 'nullable|string',
             'fichiers'     => 'nullable|array',
-            'fichiers.*'   => 'file|max:51200',
+            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
         ]);
 
         $archive->update($request->only('titre', 'description'));
 
         if ($request->hasFile('fichiers')) {
             foreach ($request->file('fichiers') as $fichier) {
-                $chemin = $fichier->store('archives', 'public');
+                $chemin = $fichier->store('archives', 'local');
                 ArchiveFichier::create([
                     'archive_id'   => $archive->id,
                     'nom_original' => $fichier->getClientOriginalName(),
@@ -103,6 +103,7 @@ class ArchiveManagementController extends Controller
     public function destroy(Archive $archive)
     {
         foreach ($archive->fichiers as $f) {
+            Storage::disk('local')->delete($f->chemin);
             Storage::disk('public')->delete($f->chemin);
         }
         $archive->delete();
@@ -111,6 +112,7 @@ class ArchiveManagementController extends Controller
 
     public function supprimerFichier(ArchiveFichier $fichier)
     {
+        Storage::disk('local')->delete($fichier->chemin);
         Storage::disk('public')->delete($fichier->chemin);
         $archiveId = $fichier->archive_id;
         $fichier->delete();
@@ -119,8 +121,17 @@ class ArchiveManagementController extends Controller
 
     public function telecharger(ArchiveFichier $fichier)
     {
-        $chemin = storage_path('app/public/' . $fichier->chemin);
+        $chemin = $this->cheminFichier($fichier->chemin);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin, $fichier->nom_original);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

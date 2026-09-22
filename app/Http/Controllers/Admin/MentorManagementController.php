@@ -121,7 +121,7 @@ class MentorManagementController extends Controller
     {
         $request->validate([
             'stagiaire_id' => 'required|exists:stagiaires,id',
-            'mentor_id'    => 'required|exists:users,id',
+            'mentor_id'    => 'required|exists:users,id,role,mentor,actif,1',
         ]);
 
         Stagiaire::findOrFail($request->stagiaire_id)

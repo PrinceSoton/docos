@@ -7,6 +7,7 @@ use App\Models\Attestation;
 use App\Models\Stagiaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AttestationController extends Controller
 {
@@ -53,8 +54,17 @@ class AttestationController extends Controller
     {
         abort_if($attestation->stagiaire->mentor_id !== Auth::id(), 403);
         abort_if(!$attestation->fichier, 404, 'Aucun fichier.');
-        $chemin = storage_path('app/public/' . $attestation->fichier);
+        $chemin = $this->cheminFichier($attestation->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

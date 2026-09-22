@@ -33,15 +33,16 @@ class AttestationManagementController extends Controller
     public function upload(Request $request, Attestation $attestation)
     {
         $request->validate([
-            'fichier'     => 'required|file|max:20480',
+            'fichier'     => 'required|file|mimes:pdf,doc,docx|max:20480',
             'commentaire' => 'nullable|string',
         ]);
 
         if ($attestation->fichier) {
+            Storage::disk('local')->delete($attestation->fichier);
             Storage::disk('public')->delete($attestation->fichier);
         }
 
-        $chemin = $request->file('fichier')->store('attestations', 'public');
+        $chemin = $request->file('fichier')->store('attestations', 'local');
 
         $attestation->update([
             'fichier'         => $chemin,
@@ -57,15 +58,27 @@ class AttestationManagementController extends Controller
     public function telecharger(Attestation $attestation)
     {
         abort_if(!$attestation->fichier, 404, 'Aucun fichier disponible.');
-        $chemin = storage_path('app/public/' . $attestation->fichier);
+        $chemin = $this->cheminFichier($attestation->fichier);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
     }
 
     public function destroy(Attestation $attestation)
     {
-        if ($attestation->fichier) Storage::disk('public')->delete($attestation->fichier);
+        if ($attestation->fichier) {
+            Storage::disk('local')->delete($attestation->fichier);
+            Storage::disk('public')->delete($attestation->fichier);
+        }
         $attestation->delete();
         return redirect()->route('admin.attestations.index')->with('succes', 'Demande supprimée.');
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }

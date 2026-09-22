@@ -17,9 +17,7 @@ RUN composer dump-autoload --optimize
 # --- Production image (PHP-FPM + Nginx) ---
 FROM php:8.2-fpm-alpine
 
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf \
-    && echo "nameserver 1.1.1.1" >> /etc/resolv.conf \
-    && apk add --no-cache nginx bash libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev zlib icu-dev oniguruma-dev curl \
+RUN apk add --no-cache nginx bash libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev zlib icu-dev oniguruma-dev curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl \
     && rm -rf /var/cache/apk/*

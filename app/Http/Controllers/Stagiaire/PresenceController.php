@@ -67,12 +67,12 @@ class PresenceController extends Controller
 
         $request->validate([
             'motif'        => 'nullable|string|max:500',
-            'justificatif' => 'nullable|file|max:10240',
+            'justificatif' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         $justificatif = null;
         if ($request->hasFile('justificatif')) {
-            $justificatif = $request->file('justificatif')->store('justificatifs', 'public');
+            $justificatif = $request->file('justificatif')->store('justificatifs', 'local');
         }
 
         Presence::create([
@@ -122,13 +122,13 @@ class PresenceController extends Controller
             'date_debut'   => 'required|date|after:' . now()->addHours(24)->toDateString(),
             'date_fin'     => 'required|date|after_or_equal:date_debut',
             'motif'        => 'required|string|max:500',
-            'justificatif' => 'nullable|file|max:10240',
+            'justificatif' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         $stagiaire    = Auth::user()->stagiaire;
         $justificatif = null;
         if ($request->hasFile('justificatif')) {
-            $justificatif = $request->file('justificatif')->store('permissions', 'public');
+            $justificatif = $request->file('justificatif')->store('permissions', 'local');
         }
 
         Permission::create([
@@ -155,8 +155,17 @@ class PresenceController extends Controller
         $stagiaire = Auth::user()->stagiaire;
         abort_if($presence->stagiaire_id !== $stagiaire->id && !Auth::user()->isAdmin(), 403);
         abort_if(!$presence->justificatif, 404);
-        $chemin = storage_path('app/public/' . $presence->justificatif);
+        $chemin = $this->cheminFichier($presence->justificatif);
         abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
         return response()->download($chemin);
+    }
+
+    private function cheminFichier(string $fichier): string
+    {
+        if (Storage::disk('local')->exists($fichier)) {
+            return Storage::disk('local')->path($fichier);
+        }
+
+        return Storage::disk('public')->path($fichier);
     }
 }
