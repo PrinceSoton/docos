@@ -63,7 +63,7 @@
                                 <i class="fas fa-file mr-1"></i>Fichier actuel
                             </a>
                         @endif
-                        <input type="file" name="fichier"
+                        <input type="file" name="fichier" accept=".pdf,.doc,.docx,.txt,.csv,.zip,.rar,.7z"
                             class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-slate-50 file:text-slate-700 file:font-medium hover:file:bg-slate-100">
                     </div>
                 </div>

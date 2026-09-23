@@ -53,7 +53,7 @@
                     </label>
                     <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-amber-400 transition-colors cursor-pointer"
                         id="dropZone">
-                        <input type="file" name="fichier" id="fichierInput" class="hidden">
+                        <input type="file" name="fichier" id="fichierInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.zip,.rar,.7z" class="hidden">
                         <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-3"></i>
                         <p class="text-slate-500 text-sm font-medium" id="fileLabel">
                             Glissez un nouveau fichier ici ou <span class="text-amber-600 hover:underline">parcourez</span>

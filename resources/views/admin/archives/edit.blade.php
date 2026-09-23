@@ -55,7 +55,7 @@
                             class="fas fa-plus mr-1 text-indigo-500"></i>Ajouter des fichiers</label>
                     <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-amber-400 transition cursor-pointer"
                         id="dropZone">
-                        <input type="file" name="fichiers[]" id="fichiersInput" multiple class="hidden">
+                        <input type="file" name="fichiers[]" id="fichiersInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.zip,.rar,.7z" multiple class="hidden">
                         <i class="fas fa-cloud-upload-alt text-3xl text-slate-300 mb-2"></i>
                         <p class="text-slate-500 text-sm">Glissez ou <span class="text-amber-600">parcourez</span></p>
                         <div id="fileList" class="mt-3 space-y-1"></div>

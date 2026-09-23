@@ -66,7 +66,7 @@
                             <i class="fas fa-download mr-1"></i>Télécharger
                         </a>
                     </div>
-                    <input type="file" name="fichier"
+                    <input type="file" name="fichier" accept=".pdf,.doc,.docx,.txt,.csv,.jpg,.jpeg,.png,.zip,.rar,.7z"
                         class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-amber-50 file:text-amber-700 file:font-medium hover:file:bg-amber-100 transition">
                     <p class="text-xs text-slate-400 mt-1">Laisser vide pour conserver le fichier actuel</p>
                 </div>

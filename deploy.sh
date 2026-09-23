@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_HOST="ubuntusrv.local"
+APP_HOST="${APP_HOST:-docos.local}"
 COMPOSE_FILE="$PROJECT_DIR/docker-compose.prod.yml"
 ENV_FILE="$PROJECT_DIR/.env.prod"
 HOSTS_FILE="/etc/hosts"
@@ -53,7 +53,7 @@ fi
 COMPOSE="docker compose -f $COMPOSE_FILE --env-file $ENV_FILE"
 
 echo "[deploy] Build de l'image de production..."
-docker build --no-cache --network=host -t nextmux_app:prod -f "$PROJECT_DIR/Dockerfile" "$PROJECT_DIR"
+docker build --no-cache --network=host -t docos_app:prod -f "$PROJECT_DIR/Dockerfile" "$PROJECT_DIR"
 
 echo "[deploy] Démarrage des services..."
 $COMPOSE up -d

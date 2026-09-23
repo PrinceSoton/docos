@@ -40,12 +40,14 @@ Le script :
 2. Génère `APP_KEY` automatiquement si absente ou vide dans `.env.prod`.
 3. Build l'image (`--no-cache`) et démarre les services.
 4. Affiche l'état des conteneurs (`docker compose ps`).
-5. Vérifie l'alias `ubuntusrv.local` dans `/etc/hosts` — l'ajoute si le script tourne en root, sinon affiche la commande `sudo` à lancer toi-même.
+5. Vérifie l'alias `docos.local` dans `/etc/hosts` — l'ajoute si le script tourne en root, sinon affiche la commande `sudo` à lancer toi-même.
 
-Le site est alors accessible via :
+Le site est alors accessible via Traefik à l'hôte configuré par `APP_HOST` (valeur par défaut : `docos.local`) :
 ```text
-http://ubuntusrv.local
+http://docos.local
 ```
+
+Le conteneur `web` n'expose volontairement aucun port directement sur l'hôte. Il est uniquement publié sur le réseau Docker externe `proxy-net`, que Traefik doit également rejoindre.
 
 ## Déploiement manuel (sans deploy.sh)
 
@@ -64,7 +66,7 @@ Copiez la valeur dans `.env.prod` → `APP_KEY=`.
 Pour l'alias local :
 ```bash
 # Linux / macOS
-printf '\n127.0.0.1 ubuntusrv.local\n' | sudo tee -a /etc/hosts
+printf '\n127.0.0.1 docos.local\n' | sudo tee -a /etc/hosts
 ```
 
 ## Cache & optimisation (après démarrage)
@@ -119,13 +121,20 @@ Mets en place une sauvegarde régulière (cron) avant de considérer ce déploie
 - **Erreur DB** : vérifier `DB_*` dans `.env.prod` et l'état du healthcheck (`docker compose -f docker-compose.prod.yml ps`).
 - **500 malgré des logs Docker propres** : consulter `storage/logs/laravel.log` directement — les erreurs applicatives PHP n'apparaissent pas dans `docker compose logs` (canal `LOG_CHANNEL=stack` → fichier, pas stdout).
 
-## Nom local (ubuntusrv.local)
+## Nom local (docos.local)
 
-- `docker-compose.prod.yml` utilise `APP_URL=http://ubuntusrv.local`.
-- `docos/nginx/default.conf` répond à `ubuntusrv.local`.
+- `docker-compose.prod.yml` utilise `APP_URL=http://docos.local` par défaut.
+- `docos/nginx/default.conf` répond à `docos.local`.
 - `deploy.sh` vérifie/propose l'ajout de l'alias dans `/etc/hosts`.
 - Pour un accès depuis d'autres machines du réseau local, ajouter le même alias dans leur `/etc/hosts` respectif, pointant vers l'IP réelle du serveur (pas `127.0.0.1`).
 
 ## Reverse-proxy nginx (optionnel)
 
-Si le projet est placé derrière un reverse-proxy sur un serveur dédié (plusieurs services sur la même machine) : ajouter une vhost avec `server_name ubuntusrv.local;` et `proxy_pass http://127.0.0.1;`.
+Si le projet est placé derrière Traefik, vérifier que le réseau externe existe et que Traefik y est connecté :
+
+```bash
+docker network create proxy-net 2>/dev/null || true
+docker network connect proxy-net traefik 2>/dev/null || true
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+docker logs traefik --tail=100
+```

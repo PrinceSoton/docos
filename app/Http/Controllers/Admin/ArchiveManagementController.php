@@ -33,7 +33,7 @@ class ArchiveManagementController extends Controller
             'titre'        => 'required|string|max:200',
             'description'  => 'nullable|string',
             'fichiers'     => 'nullable|array',
-            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
+            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:51200',
         ]);
 
         $archive = Archive::create([
@@ -79,7 +79,7 @@ class ArchiveManagementController extends Controller
             'titre'        => 'required|string|max:200',
             'description'  => 'nullable|string',
             'fichiers'     => 'nullable|array',
-            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
+            'fichiers.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:51200',
         ]);
 
         $archive->update($request->only('titre', 'description'));

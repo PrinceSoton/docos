@@ -33,7 +33,7 @@ class DocumentController extends Controller
         $request->validate([
             'titre'       => 'required|string|max:200',
             'description' => 'nullable|string',
-            'fichier'     => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
+            'fichier'     => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:51200',
             'partage_tous'=> 'boolean',
             'partages'    => 'nullable|array',
             'partages.*'  => 'exists:users,id',
@@ -90,7 +90,7 @@ class DocumentController extends Controller
         $request->validate([
             'titre'       => 'required|string|max:200',
             'description' => 'nullable|string',
-            'fichier'     => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png|max:51200',
+            'fichier'     => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:51200',
             'partage_tous'=> 'boolean',
             'partages'    => 'nullable|array',
         ]);

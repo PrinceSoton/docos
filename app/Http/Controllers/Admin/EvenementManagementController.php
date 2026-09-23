@@ -34,7 +34,7 @@ class EvenementManagementController extends Controller
             'destinataires'  => 'nullable|array',
             'destinataires.*'=> 'exists:users,id',
             'image'          => 'nullable|image|max:5120',
-            'fichier'        => 'nullable|file|max:20480',
+            'fichier'        => 'nullable|file|mimes:pdf,doc,docx,txt,csv,zip,rar,7z|max:20480',
         ]);
 
         $donnees = $request->only('titre', 'contenu', 'type', 'date_evenement', 'partage_tous');
@@ -78,7 +78,7 @@ class EvenementManagementController extends Controller
             'partage_tous'   => 'boolean',
             'destinataires'  => 'nullable|array',
             'image'          => 'nullable|image|max:5120',
-            'fichier'        => 'nullable|file|max:20480',
+            'fichier'        => 'nullable|file|mimes:pdf,doc,docx,txt,csv,zip,rar,7z|max:20480',
         ]);
 
         $donnees = $request->only('titre', 'contenu', 'type', 'date_evenement', 'partage_tous');

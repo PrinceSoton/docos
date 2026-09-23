@@ -78,7 +78,7 @@
                             class="text-slate-400 font-normal">(Tous formats, sans limite)</span></label>
                     <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-400 transition cursor-pointer"
                         id="dropZone">
-                        <input type="file" name="fichiers[]" id="fichiersInput" multiple class="hidden">
+                        <input type="file" name="fichiers[]" id="fichiersInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.zip,.rar,.7z" multiple class="hidden">
                         <i class="fas fa-cloud-upload-alt text-3xl text-slate-300 mb-2"></i>
                         <p class="text-slate-500 text-sm">Glissez vos fichiers ou <span
                                 class="text-indigo-600">parcourez</span></p>

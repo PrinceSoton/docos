@@ -32,7 +32,7 @@ class ReportController extends Controller
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
         'project_id' => 'nullable|integer',
-        'fichier'    => 'required|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png|max:20480',
+        'fichier'    => 'required|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:20480',
     ];
     $request->validate($rules);
 
@@ -125,7 +125,7 @@ class ReportController extends Controller
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
         'project_id' => 'nullable|integer',
-        'fichier'    => 'nullable|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png|max:20480',
+        'fichier'    => 'nullable|file|mimes:pdf,doc,docx,txt,csv,jpg,jpeg,png,zip,rar,7z|max:20480',
     ];
     $request->validate($rules);
 

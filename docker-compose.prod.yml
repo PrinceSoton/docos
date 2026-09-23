@@ -12,7 +12,7 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_URL: http://docos.local
+      APP_URL: ${APP_URL:-http://docos.local}
     volumes:
       - ./storage:/var/www/html/storage:rw
       - ./bootstrap/cache:/var/www/html/bootstrap/cache:rw
@@ -24,7 +24,8 @@ services:
       - proxy-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.docos.rule=Host(`docos.local`)"
+      - "traefik.docker.network=proxy-net"
+      - "traefik.http.routers.docos.rule=Host(`${APP_HOST:-docos.local}`)"
       - "traefik.http.routers.docos.entrypoints=web"
       - "traefik.http.services.docos.loadbalancer.server.port=80"
     deploy:

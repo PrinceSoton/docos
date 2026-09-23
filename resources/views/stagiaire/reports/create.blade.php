@@ -67,7 +67,7 @@
                     </label>
                     <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-indigo-400 transition cursor-pointer"
                         id="dropZone">
-                        <input type="file" name="fichier" id="fichierInput" required class="hidden">
+                        <input type="file" name="fichier" id="fichierInput" accept=".pdf,.doc,.docx,.txt,.csv,.jpg,.jpeg,.png,.zip,.rar,.7z" required class="hidden">
                         <div id="dropContent">
                             <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-3"></i>
                             <p class="text-slate-500 text-sm font-medium">Glissez votre rapport ici ou
