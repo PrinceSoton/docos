@@ -16,6 +16,9 @@ class Task extends Model
 
     protected $casts = ['date_echeance' => 'date'];
 
+  
+    /*  Relations                                                          */
+
     public function project()
     {
         return $this->belongsTo(Project::class);
@@ -26,6 +29,37 @@ class Task extends Model
         return $this->belongsTo(Stagiaire::class);
     }
 
+   
+    /*  Helpers                                                            */
+   
+    /** Vrai si la tâche n'est rattachée à aucun projet */
+    public function estIndependante(): bool
+    {
+        return is_null($this->project_id);
+    }
+
+    /** Vrai si la tâche est rattachée à un projet */
+    public function estLieeAProjet(): bool
+    {
+        return !$this->estIndependante();
+    }
+
+    
+    /** Scope : tâches indépendantes (sans projet) */
+    public function scopeIndependantes($query)
+    {
+        return $query->whereNull('project_id');
+    }
+
+    /** Scope : tâches liées à un projet */
+    public function scopeLieesAProjet($query)
+    {
+        return $query->whereNotNull('project_id');
+    }
+
+
+    /*  Badges (existants)*/
+  
     public function badgePriorite(): string
     {
         return match ($this->priorite) {

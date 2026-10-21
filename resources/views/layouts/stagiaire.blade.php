@@ -7,7 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('titre', 'Mon Espace') - DOCOS</title>
 
-    <!-- Tailwind avec configuration responsive personnalisée -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,7 +30,6 @@
         }
     </script>
 
-    <!-- Flowbite, FontAwesome, AOS, SweetAlert2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
@@ -44,7 +42,6 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Sidebar – par défaut en mode desktop (visible) */
         .sidebar {
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             min-height: 100vh;
@@ -53,17 +50,6 @@
             z-index: 60;
         }
 
-        /* Version collapsée (bouton toggle) */
-        .sidebar.collapsed {
-            width: 72px;
-        }
-
-        .sidebar.collapsed .sidebar-label,
-        .sidebar.collapsed .sidebar-logo-text {
-            display: none;
-        }
-
-        /* Version mobile : menu latéral masqué par défaut */
         @media (max-width: 767px) {
             .sidebar {
                 position: fixed;
@@ -80,7 +66,6 @@
                 transform: translateX(0);
             }
 
-            /* Overlay pour fermer le menu */
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -152,12 +137,12 @@
         @keyframes fadeSlide {
             from {
                 opacity: 0;
-                transform: translateY(15px)
+                transform: translateY(15px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0)
+                transform: translateY(0);
             }
         }
 
@@ -181,7 +166,6 @@
             transition: width .8s ease;
         }
 
-        /* Désactiver AOS sur petits écrans pour économiser les ressources */
         @media (max-width: 640px) {
             [data-aos] {
                 opacity: 1 !important;
@@ -209,12 +193,10 @@
 
     <div class="flex h-screen overflow-hidden">
 
-        <!-- Overlay pour mobile (fermeture du menu) -->
         <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col shadow-2xl">
-            <!-- En-tête sidebar -->
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
                 <img src="{{ asset('logo.png') }}" alt="DOCOS"
                     class="w-10 h-10 rounded-xl object-contain flex-shrink-0" loading="lazy">
@@ -222,19 +204,14 @@
                     <p class="text-white font-bold text-lg">DOCOS</p>
                     <p class="text-amber-400 text-xs">Mon Espace</p>
                 </div>
-                <!-- Bouton toggle (visible sur tablette/desktop) -->
-                <button id="toggleSidebarBtn" class="ml-auto text-white/60 hover:text-white hidden sm:block"
-                    aria-label="Réduire/agrandir la sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <!-- Bouton de fermeture (visible sur mobile) -->
-                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white block sm:hidden"
+
+                {{-- Fermeture : visible UNIQUEMENT sur mobile (< md) --}}
+                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white md:hidden"
                     aria-label="Fermer le menu" onclick="toggleSidebar(false)">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <!-- Info stagiaire -->
             @php $stagiaire = Auth::user()->stagiaire; @endphp
             <div class="px-5 py-4 border-b border-white/10">
                 <div class="flex items-center gap-3">
@@ -271,7 +248,6 @@
                 @endif
             </div>
 
-            <!-- Navigation -->
             <nav class="flex-1 py-4 overflow-y-auto">
                 @php
                     $routes = [
@@ -294,7 +270,6 @@
                 @endforeach
             </nav>
 
-            <!-- Bas de la sidebar -->
             <div class="p-4 border-t border-white/10">
                 <a href="{{ route('profile.index') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white mb-1">
@@ -314,12 +289,11 @@
 
         <!-- Contenu principal -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
             <header
                 class="glass border-b border-white/20 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40">
                 <div class="flex items-center gap-3">
-                    <!-- Bouton d'ouverture du menu sur mobile -->
-                    <button id="openSidebarBtn" class="block sm:hidden text-slate-700 hover:text-amber-600 text-xl"
+                    {{-- Hamburger : visible UNIQUEMENT sous md (mobile) --}}
+                    <button id="openSidebarBtn" class="md:hidden text-slate-700 hover:text-amber-600 text-xl"
                         aria-label="Ouvrir le menu" onclick="toggleSidebar(true)">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -329,11 +303,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- Espace pour notifications, etc. -->
+                    {{-- Espace notifications --}}
                 </div>
             </header>
 
-            <!-- Main -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 @if ($errors->any())
                     <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
@@ -356,7 +329,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
 
     <script>
-        // ---- Loader ----
         window.addEventListener('load', () => {
             gsap.to('#appLoader', {
                 opacity: 0,
@@ -368,7 +340,6 @@
             });
         });
 
-        // ---- AOS (désactivé sur mobile) ----
         const isMobile = window.innerWidth < 640;
         AOS.init({
             duration: 600,
@@ -376,35 +347,25 @@
             disable: isMobile ? true : false,
         });
 
-        // ---- Toggle sidebar (mobile et desktop) ----
+        // Toggle sidebar : uniquement mobile (< 768px)
         function toggleSidebar(open) {
+            if (window.innerWidth >= 768) return;
+
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            if (window.innerWidth < 768) {
-                // Mode mobile
-                if (open === undefined) {
-                    // Si aucun argument, on inverse
-                    const isOpen = sidebar.classList.contains('open');
-                    sidebar.classList.toggle('open', !isOpen);
-                    overlay.classList.toggle('active', !isOpen);
-                } else {
-                    sidebar.classList.toggle('open', open);
-                    overlay.classList.toggle('active', open);
-                }
+            if (open === undefined) {
+                const isOpen = sidebar.classList.contains('open');
+                sidebar.classList.toggle('open', !isOpen);
+                overlay.classList.toggle('active', !isOpen);
             } else {
-                // Mode tablette/desktop : on toggle la classe collapsed
-                sidebar.classList.toggle('collapsed');
+                sidebar.classList.toggle('open', open);
+                overlay.classList.toggle('active', open);
             }
         }
 
-        // Bouton d'ouverture sur mobile
         document.getElementById('openSidebarBtn')?.addEventListener('click', () => toggleSidebar(true));
-        // Bouton de fermeture dans la sidebar (mobile)
         document.getElementById('closeSidebarBtn')?.addEventListener('click', () => toggleSidebar(false));
-        // Bouton toggle sur desktop
-        document.getElementById('toggleSidebarBtn')?.addEventListener('click', () => toggleSidebar());
 
-        // Fermeture automatique quand on redimensionne vers desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) {
                 const sidebar = document.getElementById('sidebar');
@@ -414,7 +375,6 @@
             }
         });
 
-        // ---- Alertes SweetAlert ----
         @if (session('succes'))
             Swal.fire({
                 icon: 'success',
@@ -438,7 +398,6 @@
             });
         @endif
 
-        // ---- Gestion des boutons de suppression (avec confirmation) ----
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();

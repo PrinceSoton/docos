@@ -32,18 +32,28 @@
             @endif
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                <div class="p-4 bg-indigo-50 rounded-xl">
-                    <p class="text-xs text-indigo-400 uppercase font-medium">Projet</p>
-                    <p class="font-semibold text-slate-800 text-sm mt-1">{{ $task->project->titre ?? '—' }}</p>
-                </div>
+                {{-- Contexte : projet ou indépendante --}}
+                @if ($task->project)
+                    <div class="p-4 bg-indigo-50 rounded-xl">
+                        <p class="text-xs text-indigo-400 uppercase font-medium">Projet</p>
+                        <p class="font-semibold text-slate-800 text-sm mt-1">{{ $task->project->titre }}</p>
+                    </div>
+                @else
+                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                        <p class="text-xs text-amber-500 uppercase font-medium">Type de tâche</p>
+                        <p class="font-semibold text-amber-700 text-sm mt-1">
+                            <i class="fas fa-inbox mr-1"></i>Tâche indépendante
+                        </p>
+                        <p class="text-xs text-slate-400 mt-0.5">Non rattachée à un projet</p>
+                    </div>
+                @endif
+
                 @if ($task->date_echeance)
-                    <div
-                        class="p-4 {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'bg-red-50' : 'bg-slate-50' }} rounded-xl">
-                        <p
-                            class="text-xs {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'text-red-400' : 'text-slate-400' }} uppercase font-medium">
-                            Échéance</p>
-                        <p
-                            class="font-semibold {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'text-red-700' : 'text-slate-800' }} text-sm mt-1">
+                    <div class="p-4 {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'bg-red-50' : 'bg-slate-50' }} rounded-xl">
+                        <p class="text-xs {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'text-red-400' : 'text-slate-400' }} uppercase font-medium">
+                            Échéance
+                        </p>
+                        <p class="font-semibold {{ $task->date_echeance->isPast() && $task->statut !== 'termine' ? 'text-red-700' : 'text-slate-800' }} text-sm mt-1">
                             {{ $task->date_echeance->format('d/m/Y') }}
                             @if ($task->date_echeance->isPast() && $task->statut !== 'termine')
                                 <span class="text-xs text-red-500">(En retard)</span>
@@ -56,8 +66,7 @@
             @if ($task->statut !== 'termine')
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     @if ($task->statut === 'a_faire')
-                        <form action="{{ route('stagiaire.tasks.updateStatut', $task) }}" method="POST"
-                            class="no-loader col-span-2">
+                        <form action="{{ route('stagiaire.tasks.updateStatut', $task) }}" method="POST" class="no-loader col-span-2">
                             @csrf @method('PATCH')
                             <input type="hidden" name="statut" value="en_cours">
                             <button type="submit"
@@ -65,7 +74,7 @@
                                 <i class="fas fa-play mr-2"></i>Commencer cette tâche
                             </button>
                         </form>
-                    @elseif($task->statut === 'en_cours')
+                    @elseif ($task->statut === 'en_cours')
                         <form action="{{ route('stagiaire.tasks.updateStatut', $task) }}" method="POST" class="no-loader">
                             @csrf @method('PATCH')
                             <input type="hidden" name="statut" value="a_faire">

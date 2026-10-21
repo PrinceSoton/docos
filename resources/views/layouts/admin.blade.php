@@ -60,18 +60,6 @@
             z-index: 60;
         }
 
-        .sidebar.collapsed {
-            width: 72px;
-        }
-
-        .sidebar.collapsed .sidebar-label {
-            display: none;
-        }
-
-        .sidebar.collapsed .sidebar-logo-text {
-            display: none;
-        }
-
         /* Version mobile : menu latéral masqué */
         @media (max-width: 767px) {
             .sidebar {
@@ -188,7 +176,6 @@
             animation: fadeSlide .4s ease forwards;
         }
 
-        /* Désactiver AOS sur petits écrans */
         @media (max-width: 640px) {
             [data-aos] {
                 opacity: 1 !important;
@@ -226,11 +213,9 @@
                 <div class="sidebar-logo-text">
                     <p class="text-white font-bold text-lg leading-none">DOCOS</p>
                 </div>
-                <button id="toggleSidebarBtn" class="ml-auto text-white/60 hover:text-white hidden sm:block"
-                    aria-label="Réduire/agrandir la sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white block sm:hidden"
+
+                {{-- Bouton de fermeture : visible UNIQUEMENT sur mobile (< md) --}}
+                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white md:hidden"
                     aria-label="Fermer le menu" onclick="toggleSidebar(false)">
                     <i class="fas fa-times"></i>
                 </button>
@@ -321,7 +306,8 @@
             <header
                 class="glass border-b border-white/20 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40">
                 <div class="flex items-center gap-3">
-                    <button id="openSidebarBtn" class="lg:hidden text-slate-600 hover:text-indigo-600 transition"
+                    {{-- Hamburger : visible UNIQUEMENT sous md (mobile) --}}
+                    <button id="openSidebarBtn" class="md:hidden text-slate-600 hover:text-indigo-600 transition"
                         aria-label="Ouvrir le menu">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
@@ -392,28 +378,26 @@
             disable: isMobile
         });
 
-        // Toggle sidebar
+        // Toggle sidebar : uniquement mobile (< 768px)
         function toggleSidebar(open) {
+            if (window.innerWidth >= 768) return; // Aucun effet sur PC/tablette
+
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            if (window.innerWidth < 768) {
-                if (open === undefined) {
-                    const isOpen = sidebar.classList.contains('open');
-                    sidebar.classList.toggle('open', !isOpen);
-                    overlay.classList.toggle('active', !isOpen);
-                } else {
-                    sidebar.classList.toggle('open', open);
-                    overlay.classList.toggle('active', open);
-                }
+            if (open === undefined) {
+                const isOpen = sidebar.classList.contains('open');
+                sidebar.classList.toggle('open', !isOpen);
+                overlay.classList.toggle('active', !isOpen);
             } else {
-                sidebar.classList.toggle('collapsed');
+                sidebar.classList.toggle('open', open);
+                overlay.classList.toggle('active', open);
             }
         }
 
         document.getElementById('openSidebarBtn')?.addEventListener('click', () => toggleSidebar(true));
         document.getElementById('closeSidebarBtn')?.addEventListener('click', () => toggleSidebar(false));
-        document.getElementById('toggleSidebarBtn')?.addEventListener('click', () => toggleSidebar());
 
+        // Fermeture automatique de la sidebar mobile lors du passage en desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) {
                 const sidebar = document.getElementById('sidebar');

@@ -219,11 +219,12 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{project}/collaborateurs/{user}', [MentorProject::class, 'removeCollaborator'])->name('removeCollaborator');
         });
 
-        // Tâches
+                // Tâches
         Route::prefix('taches')->name('tasks.')->group(function () {
             Route::get('/', [MentorTask::class, 'index'])->name('index');
             Route::get('/creer', [MentorTask::class, 'create'])->name('create');
             Route::post('/', [MentorTask::class, 'store'])->name('store');
+            Route::get('/stagiaires-disponibles', [MentorTask::class, 'getStagiairesDisponibles'])->name('getStagiairesDisponibles');
             Route::get('/{task}/modifier', [MentorTask::class, 'edit'])->name('edit');
             Route::put('/{task}', [MentorTask::class, 'update'])->name('update');
             Route::delete('/{task}', [MentorTask::class, 'destroy'])->name('destroy');

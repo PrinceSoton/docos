@@ -48,17 +48,6 @@
             z-index: 60;
         }
 
-        /* Version collapsée (desktop) */
-        .sidebar.collapsed {
-            width: 72px;
-        }
-
-        .sidebar.collapsed .sidebar-label,
-        .sidebar.collapsed .sidebar-logo-text {
-            display: none;
-        }
-
-        /* Version mobile : menu latéral masqué */
         @media (max-width: 767px) {
             .sidebar {
                 position: fixed;
@@ -145,12 +134,12 @@
         @keyframes fadeSlide {
             from {
                 opacity: 0;
-                transform: translateY(15px)
+                transform: translateY(15px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0)
+                transform: translateY(0);
             }
         }
 
@@ -167,7 +156,6 @@
             border-radius: 3px;
         }
 
-        /* Désactiver AOS sur petits écrans pour économiser les ressources */
         @media (max-width: 640px) {
             [data-aos] {
                 opacity: 1 !important;
@@ -206,11 +194,9 @@
                 <div class="sidebar-logo-text">
                     <p class="text-white font-bold text-lg">DOCOS</p>
                 </div>
-                <button id="toggleSidebarBtn" class="ml-auto text-white/60 hover:text-white hidden sm:block"
-                    aria-label="Réduire/agrandir la sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white block sm:hidden"
+
+                {{-- Fermeture : visible UNIQUEMENT sur mobile (< md) --}}
+                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white md:hidden"
                     aria-label="Fermer le menu" onclick="toggleSidebar(false)">
                     <i class="fas fa-times"></i>
                 </button>
@@ -256,7 +242,8 @@
             <header
                 class="glass border-b border-white/20 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40">
                 <div class="flex items-center gap-3">
-                    <button id="openSidebarBtn" class="block sm:hidden text-slate-700 hover:text-emerald-600 text-xl"
+                    {{-- Hamburger : visible UNIQUEMENT sous md (mobile) --}}
+                    <button id="openSidebarBtn" class="md:hidden text-slate-700 hover:text-emerald-600 text-xl"
                         aria-label="Ouvrir le menu" onclick="toggleSidebar(true)">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -303,7 +290,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
 
     <script>
-        // ---- Loader ----
         window.addEventListener('load', () => {
             gsap.to('#appLoader', {
                 opacity: 0,
@@ -315,7 +301,6 @@
             });
         });
 
-        // ---- AOS (désactivé sur mobile) ----
         const isMobile = window.innerWidth < 640;
         AOS.init({
             duration: 600,
@@ -323,27 +308,24 @@
             disable: isMobile ? true : false,
         });
 
-        // ---- Toggle sidebar (mobile et desktop) ----
+        // Toggle sidebar : uniquement mobile (< 768px)
         function toggleSidebar(open) {
+            if (window.innerWidth >= 768) return;
+
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            if (window.innerWidth < 768) {
-                if (open === undefined) {
-                    const isOpen = sidebar.classList.contains('open');
-                    sidebar.classList.toggle('open', !isOpen);
-                    overlay.classList.toggle('active', !isOpen);
-                } else {
-                    sidebar.classList.toggle('open', open);
-                    overlay.classList.toggle('active', open);
-                }
+            if (open === undefined) {
+                const isOpen = sidebar.classList.contains('open');
+                sidebar.classList.toggle('open', !isOpen);
+                overlay.classList.toggle('active', !isOpen);
             } else {
-                sidebar.classList.toggle('collapsed');
+                sidebar.classList.toggle('open', open);
+                overlay.classList.toggle('active', open);
             }
         }
 
         document.getElementById('openSidebarBtn')?.addEventListener('click', () => toggleSidebar(true));
         document.getElementById('closeSidebarBtn')?.addEventListener('click', () => toggleSidebar(false));
-        document.getElementById('toggleSidebarBtn')?.addEventListener('click', () => toggleSidebar());
 
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) {
@@ -354,7 +336,6 @@
             }
         });
 
-        // ---- Alertes SweetAlert ----
         @if (session('succes'))
             Swal.fire({
                 icon: 'success',
@@ -378,7 +359,6 @@
             });
         @endif
 
-        // ---- Suppression avec confirmation ----
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();

@@ -109,7 +109,7 @@
                     <a href="{{ route('stagiaire.tasks.index') }}" class="text-amber-600 text-sm hover:underline">Voir
                         →</a>
                 </div>
-                @forelse($tachesRecentes as $tache)
+                                @forelse($tachesRecentes as $tache)
                     <div class="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
                         @php $pc = ['a_faire'=>'bg-slate-100 text-slate-500','en_cours'=>'bg-amber-100 text-amber-600','termine'=>'bg-green-100 text-green-600']; @endphp
                         <span
@@ -118,7 +118,11 @@
                         </span>
                         <div class="flex-1 min-w-0">
                             <p class="text-slate-700 font-medium text-sm truncate">{{ $tache->titre }}</p>
-                            <p class="text-slate-400 text-xs">{{ $tache->project->titre ?? '—' }}</p>
+                            @if ($tache->project)
+                                <p class="text-slate-400 text-xs">{{ $tache->project->titre }}</p>
+                            @else
+                                <p class="text-amber-500 text-xs"><i class="fas fa-inbox mr-1"></i>Tâche indépendante</p>
+                            @endif
                         </div>
                         <span class="text-xs px-2 py-0.5 rounded-full {{ $pc[$tache->statut] ?? '' }}">
                             {{ ['a_faire' => 'À faire', 'en_cours' => 'En cours', 'termine' => 'Terminé'][$tache->statut] ?? $tache->statut }}

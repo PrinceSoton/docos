@@ -10,36 +10,42 @@
                 </div>
                 <div>
                     <h2 class="text-slate-800 font-bold text-xl">Nouvelle tâche</h2>
-                    <p class="text-slate-400 text-sm">Découpez votre projet en sous-tâches</p>
+                    <p class="text-slate-400 text-sm">Créez une tâche liée à un projet ou indépendante</p>
                 </div>
             </div>
+
             <form action="{{ route('mentor.tasks.store') }}" method="POST" class="space-y-5">
                 @csrf
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Projet *</label>
-                        <select name="project_id" required id="projetSelect"
+                        <label class="block text-sm font-medium text-slate-700 mb-1">
+                            Projet <span class="text-slate-400 text-xs">(optionnel)</span>
+                        </label>
+                        <select name="project_id" id="projetSelect"
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
-                            <option value="">Sélectionner un projet</option>
+                            <option value="">-- Aucun projet (tâche indépendante) --</option>
                             @foreach ($projets as $p)
                                 <option value="{{ $p->id }}" {{ old('project_id') == $p->id ? 'selected' : '' }}>
-                                    {{ $p->titre }}</option>
+                                    {{ $p->titre }}
+                                </option>
                             @endforeach
                         </select>
+                        <p class="text-xs text-slate-400 mt-1">
+                            Laissez vide pour créer une tâche indépendante adressée à vos stagiaires.
+                        </p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Stagiaire *</label>
                         <select name="stagiaire_id" id="stagiaireSelect" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
                             <option value="">-- Sélectionner un stagiaire --</option>
-                            @if (old('project_id'))
-                                @foreach ($stagiaires as $stag)
-                                    <option value="{{ $stag->id }}"
-                                        {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>
-                                        {{ $stag->user->nom_complet }} — {{ $stag->matricule }}
-                                    </option>
-                                @endforeach
-                            @endif
+                            @foreach ($stagiaires as $stag)
+                                <option value="{{ $stag->id }}"
+                                    {{ old('stagiaire_id') == $stag->id ? 'selected' : '' }}>
+                                    {{ $stag->user->nom_complet }} — {{ $stag->matricule }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -61,8 +67,7 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
                         <select name="statut" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
-                            <option value="a_faire" {{ old('statut', 'a_faire') === 'a_faire' ? 'selected' : '' }}>À faire
-                            </option>
+                            <option value="a_faire" {{ old('statut', 'a_faire') === 'a_faire' ? 'selected' : '' }}>À faire</option>
                             <option value="en_cours" {{ old('statut') === 'en_cours' ? 'selected' : '' }}>En cours</option>
                             <option value="termine" {{ old('statut') === 'termine' ? 'selected' : '' }}>Terminé</option>
                         </select>
@@ -72,8 +77,7 @@
                         <select name="priorite" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
                             @foreach (['faible' => 'Faible', 'normale' => 'Normale', 'haute' => 'Haute', 'urgente' => 'Urgente'] as $v => $l)
-                                <option value="{{ $v }}"
-                                    {{ old('priorite', 'normale') === $v ? 'selected' : '' }}>{{ $l }}</option>
+                                <option value="{{ $v }}" {{ old('priorite', 'normale') === $v ? 'selected' : '' }}>{{ $l }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -82,8 +86,7 @@
                         <select name="difficulte" required
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
                             @foreach (['facile' => 'Facile', 'moyen' => 'Moyen', 'difficile' => 'Difficile'] as $v => $l)
-                                <option value="{{ $v }}"
-                                    {{ old('difficulte', 'moyen') === $v ? 'selected' : '' }}>{{ $l }}</option>
+                                <option value="{{ $v }}" {{ old('difficulte', 'moyen') === $v ? 'selected' : '' }}>{{ $l }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -100,7 +103,9 @@
                         <i class="fas fa-save mr-2"></i>Créer la tâche
                     </button>
                     <a href="{{ route('mentor.tasks.index') }}"
-                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
+                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">
+                        Annuler
+                    </a>
                 </div>
             </form>
         </div>
@@ -108,52 +113,47 @@
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const projetSelect = document.getElementById('projetSelect');
-            const stagiaireSelect = document.getElementById('stagiaireSelect');
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const projetSelect    = document.getElementById('projetSelect');
+    const stagiaireSelect = document.getElementById('stagiaireSelect');
 
-            // Définir le template de la route avec un placeholder
-            const routeUrl = '{{ route('mentor.tasks.getStagiaires', ['project' => '__PROJECT__']) }}';
+    // Endpoint unique : /mentor/taches/stagiaires-disponibles
+    const endpoint = '{{ route('mentor.tasks.getStagiairesDisponibles') }}';
 
-            function loadStagiaires(projectId) {
+    function loadStagiaires(projectId) {
+        stagiaireSelect.innerHTML = '<option value="">-- Chargement... --</option>';
+
+        const url = projectId ? endpoint + '?project_id=' + encodeURIComponent(projectId) : endpoint;
+
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(r => { if (!r.ok) throw new Error('Erreur réseau'); return r.json(); })
+            .then(data => {
                 stagiaireSelect.innerHTML = '<option value="">-- Sélectionner un stagiaire --</option>';
-                if (projectId) {
-                    // Remplacer le placeholder par l'ID du projet
-                    const url = routeUrl.replace('__PROJECT__', projectId);
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) throw new Error('Erreur réseau');
-                            return response.json();
-                        })
-                        .then(data => {
-                            data.forEach(stagiaire => {
-                                const option = document.createElement('option');
-                                option.value = stagiaire.id;
-                                option.textContent = stagiaire.nom + ' — ' + stagiaire.matricule;
-                                stagiaireSelect.appendChild(option);
-                            });
-                            // Restaurer la valeur sélectionnée si existante (erreur de validation)
-                            const oldStagiaire = '{{ old('stagiaire_id') }}';
-                            if (oldStagiaire) {
-                                stagiaireSelect.value = oldStagiaire;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur lors du chargement des stagiaires:', error);
-                        });
+                if (data.length === 0) {
+                    stagiaireSelect.innerHTML = '<option value="">Aucun stagiaire disponible</option>';
+                    return;
                 }
-            }
+                data.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.nom + ' — ' + s.matricule;
+                    stagiaireSelect.appendChild(opt);
+                });
 
-            projetSelect.addEventListener('change', function() {
-                loadStagiaires(this.value);
+                // Restaurer la valeur old() si erreur de validation
+                const oldStagiaire = '{{ old('stagiaire_id') }}';
+                if (oldStagiaire) stagiaireSelect.value = oldStagiaire;
+            })
+            .catch(err => {
+                console.error(err);
+                stagiaireSelect.innerHTML = '<option value="">Erreur de chargement</option>';
             });
+    }
 
-            // Charger initialement si un projet est déjà sélectionné
-            const initialProject = projetSelect.value;
-            if (initialProject) {
-                loadStagiaires(initialProject);
-            }
-        });
-    </script>
+    projetSelect.addEventListener('change', function () {
+        loadStagiaires(this.value);
+    });
+});
+</script>
 @endpush
