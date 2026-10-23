@@ -2,160 +2,185 @@
 @section('titre', 'Profil Stagiaire')
 @section('breadcrumb', 'Stagiaires > Profil')
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 sm:px-0 space-y-5" data-aos="fade-up">
-        <!-- En-tête -->
-        <div class="card p-0 overflow-hidden">
-            <div class="h-28 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
-            <div class="px-4 sm:px-8 pb-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-5 -mt-12 flex-wrap">
-                    <div
-                        class="w-24 h-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-emerald-400 to-teal-500">
-                        @if ($stagiaire->user->photo)
-                            <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" class="w-full h-full object-cover"
-                                loading="lazy">
-                        @else
-                            <span
-                                class="text-white font-black text-3xl">{{ strtoupper(substr($stagiaire->user->prenom, 0, 1)) }}</span>
-                        @endif
-                    </div>
-                    <div class="flex-1 mt-14 sm:mt-0">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <h2 class="text-slate-800 font-black text-xl sm:text-2xl">{{ $stagiaire->user->nom_complet }}
-                            </h2>
-                            <span
-                                class="font-mono text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg font-bold">{{ $stagiaire->matricule }}</span>
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-semibold {{ $stagiaire->statut === 'en_cours' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600' }}">
-                                {{ ucfirst($stagiaire->statut) }}
-                            </span>
-                        </div>
-                        <p class="text-slate-500 text-sm mt-1">{{ $stagiaire->user->email }} •
-                            {{ $stagiaire->user->telephone ?: '—' }}</p>
-                    </div>
-                    @if ($stagiaire->cv)
-                        <a href="{{ asset('storage/' . $stagiaire->cv) }}" download
-                            class="mt-4 flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-600 transition">
-                            <i class="fas fa-download"></i>CV
-                        </a>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $focusMarine = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $panneau = 'bg-white border border-brand-100 rounded-xl overflow-hidden';
+        $enTete = 'px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3';
+
+        $statutsStagiaire = ['en_cours' => 'En cours', 'termine' => 'Terminé', 'suspendu' => 'Suspendu'];
+        $statutsRapport = [
+            'soumis' => ['Soumis', 'bg-amber-50 text-amber-800'],
+            'valide' => ['Validé', 'bg-emerald-50 text-emerald-800'],
+            'rejete' => ['Rejeté', 'bg-red-50 text-red-800'],
+            'en_revision' => ['En révision', 'bg-sky-50 text-sky-800'],
+        ];
+    @endphp
+
+    <div class="max-w-5xl mx-auto space-y-5">
+
+        <!-- Identité et stage (bandeau marine) -->
+        <section class="rounded-xl bg-brand-800 text-white p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start gap-5">
+                <div
+                    class="h-20 w-20 rounded-full bg-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    @if ($stagiaire->user->photo)
+                        <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" alt=""
+                            class="h-full w-full object-cover" loading="lazy">
+                    @else
+                        <span class="text-2xl font-semibold text-white"
+                            aria-hidden="true">{{ strtoupper(substr($stagiaire->user->prenom, 0, 1)) }}</span>
                     @endif
                 </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                    <div class="bg-slate-50 rounded-xl p-4">
-                        <p class="text-xs text-slate-400 uppercase font-medium">École</p>
-                        <p class="text-slate-700 font-semibold text-sm mt-1">{{ $stagiaire->ecole ?: '—' }}</p>
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-2xl font-semibold text-white tracking-tight break-words">
+                            {{ $stagiaire->user->nom_complet }}</h2>
+                        <span class="text-xs font-medium font-mono px-2 py-0.5 rounded-md bg-white/15 text-white">
+                            {{ $stagiaire->matricule }}</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-white/15 text-white">
+                            {{ $statutsStagiaire[$stagiaire->statut] ?? ucfirst($stagiaire->statut) }}</span>
                     </div>
-                    <div class="bg-slate-50 rounded-xl p-4">
-                        <p class="text-xs text-slate-400 uppercase font-medium">Spécialité</p>
-                        <p class="text-slate-700 font-semibold text-sm mt-1">{{ $stagiaire->specialite ?: '—' }}</p>
-                    </div>
-                    <div class="bg-emerald-50 rounded-xl p-4">
-                        <p class="text-xs text-emerald-400 uppercase font-medium">Début</p>
-                        <p class="text-emerald-700 font-bold text-sm mt-1">{{ $stagiaire->date_debut->format('d/m/Y') }}
-                        </p>
-                    </div>
-                    <div class="bg-teal-50 rounded-xl p-4">
-                        <p class="text-xs text-teal-400 uppercase font-medium">Fin ({{ $stagiaire->dureeStageDays() }}j)
-                        </p>
-                        <p class="text-teal-700 font-bold text-sm mt-1">{{ $stagiaire->date_fin->format('d/m/Y') }}</p>
-                    </div>
+                    <p class="mt-1 text-sm text-brand-100 break-words">{{ $stagiaire->user->email }} ·
+                        {{ $stagiaire->user->telephone ?: '—' }}</p>
                 </div>
+                @if ($stagiaire->cv)
+                    <a href="{{ asset('storage/' . $stagiaire->cv) }}" download
+                        class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-brand-800 hover:bg-brand-50 transition-colors {{ $focusMarine }}">
+                        <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger le CV
+                    </a>
+                @endif
             </div>
-        </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up">
-            @foreach ([[$stats['present'], 'Présences', 'green', 'user-check'], [$stats['retard'], 'Retards', 'amber', 'clock'], [$stats['absent'], 'Absences', 'red', 'user-times'], [$stats['rapports'], 'Rapports', 'indigo', 'file-alt']] as [$val, $label, $c, $icon])
-                <div class="card p-5 text-center">
-                    <div
-                        class="w-10 h-10 bg-{{ $c }}-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                        <i class="fas fa-{{ $icon }} text-{{ $c }}-600"></i>
-                    </div>
-                    <p class="text-2xl font-black text-slate-800">{{ $val }}</p>
-                    <p class="text-slate-400 text-xs mt-1">{{ $label }}</p>
+            <dl class="mt-6 pt-5 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 text-sm">
+                <div class="min-w-0">
+                    <dt class="text-xs text-brand-100">École</dt>
+                    <dd class="mt-0.5 font-medium text-white break-words">{{ $stagiaire->ecole ?: '—' }}</dd>
                 </div>
-            @endforeach
-        </div>
+                <div class="min-w-0">
+                    <dt class="text-xs text-brand-100">Spécialité</dt>
+                    <dd class="mt-0.5 font-medium text-white break-words">{{ $stagiaire->specialite ?: '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-brand-100">Début</dt>
+                    <dd class="mt-0.5 font-medium text-white tabular-nums">{{ $stagiaire->date_debut->format('d/m/Y') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-brand-100">Fin ({{ $stagiaire->dureeStageDays() }} j)</dt>
+                    <dd class="mt-0.5 font-medium text-white tabular-nums">{{ $stagiaire->date_fin->format('d/m/Y') }}</dd>
+                </div>
+            </dl>
+        </section>
 
-        <!-- Progression tâches -->
-        <div class="card p-5 sm:p-6">
-            <div class="flex justify-between mb-2">
-                <h3 class="text-slate-800 font-bold text-lg"><i class="fas fa-tasks text-emerald-500 mr-2"></i>Progression
-                    des tâches</h3>
-                <span class="text-emerald-600 font-black text-xl">{{ $progression }}%</span>
-            </div>
-            <div class="h-4 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-1000"
-                    style="width:{{ $progression }}%"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-3 mt-4">
-                @foreach ([['a_faire', 'À faire', 'slate'], ['en_cours', 'En cours', 'amber'], ['termine', 'Terminé', 'green']] as [$s, $l, $c])
-                    <div class="bg-{{ $c }}-50 rounded-xl p-3 text-center">
-                        <p class="text-2xl font-black text-{{ $c }}-600">
-                            {{ $stagiaire->tasks->where('statut', $s)->count() }}</p>
-                        <p class="text-xs text-slate-500">{{ $l }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Suivi : présence et rapports -->
+            <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+                <h3 class="text-base font-semibold text-slate-900">Suivi</h3>
+                <dl
+                    class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:divide-x divide-brand-100 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                    @foreach ([['Présences', $stats['present'], 'bg-emerald-500'], ['Retards', $stats['retard'], 'bg-amber-500'], ['Absences', $stats['absent'], 'bg-red-500'], ['Rapports', $stats['rapports'], 'bg-slate-400']] as [$label, $val, $dot])
+                        <div class="px-3 sm:first:pl-0 sm:last:pr-0">
+                            <dd class="text-2xl font-semibold text-slate-900 tabular-nums">{{ $val }}</dd>
+                            <dt class="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+                                <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                                {{ $label }}
+                            </dt>
+                        </div>
+                    @endforeach
+                </dl>
+            </section>
+
+            <!-- Progression des tâches -->
+            <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+                <div class="flex items-baseline justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900">Progression des tâches</h3>
+                    <p class="text-lg font-semibold text-slate-900 tabular-nums">{{ $progression }} %</p>
+                </div>
+                <p class="mt-1 text-sm text-slate-500 tabular-nums">
+                    {{ $stats['taches_terminees'] }} sur {{ $stats['taches_total'] }} tâche(s) terminée(s)</p>
+                <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden" role="progressbar"
+                    aria-label="Progression des tâches" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="{{ $progression }}">
+                    <div class="h-2 rounded-full bg-accent-500 transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                        style="width:{{ $progression }}%"></div>
+                </div>
+                <dl class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                    @foreach ([['a_faire', 'À faire', 'bg-slate-400'], ['en_cours', 'En cours', 'bg-amber-500'], ['termine', 'Terminé', 'bg-emerald-500']] as [$s, $l, $dot])
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                            <dt class="text-slate-500">{{ $l }}</dt>
+                            <dd class="font-semibold text-slate-900 tabular-nums">
+                                {{ $stagiaire->tasks->where('statut', $s)->count() }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </section>
+
             <!-- Projets -->
-            <div class="card p-5 sm:p-6">
-                <h3 class="text-slate-800 font-bold text-lg mb-4"><i
-                        class="fas fa-project-diagram text-blue-500 mr-2"></i>Projets ({{ $stagiaire->projects->count() }})
-                </h3>
-                @forelse($stagiaire->projects as $p)
-                    <div class="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-folder text-blue-500 text-xs"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-slate-700 font-medium text-sm">{{ $p->titre }}</p>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <div class="flex-1 h-1.5 bg-slate-100 rounded-full">
-                                    <div class="h-1.5 bg-blue-400 rounded-full"
-                                        style="width:{{ $p->progressionPourcent() }}%"></div>
-                                </div>
-                                <span class="text-xs text-blue-600 font-semibold">{{ $p->progressionPourcent() }}%</span>
+            <section class="{{ $panneau }}">
+                <div class="{{ $enTete }}">
+                    <h3 class="text-base font-semibold text-slate-900">Projets
+                        <span class="font-normal text-slate-600 tabular-nums">({{ $stagiaire->projects->count() }})</span>
+                    </h3>
+                </div>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse($stagiaire->projects as $p)
+                        <li class="py-3">
+                            <div class="flex items-baseline justify-between gap-3">
+                                <p class="text-sm font-medium text-slate-900 truncate">{{ $p->titre }}</p>
+                                <p class="text-xs font-medium text-slate-900 tabular-nums flex-shrink-0">
+                                    {{ $p->progressionPourcent() }} %</p>
                             </div>
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun projet</p>
-                @endforelse
-            </div>
+                            <div class="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden" role="progressbar"
+                                aria-label="Progression du projet {{ $p->titre }}" aria-valuemin="0" aria-valuemax="100"
+                                aria-valuenow="{{ $p->progressionPourcent() }}">
+                                <div class="h-1.5 rounded-full bg-accent-500" style="width:{{ $p->progressionPourcent() }}%">
+                                </div>
+                            </div>
+                        </li>
+                    @empty
+                        <li class="py-6 text-center">
+                            <p class="text-sm font-medium text-slate-700">Aucun projet</p>
+                            <p class="mt-1 text-sm text-slate-500">Ce stagiaire n'est rattaché à aucun projet pour le moment.</p>
+                        </li>
+                    @endforelse
+                </ul>
+            </section>
 
             <!-- Rapports -->
-            <div class="card p-5 sm:p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-slate-800 font-bold text-lg"><i
-                            class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports ({{ $stats['rapports'] }})</h3>
-                    <a href="{{ route('mentor.reports.index') }}" class="text-emerald-600 text-sm hover:underline">Voir
-                        tous →</a>
+            <section class="{{ $panneau }}">
+                <div class="{{ $enTete }}">
+                    <h3 class="text-base font-semibold text-slate-900">Rapports
+                        <span class="font-normal text-slate-600 tabular-nums">({{ $stats['rapports'] }})</span>
+                    </h3>
+                    <a href="{{ route('mentor.reports.index') }}" class="flex-shrink-0 {{ $lien }}">Voir tout →</a>
                 </div>
-                @forelse($stagiaire->reports->take(5) as $rapport)
-                    <div class="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
-                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-file-alt text-purple-500 text-xs"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-700 font-medium text-sm truncate">{{ $rapport->titre }}</p>
-                            <p class="text-slate-400 text-xs">{{ $rapport->created_at->format('d/m/Y') }}</p>
-                        </div>
-                        @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600']; @endphp
-                        <span
-                            class="text-xs px-2 py-1 rounded-full {{ $sc[$rapport->statut] ?? 'bg-slate-100 text-slate-600' }}">{{ ucfirst($rapport->statut) }}</span>
-                    </div>
-                @empty
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun rapport</p>
-                @endforelse
-            </div>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse($stagiaire->reports->take(5) as $rapport)
+                        @php [$libelle, $cls] = $statutsRapport[$rapport->statut] ?? [ucfirst($rapport->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="flex items-center gap-3 py-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate">{{ $rapport->titre }}</p>
+                                <p class="text-xs text-slate-500 tabular-nums">{{ $rapport->created_at->format('d/m/Y') }}</p>
+                            </div>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $cls }}">{{ $libelle }}</span>
+                        </li>
+                    @empty
+                        <li class="py-6 text-center">
+                            <p class="text-sm font-medium text-slate-700">Aucun rapport</p>
+                            <p class="mt-1 text-sm text-slate-500">Les rapports déposés par ce stagiaire apparaîtront ici.</p>
+                        </li>
+                    @endforelse
+                </ul>
+            </section>
         </div>
 
-        <a href="{{ route('mentor.stagiaires.index') }}"
-            class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour à mes stagiaires
-        </a>
+        <div>
+            <a href="{{ route('mentor.stagiaires.index') }}" class="inline-flex items-center gap-2 {{ $lien }}">
+                <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour à mes stagiaires
+            </a>
+        </div>
     </div>
 @endsection

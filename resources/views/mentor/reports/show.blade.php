@@ -2,205 +2,217 @@
 @section('titre', 'Rapport')
 @section('breadcrumb', 'Rapports > Détail')
 @section('content')
-    <div class="max-w-4xl mx-auto px-4 sm:px-0 space-y-5">
-        <div class="card p-5 sm:p-6" data-aos="fade-up">
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-5">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">{{ $report->titre }}</h2>
-                    <div class="flex flex-wrap items-center gap-2 mt-2">
-                        <span
-                            class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg capitalize">{{ $report->type_affiche }}</span>
-                        @php $sc = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600','en_revision'=>'bg-blue-100 text-blue-700']; @endphp
-                        <span
-                            class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$report->statut] ?? '' }}">{{ ucfirst(str_replace('_', ' ', $report->statut)) }}</span>
-                        @if ($report->note !== null)
-                            <span
-                                class="font-bold text-{{ $report->note >= 14 ? 'green' : ($report->note >= 10 ? 'amber' : 'red') }}-600 text-sm">Note
-                                : {{ $report->note }}/20</span>
-                        @endif
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+
+        $statuts = [
+            'soumis' => ['Soumis', 'bg-amber-50 text-amber-800'],
+            'valide' => ['Validé', 'bg-emerald-50 text-emerald-800'],
+            'rejete' => ['Rejeté', 'bg-red-50 text-red-800'],
+            'en_revision' => ['En révision', 'bg-sky-50 text-sky-800'],
+        ];
+        [$libStatut, $clsStatut] = $statuts[$report->statut] ?? [ucfirst(str_replace('_', ' ', $report->statut)), 'bg-slate-100 text-slate-700'];
+        $clsNote = $report->note !== null
+            ? ($report->note >= 14 ? 'text-emerald-700' : ($report->note >= 10 ? 'text-amber-800' : 'text-red-700'))
+            : '';
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- En-tête du rapport -->
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 capitalize">{{ $report->type_affiche }}</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-md {{ $clsStatut }}">{{ $libStatut }}</span>
                     </div>
-                    <p class="text-slate-400 text-sm mt-1">Déposé le {{ $report->created_at->format('d/m/Y à H:i') }}</p>
+                    <h2 class="mt-3 text-lg font-semibold text-slate-900 leading-snug break-words">{{ $report->titre }}</h2>
+                    <p class="mt-1 text-sm text-slate-500 tabular-nums">Déposé le {{ $report->created_at->format('d/m/Y à H:i') }}</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('mentor.reports.telecharger', $report) }}"
-                        class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition hover:shadow-md">
-                        <i class="fas fa-download"></i>Télécharger
-                    </a>
+                <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                     @if ($report->statut === 'soumis' || $report->statut === 'en_revision')
-                        <a href="{{ route('mentor.reports.evaluate', $report) }}"
-                            class="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-600 transition hover:shadow-md">
-                            <i class="fas fa-star"></i>Évaluer
+                        <a href="{{ route('mentor.reports.evaluate', $report) }}" class="{{ $btnPrimaire }}">
+                            <i class="fas fa-star text-xs" aria-hidden="true"></i>Évaluer
                         </a>
                     @endif
+                    <a href="{{ route('mentor.reports.telecharger', $report) }}" class="{{ $btnSecondaire }}">
+                        <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
+                    </a>
                 </div>
             </div>
 
-            <!-- Infos stagiaire + projet -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 bg-emerald-50 rounded-2xl">
-                    <p class="text-xs text-emerald-400 uppercase font-medium mb-2">Stagiaire</p>
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-9 h-9 rounded-xl bg-emerald-200 flex items-center justify-center font-bold text-emerald-700 flex-shrink-0">
-                            {{ strtoupper(substr($report->stagiaire->user->prenom ?? '', 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">{{ $report->stagiaire->user->nom_complet ?? '—' }}
-                            </p>
-                            <p class="text-slate-500 text-xs">{{ $report->stagiaire->matricule }}</p>
-                        </div>
-                    </div>
+            <!-- Synthèse : stagiaire, projet, note (bloc teinté) -->
+            <dl class="mt-5 rounded-lg bg-brand-50 border border-brand-100 p-4 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+                <div class="min-w-0">
+                    <dt class="text-xs text-slate-600">Stagiaire</dt>
+                    <dd class="mt-1 flex items-center gap-2.5 min-w-0">
+                        <span class="h-8 w-8 rounded-full bg-brand-100 text-brand-800 text-xs font-semibold flex items-center justify-center flex-shrink-0"
+                            aria-hidden="true">{{ strtoupper(substr($report->stagiaire->user->prenom ?? '', 0, 1)) }}</span>
+                        <span class="min-w-0">
+                            <span class="block text-sm font-medium text-slate-900 truncate">{{ $report->stagiaire->user->nom_complet ?? '—' }}</span>
+                            <span class="block text-xs text-slate-600 tabular-nums">{{ $report->stagiaire->matricule }}</span>
+                        </span>
+                    </dd>
                 </div>
                 @if ($report->project)
-                    <div class="p-4 bg-blue-50 rounded-2xl">
-                        <p class="text-xs text-blue-400 uppercase font-medium mb-2">Projet lié</p>
-                        <p class="font-bold text-slate-800 text-sm">{{ $report->project->titre }}</p>
-                        <p class="text-slate-400 text-xs">{{ $report->project->progressionPourcent() }}% terminé</p>
+                    @php $progression = $report->project->progressionPourcent(); @endphp
+                    <div class="min-w-0">
+                        <dt class="text-xs text-slate-600">Projet lié</dt>
+                        <dd class="mt-1">
+                            <span class="block text-sm font-medium text-slate-900 break-words">{{ $report->project->titre }}</span>
+                            <span class="mt-2 flex items-center gap-2">
+                                <span class="flex-1 h-2 rounded-full bg-white border border-brand-100 overflow-hidden" role="progressbar"
+                                    aria-label="Progression du projet" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progression }}">
+                                    <span class="block h-full rounded-full bg-accent-500" style="width: {{ $progression }}%"></span>
+                                </span>
+                                <span class="text-xs text-slate-600 tabular-nums">{{ $progression }}% terminé</span>
+                            </span>
+                        </dd>
                     </div>
                 @endif
-            </div>
+                <div>
+                    <dt class="text-xs text-slate-600">Note</dt>
+                    <dd class="mt-1 text-sm font-medium tabular-nums {{ $report->note !== null ? $clsNote : 'text-slate-900' }}">
+                        {{ $report->note !== null ? $report->note . '/20' : 'Non noté' }}
+                    </dd>
+                </div>
+            </dl>
 
             @if ($report->description)
-                <div class="p-4 bg-slate-50 rounded-xl mt-4">
-                    <p class="text-xs text-slate-400 uppercase font-medium mb-1">Description</p>
-                    <p class="text-slate-700 text-sm">{{ $report->description }}</p>
+                <div class="mt-5">
+                    <h3 class="text-sm font-semibold text-slate-900">Description</h3>
+                    <p class="mt-1 text-sm text-slate-700 break-words whitespace-pre-line">{{ $report->description }}</p>
                 </div>
             @endif
 
             @if ($report->commentaire_mentor)
-                <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 mt-4">
-                    <p class="text-xs text-amber-500 uppercase font-medium mb-1"><i class="fas fa-comment mr-1"></i>Mon
-                        commentaire</p>
-                    <p class="text-slate-700 text-sm">{{ $report->commentaire_mentor }}</p>
+                <div class="mt-5 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                    <h3 class="text-xs text-slate-600">Mon commentaire d'évaluation</h3>
+                    <p class="mt-0.5 text-sm text-slate-900 break-words whitespace-pre-line">{{ $report->commentaire_mentor }}</p>
                 </div>
             @endif
-        </div>
+        </section>
 
-        <!-- ============================================================ -->
-        <!-- VISUALISEUR INTÉGRÉ                                          -->
-        <!-- ============================================================ -->
-        <div class="card p-5 sm:p-6" {{-- data-aos="fade-up" --}}>
-            <h3 class="text-slate-800 font-bold text-lg mb-4">
-                <i class="fas fa-eye text-indigo-500 mr-2"></i>Aperçu du rapport
-            </h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
-            @php
-                $ext = strtolower(pathinfo($report->fichier, PATHINFO_EXTENSION));
-                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'ico'];
-                $videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv', 'wmv'];
-                $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'wma'];
-                $pdfExtensions = ['pdf'];
-                $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
-                $officeExtensions = ['docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt'];
-                $streamUrl = route('mentor.reports.stream', $report);
-            @endphp
+            <!-- Visualiseur intégré -->
+            <section class="lg:col-span-2 bg-white border border-brand-100 rounded-xl overflow-hidden min-w-0">
+                <div class="flex items-center justify-between gap-3 px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100">
+                    <h3 class="text-base font-semibold text-slate-900">Aperçu du rapport</h3>
+                    <a href="{{ route('mentor.reports.telecharger', $report) }}" class="{{ $lien }}">Télécharger</a>
+                </div>
+                <div class="p-4 sm:p-5">
+                    @php
+                        $ext = strtolower(pathinfo($report->fichier, PATHINFO_EXTENSION));
+                        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'ico'];
+                        $videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv', 'wmv'];
+                        $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'wma'];
+                        $pdfExtensions = ['pdf'];
+                        $texteExtensions = ['txt', 'csv', 'json', 'xml', 'html', 'css', 'js', 'php', 'log', 'md', 'sql'];
+                        $officeExtensions = ['docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt'];
+                        $streamUrl = route('mentor.reports.stream', $report);
+                    @endphp
 
-            @if (in_array($ext, $pdfExtensions))
-                <div class="w-full rounded-xl overflow-hidden bg-slate-100" style="height: 600px;">
-                    <iframe src="{{ $streamUrl }}" class="w-full h-full border-0"
-                        style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
+                    @if (in_array($ext, $pdfExtensions))
+                        <div class="w-full rounded-lg overflow-hidden border border-brand-100 bg-slate-100" style="height: 600px;">
+                            <iframe src="{{ $streamUrl }}" title="Aperçu PDF du rapport {{ $report->titre }}"
+                                class="w-full h-full border-0" style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
+                        </div>
+                    @elseif (in_array($ext, $imageExtensions))
+                        <div class="w-full rounded-lg border border-brand-100 bg-slate-50 flex items-center justify-center p-4">
+                            <img src="{{ $streamUrl }}" alt="{{ $report->titre }}"
+                                class="max-w-full max-h-[600px] object-contain rounded-md" loading="lazy">
+                        </div>
+                    @elseif (in_array($ext, $videoExtensions))
+                        <div class="w-full rounded-lg overflow-hidden bg-slate-900 p-2">
+                            <video controls class="w-full rounded-md" style="max-height: 600px;" src="{{ $streamUrl }}">
+                                Votre navigateur ne supporte pas la lecture de vidéo.
+                            </video>
+                        </div>
+                    @elseif (in_array($ext, $audioExtensions))
+                        <div class="w-full rounded-lg border border-brand-100 bg-brand-50 p-6 flex items-center justify-center">
+                            <audio controls class="w-full max-w-2xl" src="{{ $streamUrl }}">
+                                Votre navigateur ne supporte pas la lecture audio.
+                            </audio>
+                        </div>
+                    @elseif (in_array($ext, $texteExtensions) && isset($contenuTexte))
+                        <div class="w-full rounded-lg border border-brand-100 bg-slate-50 p-4 overflow-auto" style="max-height: 600px;">
+                            <pre class="text-sm text-slate-800 font-mono whitespace-pre-wrap break-words">{{ $contenuTexte }}</pre>
+                        </div>
+                    @elseif (in_array($ext, $officeExtensions))
+                        @php
+                            $fileUrl = Storage::url($report->fichier);
+                            $encodedUrl = urlencode($fileUrl);
+                            $officeViewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src={$encodedUrl}";
+                        @endphp
+                        <div class="w-full rounded-lg overflow-hidden border border-brand-100 bg-slate-100" style="height: 600px;">
+                            <iframe src="{{ $officeViewerUrl }}" title="Aperçu Office du rapport {{ $report->titre }}"
+                                class="w-full h-full border-0" style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500">Aperçu généré via Microsoft Office Online.</p>
+                    @else
+                        <div class="rounded-lg border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                            <p class="text-sm font-medium text-slate-900">Ce type de fichier ne peut pas être visualisé en ligne.</p>
+                            <p class="mt-1 text-sm text-slate-600">Extension :
+                                <span class="font-medium text-slate-900">{{ strtoupper($ext) ?: 'inconnue' }}</span>
+                            </p>
+                            <a href="{{ route('mentor.reports.telecharger', $report) }}" class="mt-4 {{ $btnPrimaire }}">
+                                <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger le fichier
+                            </a>
+                        </div>
+                    @endif
                 </div>
-            @elseif (in_array($ext, $imageExtensions))
-                <div class="w-full rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center p-4">
-                    <img src="{{ $streamUrl }}" alt="{{ $report->titre }}"
-                        class="max-w-full max-h-[600px] object-contain rounded-lg shadow-sm" loading="lazy">
-                </div>
-            @elseif (in_array($ext, $videoExtensions))
-                <div class="w-full rounded-xl overflow-hidden bg-slate-900 p-2">
-                    <video controls class="w-full rounded-lg" style="max-height: 600px;" src="{{ $streamUrl }}">
-                        Votre navigateur ne supporte pas la lecture de vidéo.
-                    </video>
-                </div>
-            @elseif (in_array($ext, $audioExtensions))
-                <div class="w-full rounded-xl bg-slate-50 p-6 flex items-center justify-center">
-                    <audio controls class="w-full max-w-2xl" src="{{ $streamUrl }}">
-                        Votre navigateur ne supporte pas la lecture audio.
-                    </audio>
-                </div>
-            @elseif (in_array($ext, $texteExtensions) && isset($contenuTexte))
-                <div class="w-full rounded-xl bg-slate-900 text-white p-4 overflow-auto" style="max-height: 600px;">
-                    <pre class="text-sm font-mono whitespace-pre-wrap break-words">{{ $contenuTexte }}</pre>
-                </div>
-            @elseif (in_array($ext, $officeExtensions))
-                @php
-                    $fileUrl = Storage::url($report->fichier);
-                    $encodedUrl = urlencode($fileUrl);
-                    $officeViewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src={$encodedUrl}";
-                @endphp
-                <div class="w-full rounded-xl overflow-hidden bg-slate-100" style="height: 600px;">
-                    <iframe src="{{ $officeViewerUrl }}" class="w-full h-full border-0"
-                        style="min-height: 400px; height: 100%;" allowfullscreen></iframe>
-                </div>
-                <p class="text-xs text-slate-400 mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Aperçu généré via Microsoft Office Online.
-                </p>
-            @else
-                <div class="p-8 bg-amber-50 border border-amber-200 rounded-xl text-center">
-                    <i class="fas fa-file-alt text-4xl text-amber-400 mb-3"></i>
-                    <p class="text-amber-700 font-medium">Ce type de fichier ne peut pas être visualisé en ligne.</p>
-                    <p class="text-amber-600 text-sm mt-1">Extension :
-                        <strong>{{ strtoupper($ext) ?: 'inconnue' }}</strong>
-                    </p>
-                    <a href="{{ route('mentor.reports.telecharger', $report) }}"
-                        class="mt-4 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition">
-                        <i class="fas fa-download"></i>Télécharger le fichier
-                    </a>
-                </div>
-            @endif
-        </div>
+            </section>
 
-        <!-- Commentaires -->
-        <div class="card p-5 sm:p-6" data-aos="fade-up">
-            <h3 class="text-slate-800 font-bold text-lg mb-4"><i
-                    class="fas fa-comments text-emerald-500 mr-2"></i>Commentaires ({{ $report->comments->count() }})</h3>
-
-            <form action="{{ route('mentor.reports.commenter', $report) }}" method="POST" class="mb-5">
-                @csrf
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                        <span
-                            class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
-                    </div>
-                    <div class="flex-1">
-                        <textarea name="contenu" rows="2" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm resize-none"
-                            placeholder="Ajouter un commentaire..."></textarea>
-                        <button type="submit"
-                            class="mt-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition hover:shadow-md">
-                            <i class="fas fa-paper-plane mr-1"></i>Commenter
+            <!-- Commentaires -->
+            <section class="bg-white border border-brand-100 rounded-xl overflow-hidden min-w-0">
+                <div class="flex items-center justify-between gap-3 px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100">
+                    <h3 class="text-base font-semibold text-slate-900">Commentaires</h3>
+                    <span class="text-xs text-slate-600 tabular-nums">{{ $report->comments->count() }}</span>
+                </div>
+                <div class="p-5 sm:p-6">
+                    <form action="{{ route('mentor.reports.commenter', $report) }}" method="POST">
+                        @csrf
+                        <label for="commentaire-contenu" class="block text-sm font-medium text-slate-700 mb-1">Ajouter un commentaire</label>
+                        <textarea id="commentaire-contenu" name="contenu" rows="3" required class="{{ $champ }} resize-none"
+                            placeholder="Votre message au stagiaire..."></textarea>
+                        @error('contenu')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
+                        <button type="submit" class="mt-3 w-full sm:w-auto {{ $btnPrimaire }}">
+                            <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>Commenter
                         </button>
+                    </form>
+
+                    <div class="mt-6 pt-5 border-t border-brand-100 space-y-4">
+                        @forelse($report->comments as $comment)
+                            @php $estMoi = $comment->user_id === Auth::id(); @endphp
+                            <div class="flex gap-3 {{ $estMoi ? '' : 'flex-row-reverse' }}">
+                                <span class="h-8 w-8 rounded-full {{ $estMoi ? 'bg-brand-800 text-white' : 'bg-brand-100 text-brand-800' }} text-xs font-semibold flex items-center justify-center flex-shrink-0"
+                                    aria-hidden="true">{{ strtoupper(substr($comment->user->prenom ?? '', 0, 1)) }}</span>
+                                <div class="{{ $estMoi ? '' : 'text-right' }} flex-1 min-w-0">
+                                    <div class="inline-block max-w-full text-left rounded-lg px-4 py-3 {{ $estMoi ? 'bg-brand-50 border border-brand-100' : 'bg-slate-50 border border-slate-100' }}">
+                                        <p class="text-xs font-medium text-slate-600">{{ $comment->user->nom_complet ?? '—' }}</p>
+                                        <p class="mt-0.5 text-sm text-slate-900 break-words whitespace-pre-line">{{ $comment->contenu }}</p>
+                                        <p class="mt-1 text-xs text-slate-600">{{ $comment->created_at->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-slate-500 text-center py-4">Aucun commentaire pour le moment.</p>
+                        @endforelse
                     </div>
                 </div>
-            </form>
-
-            <div class="space-y-3">
-                @forelse($report->comments as $comment)
-                    <div class="flex gap-3 {{ $comment->user_id === Auth::id() ? '' : 'flex-row-reverse' }}">
-                        <div
-                            class="w-8 h-8 rounded-xl {{ $comment->user_id === Auth::id() ? 'bg-emerald-400' : 'bg-indigo-400' }} flex items-center justify-center flex-shrink-0">
-                            <span
-                                class="text-white font-bold text-xs">{{ strtoupper(substr($comment->user->prenom ?? '', 0, 1)) }}</span>
-                        </div>
-                        <div class="{{ $comment->user_id === Auth::id() ? '' : 'text-right' }} flex-1">
-                            <div
-                                class="inline-block max-w-xs {{ $comment->user_id === Auth::id() ? 'bg-emerald-50' : 'bg-slate-50' }} rounded-2xl px-4 py-3">
-                                <p class="text-slate-500 text-xs font-medium mb-1">{{ $comment->user->nom_complet ?? '—' }}
-                                </p>
-                                <p class="text-slate-700 text-sm">{{ $comment->contenu }}</p>
-                                <p class="text-slate-400 text-xs mt-1">{{ $comment->created_at->diffForHumans() }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun commentaire</p>
-                @endforelse
-            </div>
+            </section>
         </div>
 
-        <a href="{{ route('mentor.reports.index') }}"
-            class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour aux rapports
+        <a href="{{ route('mentor.reports.index') }}" class="{{ $lien }} inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour aux rapports
         </a>
     </div>
 @endsection

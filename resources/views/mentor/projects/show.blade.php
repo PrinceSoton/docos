@@ -2,222 +2,273 @@
 @section('titre', $project->titre)
 @section('breadcrumb', 'Projets > Détail')
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 sm:px-0 space-y-4 sm:space-y-5">
+    @php
+        $statutsProjet = [
+            'en_attente' => 'En attente',
+            'en_cours' => 'En cours',
+            'termine' => 'Terminé',
+            'suspendu' => 'Suspendu',
+        ];
+        $priorites = [
+            'faible' => ['Faible', 'bg-slate-400'],
+            'normale' => ['Normale', 'bg-sky-500'],
+            'haute' => ['Haute', 'bg-amber-500'],
+            'urgente' => ['Urgente', 'bg-red-500'],
+        ];
+        $statutsRapport = [
+            'soumis' => ['Soumis', 'bg-amber-50 text-amber-800'],
+            'valide' => ['Validé', 'bg-emerald-50 text-emerald-800'],
+            'rejete' => ['Rejeté', 'bg-red-50 text-red-800'],
+            'en_revision' => ['En révision', 'bg-sky-50 text-sky-800'],
+        ];
+        $libStatut = $statutsProjet[$project->statut] ?? ucfirst(str_replace('_', ' ', $project->statut));
+        [$libPriorite, $dotPriorite] = $priorites[$project->priorite] ?? [ucfirst((string) $project->priorite), 'bg-slate-300'];
+        $pct = $project->progressionPourcent();
 
-        <!-- En-tête -->
-        <div class="card p-5 sm:p-6" data-aos="fade-down">
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
-                <div>
-                    <div class="flex flex-wrap items-center gap-2 mb-2">
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-800">{{ $project->titre }}</h2>
-                        @php $sc = ['en_attente'=>'bg-slate-100 text-slate-600','en_cours'=>'bg-blue-100 text-blue-700','termine'=>'bg-green-100 text-green-700','suspendu'=>'bg-red-100 text-red-600']; @endphp
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$project->statut] ?? '' }}">
-                            {{ ucfirst(str_replace('_', ' ', $project->statut)) }}
-                        </span>
-                        @php $pc = ['faible'=>'bg-slate-100 text-slate-500','normale'=>'bg-blue-100 text-blue-600','haute'=>'bg-amber-100 text-amber-700','urgente'=>'bg-red-100 text-red-700']; @endphp
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $pc[$project->priorite] ?? '' }}">
-                            <i class="fas fa-flag mr-1"></i>{{ ucfirst($project->priorite) }}
-                        </span>
+        $colonnes = [
+            ['a_faire', 'À faire', 'bg-slate-400'],
+            ['en_cours', 'En cours', 'bg-amber-500'],
+            ['termine', 'Terminé', 'bg-emerald-500'],
+        ];
+
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $focusMarine = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnMarinePrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-brand-800 hover:bg-brand-50 transition-colors ' . $focusMarine;
+        $btnMarineSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors ' . $focusMarine;
+        $btnMini = 'inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ' . $focus;
+        $btnMiniSecondaire = $btnMini . ' border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300';
+        $btnMiniDanger = $btnMini . ' border border-red-200 bg-white text-red-700 hover:bg-red-50';
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- En-tête du projet (bandeau marine) -->
+        <section class="rounded-xl bg-brand-800 text-white p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-lg font-semibold text-white leading-snug break-words">{{ $project->titre }}</h2>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-white/15 text-white">{{ $libStatut }}</span>
                         @if (!$project->isOwner(Auth::user()))
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
-                                <i class="fas fa-users mr-1"></i>Collaborateur
-                            </span>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-white/15 text-white">Collaborateur</span>
                         @endif
                     </div>
                     @if ($project->description)
-                        <p class="text-slate-500 text-sm">{{ $project->description }}</p>
+                        <p class="mt-1.5 text-sm text-brand-100 max-w-3xl break-words">{{ $project->description }}</p>
                     @endif
-                    <p class="text-slate-400 text-xs mt-2">
-                        <i class="fas fa-calendar mr-1"></i>{{ $project->date_debut->format('d/m/Y') }}
+                </div>
+                <div class="flex flex-wrap gap-2 flex-shrink-0">
+                    <a href="{{ route('mentor.projects.edit', $project) }}" class="{{ $btnMarinePrimaire }}">
+                        <i class="fas fa-pen text-xs" aria-hidden="true"></i>Modifier
+                    </a>
+                    <a href="{{ route('mentor.tasks.create') }}" class="{{ $btnMarineSecondaire }}">
+                        <i class="fas fa-plus text-xs" aria-hidden="true"></i>Tâche
+                    </a>
+                </div>
+            </div>
+
+            <dl class="mt-5 pt-5 border-t border-white/15 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 text-sm">
+                <div>
+                    <dt class="text-xs text-brand-100">Priorité</dt>
+                    <dd class="mt-0.5 flex items-center gap-2 font-medium text-white">
+                        <span class="h-2 w-2 rounded-full {{ $dotPriorite }}" aria-hidden="true"></span>
+                        {{ $libPriorite }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-brand-100">Tâches</dt>
+                    <dd class="mt-0.5 font-medium text-white tabular-nums">
+                        {{ $project->tasks->where('statut', 'termine')->count() }}/{{ $project->tasks->count() }} terminée(s)
+                    </dd>
+                </div>
+                <div class="col-span-2 lg:col-span-1">
+                    <dt class="text-xs text-brand-100">Période</dt>
+                    <dd class="mt-0.5 font-medium text-white tabular-nums">
+                        {{ $project->date_debut->format('d/m/Y') }}
                         @if ($project->date_fin)
                             → {{ $project->date_fin->format('d/m/Y') }}
                         @endif
-                    </p>
+                    </dd>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('mentor.projects.edit', $project) }}"
-                        class="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-600 transition">
-                        <i class="fas fa-edit"></i>Modifier
-                    </a>
-                    <a href="{{ route('mentor.tasks.create') }}"
-                        class="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-600 transition">
-                        <i class="fas fa-plus"></i>Tâche
-                    </a>
+                <div class="col-span-2 lg:col-span-1">
+                    <dt class="flex justify-between gap-3 text-xs text-brand-100">
+                        <span>Progression globale</span>
+                        <span class="font-semibold text-white tabular-nums">{{ $pct }} %</span>
+                    </dt>
+                    <dd class="mt-2">
+                        <div class="h-2 rounded-full bg-white/15 overflow-hidden" role="progressbar"
+                            aria-label="Progression du projet {{ $project->titre }}" aria-valuemin="0"
+                            aria-valuemax="100" aria-valuenow="{{ $pct }}">
+                            <div class="h-2 rounded-full bg-accent-500" style="width:{{ $pct }}%"></div>
+                        </div>
+                    </dd>
                 </div>
-            </div>
+            </dl>
+        </section>
 
-            <!-- Progression -->
-            <div class="mt-5">
-                <div class="flex justify-between text-sm text-slate-600 mb-2">
-                    <span>Progression globale</span>
-                    <span class="font-bold text-emerald-600">{{ $project->progressionPourcent() }}%</span>
+        <!-- Équipe : mentors et stagiaires -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            <section class="bg-white border border-brand-100 rounded-xl overflow-hidden">
+                <div class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900">Mentors du projet</h3>
+                    <span class="text-sm font-medium text-slate-600 tabular-nums">{{ $project->mentors->count() }}</span>
                 </div>
-                <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-3 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-1000"
-                        style="width:{{ $project->progressionPourcent() }}%"></div>
-                </div>
-            </div>
-
-            <!-- Mentors / Collaborateurs -->
-            <div class="mt-5 pt-4 border-t border-slate-100">
-                <div class="flex flex-wrap items-center gap-3 mb-3">
-                    <span class="text-xs text-slate-500 font-medium">Mentors du projet :</span>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
                     @foreach ($project->mentors as $mentor)
-                        <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
-                            <div
-                                class="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">
-                                {{ strtoupper(substr($mentor->prenom, 0, 1)) }}
-                            </div>
-                            <span class="text-slate-700 text-sm font-medium">{{ $mentor->nom_complet }}</span>
+                        <li class="flex items-center gap-3 py-3">
+                            <p class="flex-1 min-w-0 text-sm font-medium text-slate-900 truncate">{{ $mentor->nom_complet }}</p>
                             @if ($mentor->id === $project->mentor_id)
-                                <span class="text-xs text-emerald-600 font-semibold">Créateur</span>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-brand-100 text-brand-800">Créateur</span>
                             @endif
                             @if ($mentor->id !== $project->mentor_id)
                                 <form action="{{ route('mentor.projects.removeCollaborator', [$project, $mentor]) }}"
-                                    method="POST" class="no-loader">
+                                    method="POST" class="no-loader flex-shrink-0">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600 transition"
-                                        title="Retirer">
-                                        <i class="fas fa-times text-xs"></i>
+                                    <button type="submit" class="{{ $btnMiniDanger }}"
+                                        aria-label="Retirer {{ $mentor->nom_complet }} du projet">
+                                        <i class="fas fa-times text-xs" aria-hidden="true"></i>Retirer
                                     </button>
                                 </form>
                             @endif
-                        </div>
+                        </li>
                     @endforeach
-                </div>
+                </ul>
 
                 <!-- Formulaire d'invitation rapide -->
                 @if ($autresMentors->count() > 0)
-                    <form action="{{ route('mentor.projects.invite', $project) }}" method="POST"
-                        class="flex flex-col sm:flex-row gap-2">
-                        @csrf
-                        <select name="mentor_id" required
-                            class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-400 transition">
-                            <option value="">Inviter un autre mentor...</option>
-                            @foreach ($autresMentors as $m)
-                                <option value="{{ $m->id }}">{{ $m->nom_complet }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit"
-                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-                            <i class="fas fa-paper-plane mr-1"></i>Inviter
-                        </button>
-                    </form>
+                    <div class="px-5 sm:px-6 py-4 border-t border-brand-100">
+                        <form action="{{ route('mentor.projects.invite', $project) }}" method="POST"
+                            class="flex flex-col sm:flex-row gap-2">
+                            @csrf
+                            <label for="invite_mentor_id" class="sr-only">Inviter un autre mentor</label>
+                            <select id="invite_mentor_id" name="mentor_id" required class="flex-1 {{ $champ }}">
+                                <option value="">Inviter un autre mentor...</option>
+                                @foreach ($autresMentors as $m)
+                                    <option value="{{ $m->id }}">{{ $m->nom_complet }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="{{ $btnPrimaire }}">
+                                <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>Inviter
+                            </button>
+                        </form>
+                    </div>
                 @endif
-            </div>
+            </section>
 
-            <!-- Stagiaires -->
-            <div class="flex flex-wrap gap-2 mt-4">
-                <span class="text-xs text-slate-500 font-medium">Stagiaires :</span>
-                @foreach ($project->stagiaires as $stag)
-                    <a href="{{ route('mentor.stagiaires.show', $stag) }}"
-                        class="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-medium transition">
-                        <i class="fas fa-user-graduate text-xs"></i>{{ $stag->user->nom_complet }}
-                    </a>
-                @endforeach
-            </div>
+            <section class="bg-white border border-brand-100 rounded-xl overflow-hidden">
+                <div class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900">Stagiaires</h3>
+                    <span class="text-sm font-medium text-slate-600 tabular-nums">{{ $project->stagiaires->count() }}</span>
+                </div>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse ($project->stagiaires as $stag)
+                        <li class="py-3">
+                            <a href="{{ route('mentor.stagiaires.show', $stag) }}" class="{{ $lien }}">{{ $stag->user->nom_complet }}</a>
+                        </li>
+                    @empty
+                        <li class="py-4 text-sm text-slate-500">Aucun stagiaire sur ce projet.</li>
+                    @endforelse
+                </ul>
+            </section>
         </div>
 
         <!-- Kanban tâches -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5" data-aos="fade-up">
-            @foreach ([['a_faire', 'À Faire', 'slate', 'clock'], ['en_cours', 'En Cours', 'amber', 'spinner'], ['termine', 'Terminé', 'green', 'check-circle']] as [$statut, $label, $color, $icon])
-                @php $tachesFiltrees = $project->tasks->where('statut', $statut); @endphp
-                <div class="bg-{{ $color }}-50 rounded-2xl p-4 border border-{{ $color }}-100">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-{{ $icon }} text-{{ $color }}-600"></i>
-                            <h3 class="font-bold text-slate-800">{{ $label }}</h3>
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <h3 class="text-base font-semibold text-slate-900">Tâches du projet</h3>
+            <div class="mt-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
+                @foreach ($colonnes as [$statut, $label, $dot])
+                    @php $tachesFiltrees = $project->tasks->where('statut', $statut); @endphp
+                    <div class="min-w-0 rounded-lg bg-brand-50 border border-brand-100 p-3">
+                        <div class="flex items-center justify-between gap-2 px-1 pb-2 border-b border-brand-100">
+                            <h4 class="flex items-center gap-2 text-sm font-medium text-slate-900">
+                                <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                                {{ $label }}
+                            </h4>
+                            <span class="text-xs font-medium text-slate-600 tabular-nums">{{ $tachesFiltrees->count() }}</span>
                         </div>
-                        <span
-                            class="w-6 h-6 rounded-full bg-{{ $color }}-200 text-{{ $color }}-700 text-xs font-bold flex items-center justify-center">{{ $tachesFiltrees->count() }}</span>
-                    </div>
-                    <div class="space-y-3">
-                        @forelse($tachesFiltrees as $tache)
-                            <div
-                                class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-{{ $color }}-100">
-                                <div class="flex items-start justify-between gap-2 mb-2">
-                                    <p class="font-semibold text-slate-800 text-sm">{{ $tache->titre }}</p>
-                                    @php $pc2 = ['faible'=>'bg-slate-100 text-slate-500','normale'=>'bg-blue-100 text-blue-600','haute'=>'bg-amber-100 text-amber-700','urgente'=>'bg-red-100 text-red-700']; @endphp
-                                    <span
-                                        class="text-xs px-2 py-0.5 rounded-full {{ $pc2[$tache->priorite] ?? '' }} flex-shrink-0">{{ ucfirst($tache->priorite) }}</span>
-                                </div>
-                                @if ($tache->description)
-                                    <p class="text-slate-400 text-xs mb-2 line-clamp-2">{{ $tache->description }}</p>
-                                @endif
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-slate-400"><i
-                                            class="fas fa-user mr-1"></i>{{ $tache->stagiaire->user->prenom ?? '—' }}</span>
-                                    @if ($tache->date_echeance)
-                                        <span
-                                            class="text-xs {{ $tache->date_echeance->isPast() && $tache->statut !== 'termine' ? 'text-red-500 font-semibold' : 'text-slate-400' }}">
-                                            <i class="fas fa-calendar mr-1"></i>{{ $tache->date_echeance->format('d/m') }}
+                        <ul class="mt-2 space-y-2">
+                            @forelse($tachesFiltrees as $tache)
+                                @php
+                                    [$libP, $dotP] = $priorites[$tache->priorite] ?? [ucfirst((string) $tache->priorite), 'bg-slate-300'];
+                                    $enRetard = $tache->date_echeance && $tache->date_echeance->isPast() && $tache->statut !== 'termine';
+                                @endphp
+                                <li class="rounded-lg border border-brand-100 bg-white p-3">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <p class="min-w-0 text-sm font-medium text-slate-900 break-words">{{ $tache->titre }}</p>
+                                        <span class="flex items-center gap-1.5 flex-shrink-0 text-xs text-slate-600">
+                                            <span class="h-2 w-2 rounded-full {{ $dotP }}" aria-hidden="true"></span>
+                                            <span class="sr-only">Priorité :</span>{{ $libP }}
                                         </span>
-                                    @endif
-                                </div>
-                                <div class="flex flex-wrap items-center gap-1 mt-2">
-                                    <span
-                                        class="text-xs px-2 py-0.5 rounded-full {{ $tache->difficulte === 'difficile' ? 'bg-red-50 text-red-600' : ($tache->difficulte === 'moyen' ? 'bg-amber-50 text-amber-600' : 'bg-green-50 text-green-600') }}">
-                                        {{ ucfirst($tache->difficulte) }}
-                                    </span>
-                                    <div class="ml-auto flex gap-1">
-                                        <a href="{{ route('mentor.tasks.edit', $tache) }}"
-                                            class="w-6 h-6 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded flex items-center justify-center transition">
-                                            <i class="fas fa-edit" style="font-size:9px"></i>
-                                        </a>
-                                        <form action="{{ route('mentor.tasks.destroy', $tache) }}" method="POST"
-                                            id="del-t-{{ $tache->id }}">
-                                            @csrf @method('DELETE')
-                                            <button type="button"
-                                                class="btn-delete w-6 h-6 bg-red-50 hover:bg-red-100 text-red-600 rounded flex items-center justify-center transition"
-                                                data-form="del-t-{{ $tache->id }}">
-                                                <i class="fas fa-trash" style="font-size:9px"></i>
-                                            </button>
-                                        </form>
                                     </div>
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-{{ $color }}-400 text-xs text-center py-4">Aucune tâche</p>
-                        @endforelse
+                                    @if ($tache->description)
+                                        <p class="mt-1 text-xs text-slate-500 line-clamp-2 break-words">{{ $tache->description }}</p>
+                                    @endif
+                                    <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                                        <span class="text-slate-500">{{ $tache->stagiaire->user->prenom ?? '—' }}</span>
+                                        @if ($tache->date_echeance)
+                                            <span class="tabular-nums {{ $enRetard ? 'text-red-700 font-medium' : 'text-slate-500' }}">
+                                                Échéance {{ $tache->date_echeance->format('d/m') }}{{ $enRetard ? ' · En retard' : '' }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                                        <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">{{ ucfirst($tache->difficulte) }}</span>
+                                        <div class="ml-auto flex flex-wrap gap-1.5">
+                                            <a href="{{ route('mentor.tasks.edit', $tache) }}" class="{{ $btnMiniSecondaire }}"
+                                                aria-label="Modifier la tâche {{ $tache->titre }}">
+                                                <i class="fas fa-pen text-xs" aria-hidden="true"></i>Modifier
+                                            </a>
+                                            <form action="{{ route('mentor.tasks.destroy', $tache) }}" method="POST"
+                                                id="del-t-{{ $tache->id }}">
+                                                @csrf @method('DELETE')
+                                                <button type="button" class="btn-delete {{ $btnMiniDanger }}"
+                                                    data-form="del-t-{{ $tache->id }}"
+                                                    aria-label="Supprimer la tâche {{ $tache->titre }}">
+                                                    <i class="fas fa-trash text-xs" aria-hidden="true"></i>Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="px-1 py-3 text-sm text-slate-600">Aucune tâche</li>
+                            @endforelse
+                        </ul>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
+        </section>
 
         <!-- Rapports liés -->
         @if ($project->reports->count() > 0)
-            <div class="card p-5 sm:p-6" data-aos="fade-up">
-                <h3 class="text-slate-800 font-bold text-lg mb-4">
-                    <i class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports liés ({{ $project->reports->count() }})
-                </h3>
-                <div class="space-y-2">
+            <section class="bg-white border border-brand-100 rounded-xl overflow-hidden">
+                <div class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900">Rapports liés</h3>
+                    <span class="text-sm font-medium text-slate-600 tabular-nums">{{ $project->reports->count() }}</span>
+                </div>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
                     @foreach ($project->reports as $rapport)
-                        <div
-                            class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-slate-50 rounded-xl hover:bg-purple-50 transition">
-                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-file-alt text-purple-500 text-xs"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-slate-800 text-sm">{{ $rapport->titre }}</p>
-                                <p class="text-slate-400 text-xs">{{ $rapport->stagiaire->user->nom_complet ?? '' }} •
+                        @php [$libR, $clsR] = $statutsRapport[$rapport->statut] ?? [ucfirst($rapport->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="flex flex-wrap sm:flex-nowrap items-center gap-3 py-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate">{{ $rapport->titre }}</p>
+                                <p class="text-xs text-slate-500 tabular-nums">{{ $rapport->stagiaire->user->nom_complet ?? '' }} ·
                                     {{ $rapport->created_at->format('d/m/Y') }}</p>
                             </div>
-                            @php $sr = ['soumis'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','rejete'=>'bg-red-100 text-red-600']; @endphp
-                            <span
-                                class="text-xs px-2 py-1 rounded-full {{ $sr[$rapport->statut] ?? '' }}">{{ ucfirst($rapport->statut) }}</span>
-                            <a href="{{ route('mentor.reports.show', $rapport) }}"
-                                class="w-8 h-8 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg flex items-center justify-center transition">
-                                <i class="fas fa-eye text-xs"></i>
-                            </a>
-                        </div>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $clsR }}">{{ $libR }}</span>
+                            <a href="{{ route('mentor.reports.show', $rapport) }}" class="{{ $btnMiniSecondaire }} flex-shrink-0"
+                                aria-label="Voir le rapport {{ $rapport->titre }}">Voir</a>
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
+            </section>
         @endif
 
-        <a href="{{ route('mentor.projects.index') }}"
-            class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour aux projets
+        <a href="{{ route('mentor.projects.index') }}" class="inline-flex items-center gap-2 {{ $lien }}">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour aux projets
         </a>
     </div>
 @endsection

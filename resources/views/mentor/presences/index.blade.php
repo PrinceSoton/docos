@@ -2,68 +2,81 @@
 @section('titre', 'Présences & Permissions')
 @section('breadcrumb', 'Mentor > Présences')
 @section('content')
-    <div class="space-y-4 sm:space-y-5">
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        $btnDanger = 'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+        $lienFichier = 'inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $panneau = 'bg-white border border-brand-100 rounded-xl overflow-hidden';
+        $enTete = 'px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100';
 
-        <!-- En-tête -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Présences & Permissions</h2>
-                <p class="text-sm text-slate-500">Suivi des présences et validation des permissions</p>
-            </div>
-            <a href="{{ route('mentor.presences.formMarquage') }}"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                <i class="fas fa-user-check"></i>Marquer les présences
+        $statutsPresence = [
+            'present' => ['Présent', 'bg-emerald-50 text-emerald-800'],
+            'retard' => ['Retard', 'bg-amber-50 text-amber-800'],
+            'absent' => ['Absent', 'bg-red-50 text-red-800'],
+        ];
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- Barre d'outils -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p class="text-sm text-slate-600">Suivi des présences et validation des permissions</p>
+            <a href="{{ route('mentor.presences.formMarquage') }}" class="w-full sm:w-auto {{ $btnPrimaire }}">
+                <i class="fas fa-user-check text-xs" aria-hidden="true"></i>Marquer les présences
             </a>
         </div>
 
         <!-- Permissions en attente -->
         @if ($permissionsEnAttente->count() > 0)
-            <div class="card p-5 sm:p-6 border-l-4 border-amber-400" data-aos="fade-down">
-                <h3 class="text-slate-800 font-bold text-lg mb-4">
-                    <i class="fas fa-bell text-amber-500 mr-2"></i>Permissions en attente de validation
-                    ({{ $permissionsEnAttente->count() }})
-                </h3>
-                <div class="space-y-3">
+            <section class="{{ $panneau }}">
+                <div class="{{ $enTete }} flex items-center justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900">Permissions en attente de validation</h3>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 tabular-nums flex-shrink-0">
+                        {{ $permissionsEnAttente->count() }} en attente</span>
+                </div>
+                <ul class="divide-y divide-slate-100">
                     @foreach ($permissionsEnAttente as $perm)
-                        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                            <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
-                                <div class="flex items-start gap-3">
+                        @php $nbJours = $perm->date_debut->diffInDays($perm->date_fin) + 1; @endphp
+                        <li class="px-5 sm:px-6 py-4">
+                            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                                <div class="flex items-start gap-3 min-w-0">
                                     <div
-                                        class="w-10 h-10 rounded-xl bg-amber-200 flex items-center justify-center flex-shrink-0">
-                                        <span
-                                            class="font-bold text-amber-700">{{ strtoupper(substr($perm->stagiaire->user->prenom ?? '', 0, 1)) }}</span>
+                                        class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-sm font-semibold text-brand-800"
+                                            aria-hidden="true">{{ strtoupper(substr($perm->stagiaire->user->prenom ?? '', 0, 1)) }}</span>
                                     </div>
-                                    <div>
-                                        <p class="font-bold text-slate-800">{{ $perm->stagiaire->user->nom_complet ?? '—' }}
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-slate-900">
+                                            {{ $perm->stagiaire->user->nom_complet ?? '—' }}</p>
+                                        <p class="mt-0.5 text-xs text-slate-500 tabular-nums">
+                                            {{ $perm->date_debut->format('d/m/Y') }} → {{ $perm->date_fin->format('d/m/Y') }}
+                                            ({{ $nbJours }} jour(s))
                                         </p>
-                                        <p class="text-slate-500 text-sm">
-                                            <i class="fas fa-calendar mr-1"></i>{{ $perm->date_debut->format('d/m/Y') }} →
-                                            {{ $perm->date_fin->format('d/m/Y') }}
-                                            ({{ $perm->date_debut->diffInDays($perm->date_fin) + 1 }} jour(s))
-                                        </p>
-                                        <p class="text-slate-600 text-sm mt-1"><i
-                                                class="fas fa-comment mr-1"></i>{{ $perm->motif }}</p>
+                                        <p class="mt-1 text-sm text-slate-600 break-words">{{ $perm->motif }}</p>
                                         @if ($perm->justificatif)
                                             <a href="{{ asset('storage/' . $perm->justificatif) }}" download
-                                                class="text-indigo-600 text-xs hover:underline font-medium mt-1 inline-flex items-center gap-1">
-                                                <i class="fas fa-paperclip"></i>Justificatif joint
+                                                class="mt-2 {{ $lienFichier }}">
+                                                <i class="fas fa-paperclip" aria-hidden="true"></i>Télécharger le justificatif
                                             </a>
                                         @endif
                                     </div>
                                 </div>
-                                <div class="flex gap-2 w-full sm:w-auto">
+                                <div class="flex gap-2 w-full lg:w-auto flex-shrink-0">
                                     <form action="{{ route('mentor.presences.validerPermission', $perm) }}" method="POST"
-                                        class="no-loader flex-1 sm:flex-none">
+                                        class="no-loader flex-1 lg:flex-none">
                                         @csrf @method('PATCH')
                                         <input type="hidden" name="statut" value="valide">
-                                        <button type="submit"
-                                            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition hover:shadow-md">
-                                            <i class="fas fa-check"></i>Valider
+                                        <button type="submit" class="w-full {{ $btnPrimaire }}">
+                                            <i class="fas fa-check text-xs" aria-hidden="true"></i>Valider
                                         </button>
                                     </form>
                                     <button type="button" onclick="ouvrirRefus({{ $perm->id }})"
-                                        class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition hover:shadow-md">
-                                        <i class="fas fa-times"></i>Refuser
+                                        class="flex-1 lg:flex-none {{ $btnDanger }}">
+                                        <i class="fas fa-times text-xs" aria-hidden="true"></i>Refuser
                                     </button>
                                     <form action="{{ route('mentor.presences.validerPermission', $perm) }}" method="POST"
                                         id="refusForm-{{ $perm->id }}" class="hidden no-loader">
@@ -74,20 +87,20 @@
                                     </form>
                                 </div>
                             </div>
-                        </div>
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
+            </section>
         @endif
 
-        <!-- Filtres complets -->
-        <div class="card p-5" data-aos="fade-up">
+        <!-- Filtres -->
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <h3 class="text-base font-semibold text-slate-900">Filtrer les présences</h3>
             <form action="{{ route('mentor.presences.index') }}" method="GET"
-                class="flex flex-wrap gap-3 items-end no-loader">
-                <div class="flex-1 min-w-48 w-full sm:w-auto">
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Stagiaire</label>
-                    <select name="stagiaire_id"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm transition">
+                class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] gap-4 items-end no-loader">
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <label for="filtre-stagiaire" class="block text-sm font-medium text-slate-700 mb-1">Stagiaire</label>
+                    <select name="stagiaire_id" id="filtre-stagiaire" class="{{ $champ }}">
                         <option value="">Tous mes stagiaires</option>
                         @foreach ($stagiaires as $stag)
                             <option value="{{ $stag->id }}"
@@ -97,65 +110,62 @@
                         @endforeach
                     </select>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Jour</label>
-                    <input type="date" name="date" value="{{ request('date') }}"
-                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm transition w-full sm:w-auto">
+                    <label for="filtre-date" class="block text-sm font-medium text-slate-700 mb-1">Jour</label>
+                    <input type="date" name="date" id="filtre-date" value="{{ request('date') }}"
+                        class="{{ $champ }} tabular-nums">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Mois</label>
-                    <input type="month" name="mois" value="{{ request('mois', date('Y-m')) }}"
-                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm transition w-full sm:w-auto">
+                    <label for="filtre-mois" class="block text-sm font-medium text-slate-700 mb-1">Mois</label>
+                    <input type="month" name="mois" id="filtre-mois" value="{{ request('mois', date('Y-m')) }}"
+                        class="{{ $champ }} tabular-nums">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Année</label>
-                    <input type="number" name="annee" value="{{ request('annee') }}" min="2000"
-                        max="{{ date('Y') }}" placeholder="Ex: 2025"
-                        class="border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm transition w-full sm:w-32">
+                    <label for="filtre-annee" class="block text-sm font-medium text-slate-700 mb-1">Année</label>
+                    <input type="number" name="annee" id="filtre-annee" value="{{ request('annee') }}" min="2000"
+                        max="{{ date('Y') }}" placeholder="Ex: 2025" class="{{ $champ }} tabular-nums">
                 </div>
 
-                <div class="flex flex-wrap gap-3">
-                    <button type="submit"
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
-                        <i class="fas fa-search mr-2"></i>Filtrer
+                <div class="sm:col-span-2 lg:col-span-4 flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-search text-xs" aria-hidden="true"></i>Filtrer
                     </button>
-                    <a href="{{ route('mentor.presences.index') }}"
-                        class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-2.5 rounded-xl font-medium transition-all">
-                        <i class="fas fa-undo mr-2"></i>Réinitialiser
+                    <a href="{{ route('mentor.presences.index') }}" class="{{ $btnSecondaire }}">
+                        <i class="fas fa-undo text-xs text-slate-400" aria-hidden="true"></i>Réinitialiser
                     </a>
                     @if (request('stagiaire_id'))
                         <a href="{{ route('mentor.presences.show', request('stagiaire_id')) }}"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all hover:shadow-md">
-                            <i class="fas fa-eye mr-2"></i>Fiche complète
+                            class="sm:ml-auto {{ $btnSecondaire }}">
+                            <i class="fas fa-eye text-xs text-slate-400" aria-hidden="true"></i>Fiche complète
                         </a>
                     @endif
                 </div>
             </form>
-        </div>
+        </section>
 
-        <!-- Stats du stagiaire sélectionné -->
+        <!-- Synthèse du stagiaire sélectionné -->
         @if ($stagiaire && $statsStagiaire)
-            <div class="grid grid-cols-3 gap-4" data-aos="fade-up">
-                @foreach ([['present', 'Présent', 'green', 'user-check'], ['retard', 'Retard', 'amber', 'clock'], ['absent', 'Absent', 'red', 'user-times']] as [$statut, $label, $color, $icon])
-                    <div class="card p-5 text-center">
-                        <div
-                            class="w-12 h-12 bg-{{ $color }}-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                            <i class="fas fa-{{ $icon }} text-{{ $color }}-600 text-xl"></i>
+            <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+                <h3 class="text-base font-semibold text-slate-900">Synthèse — {{ $stagiaire->user->nom_complet }}</h3>
+                <dl class="mt-4 grid grid-cols-3 divide-x divide-brand-100 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                    @foreach ([['present', 'Présent', 'bg-emerald-500'], ['retard', 'Retard', 'bg-amber-500'], ['absent', 'Absent', 'bg-red-500']] as [$statut, $label, $dot])
+                        <div class="px-3 first:pl-0 last:pr-0">
+                            <dd class="text-2xl font-semibold text-slate-900 tabular-nums">{{ $statsStagiaire[$statut] }}</dd>
+                            <dt class="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+                                <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                                {{ $label }}
+                            </dt>
                         </div>
-                        <p class="text-2xl font-black text-slate-800">{{ $statsStagiaire[$statut] }}</p>
-                        <p class="text-slate-400 text-xs mt-1">{{ $label }}</p>
-                    </div>
-                @endforeach
-            </div>
+                    @endforeach
+                </dl>
+            </section>
         @endif
 
-        <!-- Tableau complet des présences -->
+        <!-- Tableau des présences -->
         @if ($presences->count() > 0)
-            <div class="card overflow-hidden" data-aos="fade-up">
-                <div
-                    class="px-4 sm:px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <h3 class="font-bold text-slate-800">
+            <section class="{{ $panneau }}">
+                <div class="{{ $enTete }} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="text-base font-semibold text-slate-900 min-w-0">
                         @if ($stagiaire)
                             Présences de {{ $stagiaire->user->nom_complet }}
                         @else
@@ -169,83 +179,59 @@
                             — Année {{ request('annee') }}
                         @endif
                     </h3>
-                    <input type="text" id="search" placeholder="Rechercher..."
-                        class="w-full sm:w-56 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-400 transition">
+                    <input type="search" id="search" placeholder="Rechercher..." aria-label="Rechercher dans les présences"
+                        class="w-full sm:w-56 {{ $champ }}">
                 </div>
-                <div class="overflow-x-auto">
+
+                <!-- Tableau (écrans larges) -->
+                <div class="hidden xl:block overflow-x-auto">
                     <table class="w-full text-sm">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Date</th>
+                        <thead class="bg-brand-50 border-b border-brand-100">
+                            <tr class="text-left text-xs font-medium text-slate-600">
+                                <th scope="col" class="px-5 py-2.5">Date</th>
                                 @if (!$stagiaire)
-                                    <th
-                                        class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden sm:table-cell">
-                                        Stagiaire</th>
+                                    <th scope="col" class="px-3 py-2.5">Stagiaire</th>
                                 @endif
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600">Départ</th>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden md:table-cell">
-                                    Motif</th>
-                                <th class="px-4 sm:px-5 py-3 text-left font-semibold text-slate-600 hidden lg:table-cell">
-                                    Marqué par</th>
-                                <th class="px-4 sm:px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
+                                <th scope="col" class="px-3 py-2.5">Statut</th>
+                                <th scope="col" class="px-3 py-2.5">Arrivée</th>
+                                <th scope="col" class="px-3 py-2.5">Départ</th>
+                                <th scope="col" class="px-3 py-2.5">Motif</th>
+                                <th scope="col" class="px-3 py-2.5">Marqué par</th>
+                                <th scope="col" class="px-5 py-2.5 text-right">Justificatif</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50" id="presTable">
+                        <tbody class="divide-y divide-slate-100" id="presTable">
                             @foreach ($presences as $p)
-                                <tr class="hover:bg-slate-50 transition pres-row">
-                                    <td class="px-4 sm:px-5 py-3 font-medium text-slate-800 whitespace-nowrap">
+                                @php [$libelle, $cls] = $statutsPresence[$p->statut] ?? [ucfirst($p->statut), 'bg-slate-100 text-slate-700']; @endphp
+                                <tr class="hover:bg-slate-50 pres-row">
+                                    <td class="px-5 py-3 font-medium text-slate-900 whitespace-nowrap tabular-nums">
                                         {{ $p->date->translatedFormat('D d/m/Y') }}</td>
                                     @if (!$stagiaire)
-                                        <td class="px-4 sm:px-5 py-3 text-slate-600 hidden sm:table-cell">
+                                        <td class="px-3 py-3 text-slate-700">
                                             {{ $p->stagiaire->user->nom_complet ?? '—' }}
                                         </td>
                                     @endif
-                                    <td class="px-4 sm:px-5 py-3">
-                                        @php
-                                            $sc = [
-                                                'present' => 'bg-green-100 text-green-700',
-                                                'retard' => 'bg-amber-100 text-amber-700',
-                                                'absent' => 'bg-red-100 text-red-600',
-                                            ];
-                                            $si = [
-                                                'present' => 'check-circle',
-                                                'retard' => 'clock',
-                                                'absent' => 'times-circle',
-                                            ];
-                                        @endphp
-                                        <span
-                                            class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$p->statut] ?? '' }}">
-                                            <i
-                                                class="fas fa-{{ $si[$p->statut] ?? '' }} mr-1"></i>{{ ucfirst($p->statut) }}
-                                        </span>
+                                    <td class="px-3 py-3">
+                                        <span class="text-xs font-medium px-2 py-0.5 rounded-md {{ $cls }}">{{ $libelle }}</span>
                                     </td>
-                                    <td class="px-4 sm:px-5 py-3 font-mono text-slate-600 text-sm">
+                                    <td class="px-3 py-3 text-slate-700 tabular-nums">
                                         {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
-                                    <td class="px-4 sm:px-5 py-3 font-mono text-blue-600 text-sm">
+                                    <td class="px-3 py-3 text-slate-700 tabular-nums">
                                         {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
-                                    <td
-                                        class="px-4 sm:px-5 py-3 text-slate-500 text-xs max-w-xs truncate hidden md:table-cell">
+                                    <td class="px-3 py-3 text-slate-500 max-w-[12rem] truncate" title="{{ $p->motif }}">
                                         {{ $p->motif ?: '—' }}</td>
-                                    <td class="px-4 sm:px-5 py-3 hidden lg:table-cell">
-                                        @if ($p->marquePar)
-                                            <span
-                                                class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg text-xs font-medium">
-                                                <i class="fas fa-user-edit"></i>{{ $p->marquePar->nom_complet }}
-                                            </span>
-                                        @else
-                                            <span class="text-slate-400 text-xs">—</span>
-                                        @endif
+                                    <td class="px-3 py-3 text-slate-700">
+                                        {{ $p->marquePar ? $p->marquePar->nom_complet : '—' }}
                                     </td>
-                                    <td class="px-4 sm:px-5 py-3 text-center">
+                                    <td class="px-5 py-3 text-right">
                                         @if ($p->justificatif)
                                             <a href="{{ asset('storage/' . $p->justificatif) }}" download
-                                                class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-xs font-medium transition">
-                                                <i class="fas fa-download"></i>
+                                                class="{{ $lienFichier }}"
+                                                aria-label="Télécharger le justificatif du {{ $p->date->format('d/m/Y') }}">
+                                                <i class="fas fa-download" aria-hidden="true"></i>Télécharger
                                             </a>
                                         @else
-                                            <span class="text-slate-300">—</span>
+                                            <span class="text-slate-500">—</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -253,18 +239,55 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="px-4 sm:px-5 py-4 border-t border-slate-100">{{ $presences->links() }}</div>
-            </div>
+
+                <!-- Liste (téléphone et tablette) -->
+                <ul class="xl:hidden divide-y divide-slate-100">
+                    @foreach ($presences as $p)
+                        @php [$libelle, $cls] = $statutsPresence[$p->statut] ?? [ucfirst($p->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="px-5 py-3 pres-row">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="text-sm font-medium text-slate-900 tabular-nums">
+                                    {{ $p->date->translatedFormat('D d/m/Y') }}</p>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $cls }}">{{ $libelle }}</span>
+                            </div>
+                            @if (!$stagiaire)
+                                <p class="mt-0.5 text-sm text-slate-700">{{ $p->stagiaire->user->nom_complet ?? '—' }}</p>
+                            @endif
+                            <p class="mt-1 text-sm text-slate-600 tabular-nums">
+                                Arrivée {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}
+                                · Départ {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}
+                            </p>
+                            @if ($p->motif)
+                                <p class="mt-1 text-sm text-slate-500 break-words">{{ $p->motif }}</p>
+                            @endif
+                            @if ($p->marquePar)
+                                <p class="mt-1 text-xs text-slate-500">Marqué par {{ $p->marquePar->nom_complet }}</p>
+                            @endif
+                            @if ($p->justificatif)
+                                <a href="{{ asset('storage/' . $p->justificatif) }}" download class="mt-2 {{ $lienFichier }}">
+                                    <i class="fas fa-download" aria-hidden="true"></i>Télécharger le justificatif
+                                </a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+
+                <p id="presNoResult" class="hidden px-5 sm:px-6 py-6 text-center text-sm text-slate-500">Aucun résultat pour
+                    cette recherche.</p>
+
+                <div class="px-5 sm:px-6 py-4 border-t border-brand-100">{{ $presences->links() }}</div>
+            </section>
         @else
-            <div class="card p-8 sm:p-12 text-center" data-aos="fade-up">
-                <i class="fas fa-clipboard-list text-4xl sm:text-5xl text-slate-200 mb-4"></i>
-                <p class="text-slate-400">
-                    @if (request('date') || request('mois') || request('annee') || request('stagiaire_id'))
-                        Aucune présence trouvée pour les critères sélectionnés
-                    @else
-                        Aucune présence enregistrée pour vos stagiaires
-                    @endif
-                </p>
+            <div class="rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                @if (request('date') || request('mois') || request('annee') || request('stagiaire_id'))
+                    <p class="text-sm font-medium text-slate-900">Aucune présence trouvée pour les critères sélectionnés</p>
+                    <p class="mt-1 text-sm text-slate-600">Modifiez les filtres ou
+                        <a href="{{ route('mentor.presences.index') }}" class="{{ $lien }}">réinitialisez-les</a>.
+                    </p>
+                @else
+                    <p class="text-sm font-medium text-slate-900">Aucune présence enregistrée pour vos stagiaires</p>
+                    <p class="mt-1 text-sm text-slate-600">Les présences apparaîtront ici dès qu'elles seront marquées.</p>
+                @endif
             </div>
         @endif
     </div>
@@ -272,12 +295,16 @@
 
 @push('scripts')
     <script>
-        /* Recherche instantanée dans le tableau */
+        /* Recherche instantanée dans le tableau et la liste */
         document.getElementById('search')?.addEventListener('input', function() {
             const val = this.value.toLowerCase();
             document.querySelectorAll('.pres-row').forEach(r => {
                 r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
             });
+            // Le tableau sert de référence pour compter les résultats visibles
+            const lignes = document.querySelectorAll('#presTable .pres-row');
+            const visibles = Array.from(lignes).filter(r => r.style.display !== 'none').length;
+            document.getElementById('presNoResult')?.classList.toggle('hidden', lignes.length === 0 || visibles > 0);
         });
 
         /* Refus de permission avec motif (SweetAlert) */
@@ -285,13 +312,17 @@
             Swal.fire({
                 title: 'Motif du refus',
                 input: 'textarea',
+                inputLabel: 'Ce commentaire sera transmis au stagiaire',
                 inputPlaceholder: 'Expliquez le motif du refus (optionnel)...',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmer le refus',
                 cancelButtonText: 'Annuler',
-                confirmButtonColor: '#ef4444',
+                confirmButtonColor: '#b91c1c',
+                cancelButtonColor: '#64748b',
+                reverseButtons: true,
                 inputAttributes: {
-                    rows: 3
+                    rows: 3,
+                    'aria-label': 'Motif du refus'
                 }
             }).then(result => {
                 if (result.isConfirmed) {
