@@ -2,82 +2,99 @@
 @section('titre', $evenement->titre)
 @section('breadcrumb', 'Événements > Détail')
 @section('content')
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        $btnDanger = 'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+
+        $tc = [
+            'information' => ['Information', 'bg-sky-50 text-sky-800'],
+            'evenement' => ['Événement', 'bg-brand-50 text-brand-800'],
+            'note' => ['Note', 'bg-slate-100 text-slate-700'],
+        ];
+        [$libType, $clsType] = $tc[$evenement->type] ?? [ucfirst((string) $evenement->type), 'bg-slate-100 text-slate-700'];
+    @endphp
+
     <div class="max-w-3xl mx-auto space-y-5">
-        <div class="card overflow-hidden" data-aos="fade-up">
+        <article class="bg-white border border-brand-100 rounded-xl overflow-hidden">
             @if ($evenement->image)
-                <div class="h-56 overflow-hidden">
+                <div class="h-44 sm:h-56 overflow-hidden bg-brand-50">
                     <img src="{{ asset('storage/' . $evenement->image) }}" alt="{{ $evenement->titre }}"
                         class="w-full h-full object-cover">
                 </div>
             @endif
-            <div class="p-8">
-                <div class="flex items-start justify-between flex-wrap gap-4 mb-5">
-                    <div>
-                        @php $tc = ['information'=>'bg-blue-100 text-blue-700','evenement'=>'bg-purple-100 text-purple-700','note'=>'bg-amber-100 text-amber-700']; @endphp
-                        <span
-                            class="px-3 py-1 rounded-full text-xs font-semibold {{ $tc[$evenement->type] ?? '' }} mb-3 inline-block">
-                            {{ ucfirst($evenement->type) }}
-                        </span>
-                        <h2 class="text-slate-800 font-black text-2xl">{{ $evenement->titre }}</h2>
-                        <p class="text-slate-400 text-sm mt-1">
-                            Par {{ $evenement->creePar?->nom_complet }} • {{ $evenement->created_at->diffForHumans() }}
-                        </p>
-                        @if ($evenement->date_evenement)
-                            <p class="text-indigo-600 font-medium text-sm mt-1">
-                                <i class="fas fa-calendar mr-1"></i>{{ $evenement->date_evenement->format('d/m/Y à H:i') }}
-                            </p>
-                        @endif
+            <div class="p-5 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-md {{ $clsType }}">{{ $libType }}</span>
+                        <h2 class="mt-3 text-lg font-semibold text-slate-900 leading-snug break-words">{{ $evenement->titre }}</h2>
                     </div>
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.evenements.edit', $evenement) }}"
-                            class="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-600 transition">
-                            <i class="fas fa-edit"></i>Modifier
+                    <div class="flex flex-wrap gap-2 flex-shrink-0">
+                        <a href="{{ route('admin.evenements.edit', $evenement) }}" class="{{ $btnSecondaire }} whitespace-nowrap">
+                            <i class="fas fa-pen text-xs" aria-hidden="true"></i>Modifier
                         </a>
                         <form action="{{ route('admin.evenements.destroy', $evenement) }}" method="POST">
                             @csrf @method('DELETE')
-                            <button type="button"
-                                class="btn-delete flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-600 transition">
-                                <i class="fas fa-trash"></i>
+                            <button type="button" class="btn-delete {{ $btnDanger }} whitespace-nowrap">
+                                <i class="fas fa-trash text-xs" aria-hidden="true"></i>Supprimer
                             </button>
                         </form>
                     </div>
                 </div>
 
+                <!-- Métadonnées (bloc teinté) -->
+                <dl class="mt-4 rounded-lg bg-brand-50 border border-brand-100 p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                    <div class="min-w-0">
+                        <dt class="text-xs text-slate-600">Publié par</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-900 break-words">{{ $evenement->creePar?->nom_complet }}
+                            <span class="font-normal text-slate-600">• {{ $evenement->created_at->diffForHumans() }}</span>
+                        </dd>
+                    </div>
+                    @if ($evenement->date_evenement)
+                        <div>
+                            <dt class="text-xs text-slate-600">Date de l'événement</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">{{ $evenement->date_evenement->format('d/m/Y à H:i') }}</dd>
+                        </div>
+                    @endif
+                </dl>
+
                 @if ($evenement->contenu)
-                    <div class="prose prose-sm max-w-none text-slate-700 mb-5">
+                    <div class="mt-5 pt-5 border-t border-brand-100 text-sm sm:text-base text-slate-700 leading-relaxed break-words">
                         {!! nl2br(e($evenement->contenu)) !!}
                     </div>
                 @endif
 
                 @if ($evenement->fichier)
-                    <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mb-5">
-                        <p class="text-xs text-indigo-400 font-medium mb-2">Fichier joint</p>
-                        <a href="{{ asset('storage/' . $evenement->fichier) }}" download
-                            class="flex items-center gap-2 text-indigo-700 hover:text-indigo-900 font-medium text-sm">
-                            <i class="fas fa-download"></i>Télécharger le fichier
+                    <!-- Fichier joint (bloc teinté) -->
+                    <div class="mt-5 rounded-lg bg-brand-50 border border-brand-100 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-slate-900">Fichier joint</h3>
+                        <a href="{{ asset('storage/' . $evenement->fichier) }}" download class="{{ $btnSecondaire }} w-full sm:w-auto">
+                            <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger le fichier
                         </a>
                     </div>
                 @endif
 
-                <div class="p-4 bg-slate-50 rounded-xl">
-                    <p class="text-xs text-slate-400 font-medium uppercase mb-2">Destinataires</p>
+                <!-- Destinataires -->
+                <div class="mt-5 pt-5 border-t border-brand-100">
+                    <h3 class="text-sm font-semibold text-slate-900">Destinataires</h3>
                     @if ($evenement->partage_tous)
-                        <span class="text-green-600 font-medium text-sm"><i class="fas fa-globe mr-2"></i>Tous les
-                            utilisateurs</span>
+                        <p class="mt-2">
+                            <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-md bg-accent-50 text-accent-700">Tous les utilisateurs</span>
+                        </p>
                     @else
-                        <div class="flex flex-wrap gap-2">
+                        <ul class="mt-2 flex flex-wrap gap-2">
                             @foreach ($evenement->utilisateurssCibles as $u)
-                                <span
-                                    class="bg-white border border-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full">{{ $u->nom_complet }}</span>
+                                <li class="bg-white border border-brand-100 text-slate-700 text-xs px-2.5 py-1 rounded-md">{{ $u->nom_complet }}</li>
                             @endforeach
-                        </div>
+                        </ul>
                     @endif
                 </div>
             </div>
-        </div>
-        <a href="{{ route('admin.evenements.index') }}"
-            class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour
+        </article>
+
+        <a href="{{ route('admin.evenements.index') }}" class="{{ $lien }} inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour
         </a>
     </div>
 @endsection

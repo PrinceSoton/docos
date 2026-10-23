@@ -2,137 +2,160 @@
 @section('titre', 'Mes Projets')
 @section('breadcrumb', 'Mentor > Projets')
 @section('content')
-    <div class="space-y-4 sm:space-y-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Mes Projets</h2>
-                <p class="text-sm text-slate-500">{{ $projets->total() }} projet(s)</p>
+    @php
+        $statutsProjet = [
+            'en_attente' => ['En attente', 'bg-slate-100 text-slate-700'],
+            'en_cours' => ['En cours', 'bg-sky-50 text-sky-800'],
+            'termine' => ['Terminé', 'bg-emerald-50 text-emerald-800'],
+            'suspendu' => ['Suspendu', 'bg-red-50 text-red-800'],
+        ];
+        $priorites = [
+            'faible' => ['Faible', 'bg-slate-400'],
+            'normale' => ['Normale', 'bg-sky-500'],
+            'haute' => ['Haute', 'bg-amber-500'],
+            'urgente' => ['Urgente', 'bg-red-500'],
+        ];
+
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnCarte = 'inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ' . $focus;
+        $btnCarteSecondaire = $btnCarte . ' border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300';
+        $btnCarteDanger = $btnCarte . ' border border-red-200 bg-white text-red-700 hover:bg-red-50';
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- Résumé, recherche, filtre et création -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <p class="text-sm text-slate-600 tabular-nums">
+                <span class="font-semibold text-slate-900">{{ $projets->total() }}</span> projet(s)
+            </p>
+            <div class="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap gap-3">
+                <input type="search" id="search" placeholder="Rechercher un projet..." aria-label="Rechercher un projet"
+                    class="sm:w-64 {{ $champ }}">
+                <select id="filterStatut" aria-label="Filtrer par statut" class="sm:w-44 {{ $champ }}">
+                    <option value="">Tous statuts</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="en_cours">En cours</option>
+                    <option value="termine">Terminé</option>
+                    <option value="suspendu">Suspendu</option>
+                </select>
+                <a href="{{ route('mentor.projects.create') }}" class="{{ $btnPrimaire }} whitespace-nowrap">
+                    <i class="fas fa-plus text-xs" aria-hidden="true"></i>Nouveau projet
+                </a>
             </div>
-            <a href="{{ route('mentor.projects.create') }}"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                <i class="fas fa-plus"></i>Nouveau projet
-            </a>
         </div>
 
-        <div class="card p-4 flex flex-col sm:flex-row gap-3" data-aos="fade-up">
-            <input type="text" id="search" placeholder="Rechercher un projet..."
-                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm">
-            <select id="filterStatut"
-                class="w-full sm:w-auto border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 text-sm">
-                <option value="">Tous statuts</option>
-                <option value="en_attente">En attente</option>
-                <option value="en_cours">En cours</option>
-                <option value="termine">Terminé</option>
-                <option value="suspendu">Suspendu</option>
-            </select>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5" id="projetGrid">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start" id="projetGrid">
             @forelse($projets as $projet)
-                <div class="card overflow-hidden projet-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                    data-statut="{{ $projet->statut }}" data-aos="fade-up" data-aos-delay="{{ $loop->index * 60 }}">
-                    <div
-                        class="h-1.5 {{ $projet->priorite === 'urgente' ? 'bg-red-500' : ($projet->priorite === 'haute' ? 'bg-amber-500' : ($projet->priorite === 'normale' ? 'bg-blue-400' : 'bg-slate-300')) }}">
+                @php
+                    [$libStatut, $clsStatut] = $statutsProjet[$projet->statut] ?? [ucfirst(str_replace('_', ' ', $projet->statut)), 'bg-slate-100 text-slate-700'];
+                    [$libPriorite, $dotPriorite] = $priorites[$projet->priorite] ?? [ucfirst((string) $projet->priorite), 'bg-slate-300'];
+                    $pct = $projet->progressionPourcent();
+                @endphp
+                <article class="projet-card min-w-0 bg-white border border-brand-100 rounded-xl p-5 sm:p-6"
+                    data-statut="{{ $projet->statut }}">
+                    <!-- Titre, statut -->
+                    <div class="flex items-start justify-between gap-3">
+                        <h2 class="text-base font-semibold text-slate-900 leading-snug min-w-0 break-words">{{ $projet->titre }}</h2>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $clsStatut }}">{{ $libStatut }}</span>
                     </div>
-                    <div class="p-4 sm:p-5">
-                        <div class="flex items-start justify-between gap-2 mb-3">
-                            <h3 class="font-bold text-slate-800 text-base sm:text-lg leading-tight">{{ $projet->titre }}
-                            </h3>
-                            @php $sc = ['en_attente'=>'bg-slate-100 text-slate-600','en_cours'=>'bg-blue-100 text-blue-700','termine'=>'bg-green-100 text-green-700','suspendu'=>'bg-red-100 text-red-600']; @endphp
-                            <span
-                                class="px-2 py-1 rounded-lg text-xs font-semibold flex-shrink-0 {{ $sc[$projet->statut] ?? '' }}">
-                                {{ ucfirst(str_replace('_', ' ', $projet->statut)) }}
-                            </span>
+
+                    @if (!$projet->isOwner(Auth::user()))
+                        <span class="mt-2 inline-block text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">Collaborateur</span>
+                    @endif
+
+                    @if ($projet->description)
+                        <p class="mt-1.5 text-sm text-slate-500 line-clamp-2 break-words">{{ $projet->description }}</p>
+                    @endif
+
+                    <!-- Synthèse -->
+                    <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm rounded-lg bg-brand-50 border border-brand-100 p-4">
+                        <div>
+                            <dt class="text-xs text-slate-600">Priorité</dt>
+                            <dd class="mt-0.5 flex items-center gap-2 font-medium text-slate-900">
+                                <span class="h-2 w-2 rounded-full {{ $dotPriorite }}" aria-hidden="true"></span>
+                                {{ $libPriorite }}
+                            </dd>
                         </div>
-
-                        @if (!$projet->isOwner(Auth::user()))
-                            <span
-                                class="inline-block mb-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-lg font-medium">
-                                <i class="fas fa-users mr-1"></i>Collaborateur
-                            </span>
-                        @endif
-
-                        @if ($projet->description)
-                            <p class="text-slate-500 text-sm line-clamp-2 mb-3">{{ $projet->description }}</p>
-                        @endif
-
-                        <!-- Mentors -->
-                        <div class="flex items-center gap-1 mb-3 flex-wrap">
-                            @foreach ($projet->mentors->take(3) as $mentor)
-                                <span
-                                    class="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-xs font-medium">
-                                    <i class="fas fa-chalkboard-teacher text-xs"></i>{{ $mentor->prenom }}
-                                </span>
-                            @endforeach
+                        <div>
+                            <dt class="text-xs text-slate-600">Période</dt>
+                            <dd class="mt-0.5 font-medium text-slate-900 tabular-nums">
+                                {{ $projet->date_debut->format('d/m/Y') }}
+                                @if ($projet->date_fin)
+                                    → {{ $projet->date_fin->format('d/m/Y') }}
+                                @endif
+                            </dd>
                         </div>
-
-                        <!-- Stagiaires -->
-                        <div class="flex items-center gap-1 mb-3 flex-wrap">
-                            @foreach ($projet->stagiaires->take(3) as $stag)
-                                <span
-                                    class="flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-1 rounded-lg text-xs font-medium">
-                                    <i class="fas fa-user-graduate text-xs"></i>{{ $stag->user->prenom ?? '' }}
-                                </span>
-                            @endforeach
-                            @if ($projet->stagiaires->count() > 3)
-                                <span class="text-slate-400 text-xs">+{{ $projet->stagiaires->count() - 3 }}</span>
-                            @endif
+                        <div class="min-w-0">
+                            <dt class="text-xs text-slate-600">Mentors</dt>
+                            <dd class="mt-0.5 font-medium text-slate-900 break-words">
+                                {{ $projet->mentors->take(3)->pluck('prenom')->implode(', ') ?: '—' }}
+                            </dd>
                         </div>
-
-                        <div class="mb-4">
-                            <div class="flex justify-between text-xs text-slate-500 mb-1">
-                                <span>Progression
+                        <div class="min-w-0">
+                            <dt class="text-xs text-slate-600">Stagiaires</dt>
+                            <dd class="mt-0.5 font-medium text-slate-900 break-words">
+                                @forelse ($projet->stagiaires->take(3) as $stag)
+                                    {{ $stag->user->prenom ?? '' }}{{ !$loop->last ? ',' : '' }}
+                                @empty
+                                    —
+                                @endforelse
+                                @if ($projet->stagiaires->count() > 3)
+                                    <span class="text-slate-600 font-normal tabular-nums">+{{ $projet->stagiaires->count() - 3 }}</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div class="col-span-2">
+                            <dt class="flex justify-between gap-3 text-xs text-slate-600">
+                                <span class="tabular-nums">Progression
                                     ({{ $projet->tasks->where('statut', 'termine')->count() }}/{{ $projet->tasks->count() }}
-                                    tâches)
-                                </span>
-                                <span class="font-bold text-emerald-600">{{ $projet->progressionPourcent() }}%</span>
-                            </div>
-                            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-2 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full"
-                                    style="width:{{ $projet->progressionPourcent() }}%"></div>
-                            </div>
+                                    tâches)</span>
+                                <span class="font-semibold text-slate-900 tabular-nums">{{ $pct }} %</span>
+                            </dt>
+                            <dd class="mt-2">
+                                <div class="h-2 rounded-full bg-brand-100 overflow-hidden" role="progressbar"
+                                    aria-label="Progression du projet {{ $projet->titre }}" aria-valuemin="0"
+                                    aria-valuemax="100" aria-valuenow="{{ $pct }}">
+                                    <div class="h-2 rounded-full bg-accent-500" style="width:{{ $pct }}%"></div>
+                                </div>
+                            </dd>
                         </div>
+                    </dl>
 
-                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400 mb-4">
-                            <span><i class="fas fa-calendar mr-1"></i>{{ $projet->date_debut->format('d/m/Y') }}</span>
-                            @if ($projet->date_fin)
-                                <span><i
-                                        class="fas fa-flag-checkered mr-1"></i>{{ $projet->date_fin->format('d/m/Y') }}</span>
-                            @endif
-                        </div>
-
-                        <div class="flex gap-2">
-                            <a href="{{ route('mentor.projects.show', $projet) }}"
-                                class="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-xl text-sm font-medium transition">
-                                <i class="fas fa-eye mr-1"></i>Voir
-                            </a>
-                            <a href="{{ route('mentor.projects.edit', $projet) }}"
-                                class="flex-1 text-center bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded-xl text-sm font-medium transition">
-                                <i class="fas fa-edit mr-1"></i>Modifier
-                            </a>
-                            <form action="{{ route('mentor.projects.destroy', $projet) }}" method="POST"
-                                id="del-proj-{{ $projet->id }}">
-                                @csrf @method('DELETE')
-                                <button type="button"
-                                    class="btn-delete w-9 h-9 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl flex items-center justify-center transition"
-                                    data-form="del-proj-{{ $projet->id }}">
-                                    <i class="fas fa-trash text-xs"></i>
-                                </button>
-                            </form>
-                        </div>
+                    <!-- Actions -->
+                    <div class="mt-4 flex flex-wrap items-center justify-end gap-2">
+                        <a href="{{ route('mentor.projects.show', $projet) }}" class="{{ $btnCarteSecondaire }}">
+                            Voir<span class="sr-only"> le projet {{ $projet->titre }}</span>
+                        </a>
+                        <a href="{{ route('mentor.projects.edit', $projet) }}" class="{{ $btnCarteSecondaire }}">
+                            <i class="fas fa-pen text-xs" aria-hidden="true"></i>Modifier<span class="sr-only"> le projet {{ $projet->titre }}</span>
+                        </a>
+                        <form action="{{ route('mentor.projects.destroy', $projet) }}" method="POST"
+                            id="del-proj-{{ $projet->id }}">
+                            @csrf @method('DELETE')
+                            <button type="button" class="btn-delete {{ $btnCarteDanger }}"
+                                data-form="del-proj-{{ $projet->id }}"
+                                aria-label="Supprimer le projet {{ $projet->titre }}">
+                                <i class="fas fa-trash text-xs" aria-hidden="true"></i>Supprimer
+                            </button>
+                        </form>
                     </div>
-                </div>
+                </article>
             @empty
-                <div class="col-span-1 sm:col-span-2 xl:col-span-3 card p-8 sm:p-16 text-center">
-                    <i class="fas fa-project-diagram text-4xl sm:text-5xl text-slate-200 mb-4"></i>
-                    <p class="text-slate-400 mb-4">Aucun projet</p>
-                    <a href="{{ route('mentor.projects.create') }}"
-                        class="inline-flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-emerald-600 transition">
-                        <i class="fas fa-plus"></i>Créer un projet
-                    </a>
+                <div class="lg:col-span-2 rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                    <p class="text-sm font-medium text-slate-900">Aucun projet</p>
+                    <p class="mt-1 text-sm text-slate-600">Créez un projet pour y assigner vos stagiaires et organiser leurs tâches.</p>
+                    <a href="{{ route('mentor.projects.create') }}" class="mt-3 inline-block {{ $lien }}">Créer un projet</a>
                 </div>
             @endforelse
         </div>
+
+        <p id="projetNoResult" class="hidden rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center text-sm text-slate-600">
+            Aucun résultat pour cette recherche.</p>
+
         <div>{{ $projets->links() }}</div>
     </div>
 @endsection
@@ -142,10 +165,14 @@
         function filterProjets() {
             const s = document.getElementById('search').value.toLowerCase();
             const st = document.getElementById('filterStatut').value;
-            document.querySelectorAll('.projet-card').forEach(card => {
-                card.style.display = card.textContent.toLowerCase().includes(s) && (!st || card.dataset.statut ===
-                    st) ? '' : 'none';
+            const cartes = document.querySelectorAll('.projet-card');
+            let visibles = 0;
+            cartes.forEach(card => {
+                const ok = card.textContent.toLowerCase().includes(s) && (!st || card.dataset.statut === st);
+                card.style.display = ok ? '' : 'none';
+                if (ok) visibles++;
             });
+            document.getElementById('projetNoResult')?.classList.toggle('hidden', cartes.length === 0 || visibles > 0);
         }
         document.getElementById('search').addEventListener('input', filterProjets);
         document.getElementById('filterStatut').addEventListener('change', filterProjets);

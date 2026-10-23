@@ -2,6 +2,14 @@
 @section('titre', 'Modifier le document')
 @section('breadcrumb', 'Documents > Modifier')
 @section('content')
+    {{-- Rôles stagiaire, mentor et admin : présentations dédiées (refonte). Autre rôle : rendu d'origine ci-dessous, inchangé. --}}
+    @if (Auth::user()->role === 'stagiaire')
+        @include('stagiaire.documents.edit')
+    @elseif (Auth::user()->role === 'mentor')
+        @include('mentor.documents.edit')
+    @elseif (Auth::user()->role === 'admin')
+        @include('admin.documents.edit')
+    @else
     <div class="max-w-2xl mx-auto px-4 sm:px-0">
         <div class="card p-5 sm:p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
@@ -108,8 +116,10 @@
             </form>
         </div>
     </div>
+    @endif
 @endsection
 
+@if (! in_array(Auth::user()->role, ['stagiaire', 'mentor', 'admin']))
 @push('scripts')
     <script>
         // Gestion du drag & drop pour le fichier
@@ -158,3 +168,4 @@
         });
     </script>
 @endpush
+@endif

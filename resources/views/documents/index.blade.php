@@ -2,6 +2,14 @@
 @section('titre', 'Documents')
 @section('breadcrumb', 'Mes documents & partages')
 @section('content')
+    {{-- Rôles stagiaire, mentor et admin : présentations dédiées (refonte). Autre rôle : rendu d'origine ci-dessous, inchangé. --}}
+    @if (Auth::user()->role === 'stagiaire')
+        @include('stagiaire.documents.index')
+    @elseif (Auth::user()->role === 'mentor')
+        @include('mentor.documents.index')
+    @elseif (Auth::user()->role === 'admin')
+        @include('admin.documents.index')
+    @else
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between flex-wrap gap-4" data-aos="fade-down">
@@ -132,7 +140,9 @@
             </div>
         @endif
     </div>
+    @endif
 @endsection
+@if (! in_array(Auth::user()->role, ['stagiaire', 'mentor', 'admin']))
 @push('scripts')
     <script>
         document.getElementById('searchDocs')?.addEventListener('input', function() {
@@ -143,3 +153,4 @@
         });
     </script>
 @endpush
+@endif

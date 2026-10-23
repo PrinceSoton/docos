@@ -2,111 +2,110 @@
 @section('titre', 'Évaluer le rapport')
 @section('breadcrumb', 'Rapports > Évaluation')
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-star text-emerald-600"></i>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+
+        // Choix de décision : [libellé, aide, pastille, classes à l'état coché]
+        $decisions = [
+            'valide' => ['Valider', 'Le rapport est accepté', 'bg-emerald-500', 'has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50'],
+            'en_revision' => ['Révision', 'Le stagiaire doit le reprendre', 'bg-sky-500', 'has-[:checked]:border-sky-600 has-[:checked]:bg-sky-50'],
+            'rejete' => ['Rejeter', 'Le rapport est refusé', 'bg-red-500', 'has-[:checked]:border-red-600 has-[:checked]:bg-red-50'],
+        ];
+    @endphp
+
+    <div class="max-w-3xl mx-auto space-y-5">
+
+        <!-- Rapport évalué (bloc de synthèse) -->
+        <section class="rounded-xl bg-brand-50 border border-brand-100 p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-xs text-slate-600">Rapport</p>
+                    <h2 class="mt-0.5 text-base font-semibold text-slate-900 break-words">{{ $report->titre }}</h2>
+                </div>
+                <a href="{{ route('mentor.reports.telecharger', $report) }}" download class="{{ $btnSecondaire }} flex-shrink-0">
+                    <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
+                </a>
+            </div>
+            <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3">
+                <div class="min-w-0">
+                    <dt class="text-xs text-slate-600">Stagiaire</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-slate-900 break-words">{{ $report->stagiaire->user->nom_complet ?? '—' }}</dd>
                 </div>
                 <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Évaluer le rapport</h2>
-                    <p class="text-slate-400 text-sm truncate">{{ $report->titre }}</p>
+                    <dt class="text-xs text-slate-600">Type</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-slate-900 capitalize">{{ $report->type_affiche }}</dd>
                 </div>
-            </div>
-
-            <div class="p-4 bg-slate-50 rounded-2xl mb-5">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-emerald-200 flex items-center justify-center font-bold text-emerald-700 flex-shrink-0">
-                        {{ strtoupper(substr($report->stagiaire->user->prenom ?? '', 0, 1)) }}
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-bold text-slate-800">{{ $report->stagiaire->user->nom_complet ?? '—' }}</p>
-                        <p class="text-slate-500 text-sm">
-                            Type : <span class="capitalize">{{ $report->type_affiche }}</span>
-                            • Déposé le {{ $report->created_at->format('d/m/Y') }}
-                        </p>
-                    </div>
-                    <a href="{{ route('mentor.reports.telecharger', $report) }}" download
-                        class="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl text-xs font-medium transition">
-                        <i class="fas fa-download"></i>Télécharger
-                    </a>
+                <div>
+                    <dt class="text-xs text-slate-600">Déposé le</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">{{ $report->created_at->format('d/m/Y') }}</dd>
                 </div>
-            </div>
+            </dl>
+        </section>
 
-            <form action="{{ route('mentor.reports.doEvaluate', $report) }}" method="POST" class="space-y-5">
+        <!-- Formulaire d'évaluation -->
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <h3 class="text-base font-semibold text-slate-900">Votre évaluation</h3>
+            <p class="mt-1 text-sm text-slate-500">Le stagiaire verra votre décision, la note et votre commentaire.</p>
+
+            <form action="{{ route('mentor.reports.doEvaluate', $report) }}" method="POST" class="mt-5 space-y-6">
                 @csrf @method('PUT')
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Décision *</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        @foreach (['valide' => ['Valider', 'green', 'check-circle'], 'en_revision' => ['Révision', 'blue', 'edit'], 'rejete' => ['Rejeter', 'red', 'times-circle']] as $val => [$label, $color, $icon])
+                <fieldset>
+                    <legend class="block text-sm font-medium text-slate-700 mb-2">Décision <span class="text-red-700" aria-hidden="true">*</span></legend>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        @foreach ($decisions as $val => [$label, $aide, $pastille, $coche])
                             <label
-                                class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition hover:border-{{ $color }}-400
-                                {{ old('statut') === $val ? 'border-' . $color . '-400 bg-' . $color . '-50' : 'border-slate-200' }}">
+                                class="flex items-start gap-3 rounded-lg border border-slate-300 bg-white p-4 cursor-pointer transition-colors hover:border-brand-600 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-600 has-[:focus-visible]:ring-offset-2 {{ $coche }}">
                                 <input type="radio" name="statut" value="{{ $val }}"
                                     {{ old('statut') === $val ? 'checked' : '' }} class="sr-only" required>
-                                <i class="fas fa-{{ $icon }} text-{{ $color }}-500 text-2xl"></i>
-                                <span class="font-semibold text-slate-800 text-sm">{{ $label }}</span>
+                                <span class="mt-1.5 h-2 w-2 rounded-full flex-shrink-0 {{ $pastille }}" aria-hidden="true"></span>
+                                <span class="min-w-0">
+                                    <span class="block text-sm font-semibold text-slate-900">{{ $label }}</span>
+                                    <span class="block mt-0.5 text-xs text-slate-600">{{ $aide }}</span>
+                                </span>
                             </label>
                         @endforeach
                     </div>
-                </div>
+                    @error('statut')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1"><i
-                            class="fas fa-star mr-1 text-amber-500"></i>Note (sur 20) — optionnel</label>
-                    <div class="flex items-center gap-3">
+                    <label for="noteRange" class="block text-sm font-medium text-slate-700 mb-1">Note sur 20 <span class="font-normal text-slate-500">(optionnel)</span></label>
+                    <div class="flex items-center gap-4 rounded-lg bg-brand-50 border border-brand-100 px-4 py-3">
                         <input type="range" name="note" min="0" max="20"
                             value="{{ old('note', $report->note ?? 10) }}" id="noteRange"
                             oninput="document.getElementById('noteVal').textContent=this.value"
-                            class="flex-1 h-2 bg-slate-200 rounded-full accent-emerald-500">
-                        <span id="noteVal"
-                            class="w-10 text-center font-black text-xl text-emerald-600">{{ old('note', $report->note ?? 10) }}</span>
-                        <span class="text-slate-400 text-sm">/20</span>
+                            class="flex-1 h-2 cursor-pointer accent-brand-800 {{ $focus }}">
+                        <p class="flex-shrink-0 text-sm text-slate-600 tabular-nums" aria-live="polite">
+                            <span id="noteVal" class="text-lg font-semibold text-slate-900">{{ old('note', $report->note ?? 10) }}</span>/20
+                        </p>
                     </div>
+                    @error('note')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1"><i
-                            class="fas fa-comment mr-1 text-indigo-500"></i>Commentaire pour le stagiaire</label>
-                    <textarea name="commentaire_mentor" rows="4"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm resize-none"
+                    <label for="commentaire_mentor" class="block text-sm font-medium text-slate-700 mb-1">Commentaire pour le stagiaire</label>
+                    <textarea id="commentaire_mentor" name="commentaire_mentor" rows="5" class="{{ $champ }} resize-y"
                         placeholder="Vos remarques, points positifs, axes d'amélioration...">{{ old('commentaire_mentor', $report->commentaire_mentor) }}</textarea>
+                    @error('commentaire_mentor')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-check mr-2"></i>Soumettre l'évaluation
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-brand-100">
+                    <a href="{{ route('mentor.reports.show', $report) }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-check text-xs" aria-hidden="true"></i>Soumettre l'évaluation
                     </button>
-                    <a href="{{ route('mentor.reports.show', $report) }}"
-                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
-        </div>
+        </section>
     </div>
 @endsection
-@push('scripts')
-    <script>
-        document.querySelectorAll('input[name=statut]').forEach(r => {
-            r.addEventListener('change', function() {
-                document.querySelectorAll('label:has(input[name=statut])').forEach(l => {
-                    l.classList.remove('border-green-400', 'bg-green-50', 'border-blue-400',
-                        'bg-blue-50', 'border-red-400', 'bg-red-50');
-                    l.classList.add('border-slate-200');
-                });
-                const colors = {
-                    valide: 'green',
-                    en_revision: 'blue',
-                    rejete: 'red'
-                };
-                const c = colors[this.value];
-                if (c) {
-                    this.closest('label').classList.add('border-' + c + '-400', 'bg-' + c + '-50');
-                    this.closest('label').classList.remove('border-slate-200');
-                }
-            });
-        });
-    </script>
-@endpush

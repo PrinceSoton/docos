@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Déposer un document</title>
+  <desc id="desc">Illustration d'un document et d'une flèche de dépôt</desc>
+  <rect x="16" y="14" width="208" height="152" rx="28" fill="#eff5fa"/>
+  <circle cx="190" cy="48" r="18" fill="#e8f6ef"/>
+  <circle cx="49" cy="125" r="8" fill="#b9d1e4"/>
+  <path d="M83 31h52l23 23v76a9 9 0 0 1-9 9H83a9 9 0 0 1-9-9V40a9 9 0 0 1 9-9Z" fill="#fff" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M135 32v16a7 7 0 0 0 7 7h16" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M91 69h37M91 82h43M91 95h27" stroke="#b9d1e4" stroke-width="4" stroke-linecap="round"/>
+  <rect x="91" y="109" width="29" height="13" rx="6.5" fill="#e8f6ef"/>
+  <path d="M160 91v30a9 9 0 0 1-9 9h-9" stroke="#22a06b" stroke-width="3" stroke-linecap="round"/>
+  <rect x="132" y="101" width="69" height="43" rx="12" fill="#fff" stroke="#b9d1e4" stroke-width="2"/>
+  <path d="M166.5 130V111m0 0-8 8m8-8 8 8" stroke="#103860" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M153 134h27" stroke="#22a06b" stroke-width="3" stroke-linecap="round"/>
+</svg>

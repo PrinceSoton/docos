@@ -2,73 +2,97 @@
 @section('titre', 'Modifier archive')
 @section('breadcrumb', 'Archives > Modifier')
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-edit text-amber-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Modifier l'archive</h2>
-                    <p class="text-slate-400 text-sm">{{ $archive->titre }}</p>
-                </div>
-            </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $champErreur = 'w-full rounded-lg border border-red-400 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20';
+        $fichier = 'w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:!bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:!text-slate-700 hover:file:!bg-slate-100 file:cursor-pointer';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        $btnPetitSecondaire = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <p class="text-sm text-slate-500 mb-5 break-words">
+                Archive : <span class="font-medium text-slate-900">{{ $archive->titre }}</span>
+            </p>
 
             <form action="{{ route('admin.archives.update', $archive) }}" method="POST" enctype="multipart/form-data"
-                class="space-y-5">
+                class="space-y-6">
                 @csrf @method('PUT')
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Titre *</label>
-                    <input type="text" name="titre" value="{{ old('titre', $archive->titre) }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm">
-                </div>
+                <fieldset class="space-y-4">
+                    <legend class="text-base font-semibold text-slate-900">Informations</legend>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                    <textarea name="description" rows="3"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm resize-none">{{ old('description', $archive->description) }}</textarea>
-                </div>
+                    <div>
+                        <label for="titre" class="block text-sm font-medium text-slate-700 mb-1">
+                            Titre <span class="text-red-700" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text" id="titre" name="titre" value="{{ old('titre', $archive->titre) }}" required
+                            class="{{ $errors->has('titre') ? $champErreur : $champ }}"
+                            @error('titre') aria-invalid="true" @enderror>
+                        @error('titre')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea id="description" name="description" rows="3"
+                            class="{{ $errors->has('description') ? $champErreur : $champ }} resize-y">{{ old('description', $archive->description) }}</textarea>
+                        @error('description')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </fieldset>
 
                 @if ($archive->fichiers->count())
+                    <hr class="border-brand-100">
+
                     <div>
-                        <p class="text-sm font-medium text-slate-700 mb-2">Fichiers existants</p>
-                        <div class="space-y-2">
+                        <h3 class="text-base font-semibold text-slate-900 mb-3">Fichiers existants</h3>
+                        <ul class="rounded-lg border border-brand-100 divide-y divide-slate-100">
                             @foreach ($archive->fichiers as $f)
-                                <div
-                                    class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                    <i class="fas fa-file text-indigo-400"></i>
-                                    <span
-                                        class="flex-1 text-sm text-slate-700 truncate w-full">{{ $f->nom_original }}</span>
+                                <li class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-4 py-3">
+                                    <span class="flex-1 min-w-0 text-sm text-slate-700 truncate"
+                                        title="{{ $f->nom_original }}">{{ $f->nom_original }}</span>
                                     <a href="{{ route('admin.archives.telecharger', $f) }}"
-                                        class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">
-                                        <i class="fas fa-download mr-1"></i>Télécharger
+                                        class="{{ $btnPetitSecondaire }} whitespace-nowrap self-start sm:self-center">
+                                        <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
                                     </a>
-                                </div>
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     </div>
                 @endif
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2"><i
-                            class="fas fa-plus mr-1 text-indigo-500"></i>Ajouter des fichiers</label>
-                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-amber-400 transition cursor-pointer"
-                        id="dropZone">
-                        <input type="file" name="fichiers[]" id="fichiersInput" multiple class="hidden">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-slate-300 mb-2"></i>
-                        <p class="text-slate-500 text-sm">Glissez ou <span class="text-amber-600">parcourez</span></p>
-                        <div id="fileList" class="mt-3 space-y-1"></div>
-                    </div>
-                </div>
+                <hr class="border-brand-100">
 
-                <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-save mr-2"></i>Mettre à jour
+                <fieldset>
+                    <legend class="text-base font-semibold text-slate-900 mb-3">Ajouter des fichiers</legend>
+                    <div class="rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 sm:p-6 transition-colors cursor-pointer"
+                        id="dropZone">
+                        <label for="fichiersInput" class="block text-sm font-medium text-slate-900">
+                            Sélectionnez un ou plusieurs fichiers à ajouter à l'archive
+                        </label>
+                        <p class="mt-1 text-xs text-slate-600">Les fichiers existants sont conservés.</p>
+                        <input type="file" name="fichiers[]" id="fichiersInput" multiple class="mt-3 {{ $fichier }}">
+                        <div id="fileList" class="mt-3 space-y-1.5" aria-live="polite"></div>
+                    </div>
+                    @error('fichiers')
+                        <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                    @enderror
+                    @error('fichiers.*')
+                        <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                    @enderror
+                </fieldset>
+
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-brand-100">
+                    <a href="{{ route('admin.archives.show', $archive) }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-save text-xs" aria-hidden="true"></i>Mettre à jour
                     </button>
-                    <a href="{{ route('admin.archives.show', $archive) }}"
-                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>
@@ -78,12 +102,20 @@
     <script>
         const dz = document.getElementById('dropZone');
         const fi = document.getElementById('fichiersInput');
-        dz.addEventListener('click', () => fi.click());
+        // Le champ natif est visible dans la zone : on évite d'ouvrir deux fois le sélecteur.
+        dz.addEventListener('click', e => {
+            if (e.target === fi || e.target.closest('label')) return;
+            fi.click();
+        });
         fi.addEventListener('change', function() {
             const list = document.getElementById('fileList');
-            list.innerHTML = Array.from(this.files).map(f =>
-                `<div class="text-xs text-slate-600 bg-white border rounded-lg px-3 py-1.5 flex items-center gap-2"><i class="fas fa-file text-amber-400"></i>${f.name}</div>`
-            ).join('');
+            list.innerHTML = '';
+            Array.from(this.files).forEach(f => {
+                const ligne = document.createElement('div');
+                ligne.className = 'text-xs text-slate-700 bg-white border border-brand-100 rounded-lg px-3 py-1.5 truncate';
+                ligne.textContent = f.name;
+                list.appendChild(ligne);
+            });
         });
     </script>
 @endpush

@@ -2,90 +2,120 @@
 @section('titre', 'Événements')
 @section('breadcrumb', 'Mon espace > Événements')
 @section('content')
-    <div class="space-y-4 sm:space-y-5">
-        <div data-aos="fade-down">
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Événements & Informations</h2>
-            <p class="text-sm text-slate-500">Communications de l'entreprise</p>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+
+        $types = [
+            'information' => ['Information', 'bg-sky-50 text-sky-800'],
+            'evenement' => ['Événement', 'bg-brand-50 text-brand-800'],
+            'note' => ['Note', 'bg-slate-100 text-slate-700'],
+        ];
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- Résumé et filtres -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="min-w-0">
+                <h2 class="text-base font-semibold text-slate-900">Événements et informations</h2>
+                <p class="text-sm text-slate-600">Communications de l'entreprise</p>
+            </div>
+            @if ($evenements->count() > 0)
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="search" id="search" placeholder="Rechercher..." aria-label="Rechercher un événement"
+                        class="w-full sm:w-64 {{ $champ }}">
+                    <select id="filterType" aria-label="Filtrer par type" class="w-full sm:w-44 {{ $champ }}">
+                        <option value="">Tous types</option>
+                        <option value="information">Information</option>
+                        <option value="evenement">Événement</option>
+                        <option value="note">Note</option>
+                    </select>
+                </div>
+            @endif
         </div>
 
-        <!-- Filtres -->
-        <div class="card p-4 flex flex-col sm:flex-row gap-3" data-aos="fade-up">
-            <input type="text" id="search" placeholder="Rechercher..."
-                class="flex-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 text-sm">
-            <select id="filterType"
-                class="w-full sm:w-auto border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400">
-                <option value="">Tous types</option>
-                <option value="information">Information</option>
-                <option value="evenement">Événement</option>
-                <option value="note">Note</option>
-            </select>
-        </div>
-
-        <!-- Grille -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="evtGrid">
+        <!-- Liste -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="evtGrid">
             @forelse($evenements as $evt)
-                <div class="card overflow-hidden evt-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                    data-type="{{ $evt->type }}" data-aos="fade-up" data-aos-delay="{{ $loop->index * 60 }}">
+                @php
+                    [$libType, $clsType] = $types[$evt->type] ?? [ucfirst((string) $evt->type), 'bg-slate-100 text-slate-700'];
+                @endphp
+                <article class="evt-card flex flex-col min-w-0 overflow-hidden bg-white border border-brand-100 rounded-xl"
+                    data-type="{{ $evt->type }}">
                     @if ($evt->image)
-                        <div class="h-36 sm:h-44 overflow-hidden">
-                            <img src="{{ asset('storage/' . $evt->image) }}"
-                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        <div class="h-36 sm:h-40 overflow-hidden bg-brand-50">
+                            <img src="{{ asset('storage/' . $evt->image) }}" alt="" class="w-full h-full object-cover"
                                 loading="lazy">
                         </div>
                     @endif
-                    <div class="p-4 sm:p-5">
-                        <div class="flex items-center justify-between mb-2">
-                            @php $tc = ['information'=>'bg-blue-100 text-blue-700','evenement'=>'bg-purple-100 text-purple-700','note'=>'bg-amber-100 text-amber-700']; @endphp
-                            <span
-                                class="px-2 py-1 rounded-lg text-xs font-semibold {{ $tc[$evt->type] ?? '' }}">{{ ucfirst($evt->type) }}</span>
-                            <span class="text-xs text-slate-400">{{ $evt->created_at->diffForHumans() }}</span>
+                    <div class="flex flex-col flex-1 p-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $clsType }}">{{ $libType }}</span>
+                            <span class="text-xs text-slate-500 text-right">{{ $evt->created_at->diffForHumans() }}</span>
                         </div>
-                        <h3 class="font-bold text-slate-800 text-base sm:text-lg mb-2">{{ $evt->titre }}</h3>
+                        <h3 class="mt-3 text-base font-semibold text-slate-900 leading-snug break-words">{{ $evt->titre }}</h3>
                         @if ($evt->contenu)
-                            <p class="text-slate-500 text-sm line-clamp-2">{{ Str::limit(strip_tags($evt->contenu), 80) }}
-                            </p>
+                            <p class="mt-1.5 text-sm text-slate-500 line-clamp-2 break-words">{{ Str::limit(strip_tags($evt->contenu), 80) }}</p>
                         @endif
                         @if ($evt->date_evenement)
-                            <p class="text-xs text-indigo-600 font-medium mt-2">
-                                <i class="fas fa-calendar mr-1"></i>{{ $evt->date_evenement->format('d/m/Y à H:i') }}
+                            <p class="mt-3 text-xs text-slate-700 tabular-nums">
+                                <span class="text-slate-500">Date :</span>
+                                <span class="font-medium">{{ $evt->date_evenement->format('d/m/Y à H:i') }}</span>
                             </p>
                         @endif
-                        <div class="flex items-center gap-2 mt-4">
-                            <a href="{{ route('stagiaire.evenements.show', $evt) }}"
-                                class="flex-1 text-center bg-amber-50 hover:bg-amber-100 text-amber-700 py-2 rounded-xl text-sm font-medium transition">
-                                <i class="fas fa-eye mr-1"></i>Voir
-                            </a>
+                        <div class="flex flex-wrap items-center gap-2 mt-auto pt-4">
+                            <a href="{{ route('stagiaire.evenements.show', $evt) }}" class="{{ $btnPrimaire }}">Voir</a>
                             @if ($evt->fichier)
                                 <a href="{{ route('stagiaire.evenements.telecharger', $evt) }}" download
-                                    class="w-9 h-9 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center transition">
-                                    <i class="fas fa-download text-xs"></i>
+                                    class="{{ $btnSecondaire }}">
+                                    <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
                                 </a>
                             @endif
                         </div>
                     </div>
-                </div>
+                </article>
             @empty
-                <div class="col-span-1 md:col-span-2 lg:col-span-3 card p-8 sm:p-16 text-center">
-                    <i class="fas fa-bell-slash text-4xl sm:text-5xl text-slate-200 mb-4"></i>
-                    <p class="text-slate-400">Aucun événement pour le moment</p>
+                <div class="md:col-span-2 lg:col-span-3 rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                    <p class="text-sm font-medium text-slate-900">Aucun événement pour le moment</p>
+                    <p class="mt-1 text-sm text-slate-600 max-w-md mx-auto">
+                        Les informations, événements et notes partagés par l'entreprise apparaîtront ici.
+                    </p>
                 </div>
             @endforelse
         </div>
+
+        <p id="evtAucun" data-sans-revelation class="hidden rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-8 text-center text-sm text-slate-600">
+            Aucun résultat pour cette recherche.
+        </p>
+
         <div>{{ $evenements->links() }}</div>
     </div>
 @endsection
 @push('scripts')
     <script>
-        function filterEvents() {
-            const s = document.getElementById('search').value.toLowerCase();
-            const t = document.getElementById('filterType').value;
-            document.querySelectorAll('.evt-card').forEach(c => {
-                const matchSearch = c.textContent.toLowerCase().includes(s);
-                const matchType = !t || c.dataset.type === t;
-                c.style.display = matchSearch && matchType ? '' : 'none';
-            });
-        }
-        document.getElementById('search').addEventListener('input', filterEvents);
-        document.getElementById('filterType').addEventListener('change', filterEvents);
+        (function() {
+            const search = document.getElementById('search');
+            const filterType = document.getElementById('filterType');
+            if (!search || !filterType) return;
+
+            function filterEvents() {
+                const s = search.value.toLowerCase();
+                const t = filterType.value;
+                let visibles = 0;
+                document.querySelectorAll('.evt-card').forEach(c => {
+                    const matchSearch = c.textContent.toLowerCase().includes(s);
+                    const matchType = !t || c.dataset.type === t;
+                    const visible = matchSearch && matchType;
+                    c.style.display = visible ? '' : 'none';
+                    if (visible) visibles++;
+                });
+                document.getElementById('evtAucun').classList.toggle('hidden', visibles > 0);
+            }
+            search.addEventListener('input', filterEvents);
+            filterType.addEventListener('change', filterEvents);
+        })();
     </script>
 @endpush

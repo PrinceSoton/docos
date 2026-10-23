@@ -2,28 +2,27 @@
 @section('titre', 'Nouvelle tâche')
 @section('breadcrumb', 'Tâches > Créer')
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-plus-circle text-emerald-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Nouvelle tâche</h2>
-                    <p class="text-slate-400 text-sm">Créez une tâche liée à un projet ou indépendante</p>
-                </div>
-            </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <p class="text-sm text-slate-500 mb-5">Créez une tâche liée à un projet ou indépendante.</p>
 
             <form action="{{ route('mentor.tasks.store') }}" method="POST" class="space-y-5">
                 @csrf
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Affectation -->
+                <div class="rounded-lg bg-brand-50 border border-brand-100 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">
-                            Projet <span class="text-slate-400 text-xs">(optionnel)</span>
+                        <label for="projetSelect" class="block text-sm font-medium text-slate-700 mb-1">
+                            Projet <span class="text-xs font-normal text-slate-600">(optionnel)</span>
                         </label>
-                        <select name="project_id" id="projetSelect"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <select name="project_id" id="projetSelect" class="{{ $champ }}">
                             <option value="">-- Aucun projet (tâche indépendante) --</option>
                             @foreach ($projets as $p)
                                 <option value="{{ $p->id }}" {{ old('project_id') == $p->id ? 'selected' : '' }}>
@@ -31,14 +30,16 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-xs text-slate-400 mt-1">
+                        <p class="mt-1 text-xs text-slate-600">
                             Laissez vide pour créer une tâche indépendante adressée à vos stagiaires.
                         </p>
+                        @error('project_id')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Stagiaire *</label>
-                        <select name="stagiaire_id" id="stagiaireSelect" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <label for="stagiaireSelect" class="block text-sm font-medium text-slate-700 mb-1">Stagiaire *</label>
+                        <select name="stagiaire_id" id="stagiaireSelect" required class="{{ $champ }}">
                             <option value="">-- Sélectionner un stagiaire --</option>
                             @foreach ($stagiaires as $stag)
                                 <option value="{{ $stag->id }}"
@@ -47,65 +48,78 @@
                                 </option>
                             @endforeach
                         </select>
+                        <p class="mt-1 text-xs text-slate-600">La liste s'adapte au projet choisi.</p>
+                        @error('stagiaire_id')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Titre de la tâche *</label>
-                    <input type="text" name="titre" value="{{ old('titre') }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                    <label for="titre" class="block text-sm font-medium text-slate-700 mb-1">Titre de la tâche *</label>
+                    <input type="text" id="titre" name="titre" value="{{ old('titre') }}" required class="{{ $champ }}">
+                    @error('titre')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                    <textarea name="description" rows="3"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm resize-none">{{ old('description') }}</textarea>
+                    <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea id="description" name="description" rows="3" class="{{ $champ }} resize-y">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
-                        <select name="statut" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <label for="statut" class="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
+                        <select id="statut" name="statut" required class="{{ $champ }}">
                             <option value="a_faire" {{ old('statut', 'a_faire') === 'a_faire' ? 'selected' : '' }}>À faire</option>
                             <option value="en_cours" {{ old('statut') === 'en_cours' ? 'selected' : '' }}>En cours</option>
                             <option value="termine" {{ old('statut') === 'termine' ? 'selected' : '' }}>Terminé</option>
                         </select>
+                        @error('statut')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Priorité *</label>
-                        <select name="priorite" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <label for="priorite" class="block text-sm font-medium text-slate-700 mb-1">Priorité *</label>
+                        <select id="priorite" name="priorite" required class="{{ $champ }}">
                             @foreach (['faible' => 'Faible', 'normale' => 'Normale', 'haute' => 'Haute', 'urgente' => 'Urgente'] as $v => $l)
                                 <option value="{{ $v }}" {{ old('priorite', 'normale') === $v ? 'selected' : '' }}>{{ $l }}</option>
                             @endforeach
                         </select>
+                        @error('priorite')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Difficulté *</label>
-                        <select name="difficulte" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <label for="difficulte" class="block text-sm font-medium text-slate-700 mb-1">Difficulté *</label>
+                        <select id="difficulte" name="difficulte" required class="{{ $champ }}">
                             @foreach (['facile' => 'Facile', 'moyen' => 'Moyen', 'difficile' => 'Difficile'] as $v => $l)
                                 <option value="{{ $v }}" {{ old('difficulte', 'moyen') === $v ? 'selected' : '' }}>{{ $l }}</option>
                             @endforeach
                         </select>
+                        @error('difficulte')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Échéance</label>
-                        <input type="date" name="date_echeance" value="{{ old('date_echeance') }}"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-400 transition text-sm">
+                        <label for="date_echeance" class="block text-sm font-medium text-slate-700 mb-1">Échéance</label>
+                        <input type="date" id="date_echeance" name="date_echeance" value="{{ old('date_echeance') }}"
+                            class="{{ $champ }} tabular-nums">
+                        @error('date_echeance')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-save mr-2"></i>Créer la tâche
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+                    <a href="{{ route('mentor.tasks.index') }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-save text-xs" aria-hidden="true"></i>Créer la tâche
                     </button>
-                    <a href="{{ route('mentor.tasks.index') }}"
-                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">
-                        Annuler
-                    </a>
                 </div>
             </form>
         </div>

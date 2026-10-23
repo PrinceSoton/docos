@@ -2,135 +2,232 @@
 @section('titre', 'Mentors')
 @section('breadcrumb', 'Gestion > Mentors')
 @section('content')
-    <div class="space-y-4 sm:space-y-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Mentors</h2>
-                <p class="text-sm text-slate-500">{{ $mentors->total() }} mentor(s) enregistré(s)</p>
-            </div>
-            <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-                <a href="{{ route('admin.mentors.assign') }}"
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                    <i class="fas fa-link"></i>Affecter
-                </a>
-                <a href="{{ route('admin.mentors.create') }}"
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                    <i class="fas fa-plus"></i>Nouveau
-                </a>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors whitespace-nowrap ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors whitespace-nowrap ' . $focus;
+        $btnPetitSecondaire = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors whitespace-nowrap ' . $focus;
+        $btnIconeDanger = 'inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-red-200 bg-white text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+        $puce = 'inline-flex max-w-full items-center gap-2 rounded-md border border-brand-100 bg-white py-1 pl-2.5 pr-1';
+        $btnRetirer = 'inline-flex flex-shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-red-50 hover:text-red-700 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- Barre d'outils : synthèse + recherche + actions -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <p class="text-sm text-slate-600 tabular-nums">
+                <span class="font-semibold text-slate-900">{{ $mentors->total() }}</span> mentor(s) enregistré(s)
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <input type="search" id="search" placeholder="Nom, département, poste..."
+                    aria-label="Rechercher un mentor" class="sm:w-72 {{ $champ }}">
+                <div class="grid grid-cols-2 sm:flex gap-3">
+                    <a href="{{ route('admin.mentors.assign') }}" class="{{ $btnSecondaire }}">
+                        <i class="fas fa-link text-xs" aria-hidden="true"></i>Affecter
+                    </a>
+                    <a href="{{ route('admin.mentors.create') }}" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-plus text-xs" aria-hidden="true"></i>Nouveau
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="card p-4" data-aos="fade-up">
-            <input type="text" id="search" placeholder="Rechercher par nom, département, poste..."
-                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 text-sm transition">
-        </div>
+        @if ($mentors->count() > 0)
+            <section class="bg-white border border-brand-100 rounded-xl overflow-hidden" aria-label="Liste des mentors">
 
-        <div class="card overflow-hidden" data-aos="fade-up">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
-                        <tr>
-                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600">Mentor</th>
-                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden sm:table-cell">Email
-                            </th>
-                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden md:table-cell">
-                                Département</th>
-                            <th class="px-4 sm:px-5 py-4 text-left font-semibold text-slate-600 hidden lg:table-cell">Poste
-                            </th>
-                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600">Stagiaires</th>
-                            <th class="px-4 sm:px-5 py-4 text-center font-semibold text-slate-600">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50" id="mentorTable">
-                        @forelse($mentors as $mentor)
-                            <tr class="hover:bg-slate-50 transition mentor-row">
-                                <td class="px-4 sm:px-5 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
-                                            @if ($mentor->user->photo)
-                                                <img src="{{ asset('storage/' . $mentor->user->photo) }}"
-                                                    class="w-full h-full object-cover" loading="lazy">
-                                            @else
-                                                <span
-                                                    class="text-white font-bold">{{ strtoupper(substr($mentor->user->prenom, 0, 1)) }}</span>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <p class="font-semibold text-slate-800">{{ $mentor->user->nom_complet }}</p>
-                                            <p class="text-slate-400 text-xs">{{ $mentor->user->telephone ?: '—' }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 sm:px-5 py-4 text-slate-600 hidden sm:table-cell">{{ $mentor->user->email }}
-                                </td>
-                                <td class="px-4 sm:px-5 py-4 text-slate-600 hidden md:table-cell">
-                                    {{ $mentor->departement ?: '—' }}</td>
-                                <td class="px-4 sm:px-5 py-4 text-slate-600 hidden lg:table-cell">
-                                    {{ $mentor->poste ?: '—' }}</td>
-                                <td class="px-4 sm:px-5 py-4 text-center">
-                                    <span
-                                        class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">{{ $mentor->stagiaires->count() }}</span>
-                                </td>
-                                <td class="px-4 sm:px-5 py-4">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('admin.mentors.edit', $mentor) }}"
-                                            class="w-8 h-8 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg flex items-center justify-center transition"
-                                            title="Modifier">
-                                            <i class="fas fa-edit text-xs"></i>
-                                        </a>
-                                        <form action="{{ route('admin.mentors.destroy', $mentor) }}" method="POST"
-                                            id="del-mentor-{{ $mentor->id }}">
-                                            @csrf @method('DELETE')
-                                            <button type="button"
-                                                class="btn-delete w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition"
-                                                data-form="del-mentor-{{ $mentor->id }}" title="Supprimer">
-                                                <i class="fas fa-trash text-xs"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+                <!-- Tableau (écrans larges) -->
+                <div class="hidden xl:block">
+                    <table class="w-full table-fixed text-sm">
+                        <colgroup>
+                            <col>
+                            <col class="w-[24%]">
+                            <col class="w-[15%]">
+                            <col class="w-[15%]">
+                            <col class="w-28">
+                            <col class="w-36">
+                        </colgroup>
+                        <thead class="bg-brand-50 border-b border-brand-100">
+                            <tr class="text-left text-xs font-medium text-slate-600">
+                                <th scope="col" class="px-5 py-2.5">Mentor</th>
+                                <th scope="col" class="px-3 py-2.5">Email</th>
+                                <th scope="col" class="px-3 py-2.5">Département</th>
+                                <th scope="col" class="px-3 py-2.5">Poste</th>
+                                <th scope="col" class="px-3 py-2.5 text-center">Stagiaires</th>
+                                <th scope="col" class="px-4 py-2.5 text-right">Actions</th>
                             </tr>
-                            @if ($mentor->stagiaires->count() > 0)
-                                <tr class="bg-emerald-50/40">
-                                    <td colspan="6" class="px-4 sm:px-8 py-3">
-                                        <div class="flex flex-wrap gap-2 items-center">
-                                            <span class="text-xs text-emerald-600 font-semibold mr-2"><i
-                                                    class="fas fa-users mr-1"></i>Stagiaires :</span>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100" id="mentorTable">
+                            @foreach ($mentors as $mentor)
+                                <tr class="hover:bg-brand-50/60 mentor-row">
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div
+                                                class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                @if ($mentor->user->photo)
+                                                    <img src="{{ asset('storage/' . $mentor->user->photo) }}" alt=""
+                                                        class="h-full w-full object-cover" loading="lazy">
+                                                @else
+                                                    <span class="text-sm font-semibold text-brand-800"
+                                                        aria-hidden="true">{{ strtoupper(substr($mentor->user->prenom, 0, 1)) }}</span>
+                                                @endif
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="font-medium text-slate-900 truncate" title="{{ $mentor->user->nom_complet }}">
+                                                    {{ $mentor->user->nom_complet }}</p>
+                                                <p class="text-xs text-slate-500 tabular-nums truncate">{{ $mentor->user->telephone ?: '—' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-3 py-3 text-slate-700">
+                                        <p class="truncate" title="{{ $mentor->user->email }}">{{ $mentor->user->email }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-slate-700">
+                                        <p class="truncate" title="{{ $mentor->departement }}">{{ $mentor->departement ?: '—' }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-slate-700">
+                                        <p class="truncate" title="{{ $mentor->poste }}">{{ $mentor->poste ?: '—' }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        <span
+                                            class="inline-block min-w-[2rem] text-xs font-semibold px-2 py-0.5 rounded-md tabular-nums {{ $mentor->stagiaires->count() > 0 ? 'bg-accent-50 text-accent-700' : 'bg-slate-100 text-slate-700' }}">{{ $mentor->stagiaires->count() }}</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <a href="{{ route('admin.mentors.edit', $mentor) }}" class="{{ $btnPetitSecondaire }}"
+                                                aria-label="Modifier {{ $mentor->user->nom_complet }}">
+                                                <i class="fas fa-pen text-[10px]" aria-hidden="true"></i>Modifier
+                                            </a>
+                                            <form action="{{ route('admin.mentors.destroy', $mentor) }}" method="POST"
+                                                id="del-mentor-{{ $mentor->id }}">
+                                                @csrf @method('DELETE')
+                                                <button type="button" class="btn-delete {{ $btnIconeDanger }}"
+                                                    data-form="del-mentor-{{ $mentor->id }}" title="Supprimer"
+                                                    aria-label="Supprimer {{ $mentor->user->nom_complet }}">
+                                                    <i class="fas fa-trash text-xs" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @if ($mentor->stagiaires->count() > 0)
+                                    <tr class="mentor-stagiaires !border-t-0">
+                                        <td colspan="6" class="px-5 pb-3 pt-0">
+                                            <div class="flex flex-wrap items-center gap-2 pl-12">
+                                                <span class="text-xs font-medium text-slate-600 mr-1">Stagiaires :</span>
+                                                @foreach ($mentor->stagiaires as $stag)
+                                                    <div class="{{ $puce }}">
+                                                        <span class="text-sm text-slate-900 font-medium truncate">{{ $stag->user->nom_complet }}</span>
+                                                        <span class="text-xs text-slate-500 font-mono">{{ $stag->matricule }}</span>
+                                                        <form action="{{ route('admin.mentors.removeAssign', $stag) }}"
+                                                            method="POST" class="no-loader">
+                                                            @csrf @method('PATCH')
+                                                            <button type="submit" class="{{ $btnRetirer }} h-7 w-7"
+                                                                title="Retirer l'affectation"
+                                                                aria-label="Retirer l'affectation de {{ $stag->user->nom_complet }}">
+                                                                <i class="fas fa-times text-xs" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Liste (téléphone et tablette) -->
+                <ul class="xl:hidden divide-y divide-slate-100">
+                    @foreach ($mentors as $mentor)
+                        <li class="px-4 sm:px-5 py-4 mentor-row">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    @if ($mentor->user->photo)
+                                        <img src="{{ asset('storage/' . $mentor->user->photo) }}" alt=""
+                                            class="h-full w-full object-cover" loading="lazy">
+                                    @else
+                                        <span class="text-sm font-semibold text-brand-800"
+                                            aria-hidden="true">{{ strtoupper(substr($mentor->user->prenom, 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="mentor-infos">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-slate-900 truncate" title="{{ $mentor->user->nom_complet }}">
+                                                    {{ $mentor->user->nom_complet }}</p>
+                                                <p class="text-sm text-slate-600 truncate" title="{{ $mentor->user->email }}">
+                                                    {{ $mentor->user->email }}</p>
+                                            </div>
+                                            <span
+                                                class="flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-md tabular-nums whitespace-nowrap {{ $mentor->stagiaires->count() > 0 ? 'bg-accent-50 text-accent-700' : 'bg-slate-100 text-slate-700' }}">{{ $mentor->stagiaires->count() }}
+                                                stagiaire(s)</span>
+                                        </div>
+                                        <p class="mt-1 text-xs text-slate-500 break-words">
+                                            <span class="tabular-nums">{{ $mentor->user->telephone ?: '—' }}</span> ·
+                                            {{ $mentor->departement ?: '—' }} · {{ $mentor->poste ?: '—' }}</p>
+                                    </div>
+
+                                    @if ($mentor->stagiaires->count() > 0)
+                                        <div class="mt-3 flex flex-wrap items-center gap-2">
                                             @foreach ($mentor->stagiaires as $stag)
-                                                <div
-                                                    class="flex items-center gap-2 bg-white border border-emerald-200 px-3 py-1.5 rounded-xl">
-                                                    <span
-                                                        class="text-sm text-slate-700 font-medium">{{ $stag->user->nom_complet }}</span>
-                                                    <span class="text-xs text-slate-400">{{ $stag->matricule }}</span>
-                                                    <form action="{{ route('admin.mentors.removeAssign', $stag) }}"
-                                                        method="POST" class="no-loader">
+                                                <div class="{{ $puce }}">
+                                                    <span class="text-sm text-slate-900 font-medium truncate">{{ $stag->user->nom_complet }}</span>
+                                                    <span class="text-xs text-slate-500 font-mono">{{ $stag->matricule }}</span>
+                                                    <form action="{{ route('admin.mentors.removeAssign', $stag) }}" method="POST"
+                                                        class="no-loader">
                                                         @csrf @method('PATCH')
-                                                        <button type="submit"
-                                                            class="text-red-400 hover:text-red-600 transition ml-1"
-                                                            title="Retirer l'affectation">
-                                                            <i class="fas fa-times text-xs"></i>
+                                                        <button type="submit" class="{{ $btnRetirer }} h-8 w-8"
+                                                            title="Retirer l'affectation"
+                                                            aria-label="Retirer l'affectation de {{ $stag->user->nom_complet }}">
+                                                            <i class="fas fa-times text-xs" aria-hidden="true"></i>
                                                         </button>
                                                     </form>
                                                 </div>
                                             @endforeach
                                         </div>
-                                    </td>
-                                </tr>
-                            @endif
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-16"><i
-                                        class="fas fa-chalkboard-teacher text-5xl text-slate-200 mb-3"></i>
-                                    <p class="text-slate-400">Aucun mentor enregistré</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                    @endif
+
+                                    <div class="mt-3 flex items-center justify-end gap-1.5">
+                                        <a href="{{ route('admin.mentors.edit', $mentor) }}" class="{{ $btnPetitSecondaire }}"
+                                            aria-label="Modifier {{ $mentor->user->nom_complet }}">
+                                            <i class="fas fa-pen text-[10px]" aria-hidden="true"></i>Modifier
+                                        </a>
+                                        <form action="{{ route('admin.mentors.destroy', $mentor) }}" method="POST"
+                                            id="del-mentor-{{ $mentor->id }}-carte">
+                                            @csrf @method('DELETE')
+                                            <button type="button" class="btn-delete {{ $btnIconeDanger }}"
+                                                data-form="del-mentor-{{ $mentor->id }}-carte" title="Supprimer"
+                                                aria-label="Supprimer {{ $mentor->user->nom_complet }}">
+                                                <i class="fas fa-trash text-xs" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <p id="mentorNoResult" class="hidden px-5 sm:px-6 py-6 text-center text-sm text-slate-500">Aucun résultat
+                    pour cette recherche.</p>
+            </section>
+        @else
+            <div class="rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                <p class="text-sm font-medium text-slate-900">Aucun mentor enregistré</p>
+                <p class="mt-1 text-sm text-slate-600">Ajoutez un mentor pour pouvoir lui affecter des stagiaires.</p>
+                <a href="{{ route('admin.mentors.create') }}"
+                    class="mt-3 inline-block text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded {{ $focus }}">Nouveau
+                    mentor</a>
             </div>
-            <div class="px-4 sm:px-5 py-4 border-t border-slate-100">{{ $mentors->links() }}</div>
-        </div>
+        @endif
+
+        <div>{{ $mentors->links() }}</div>
     </div>
 @endsection
 @push('scripts')
@@ -138,8 +235,19 @@
         document.getElementById('search').addEventListener('input', function() {
             const val = this.value.toLowerCase();
             document.querySelectorAll('.mentor-row').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+                // Même critère que la liste d'origine : informations du mentor (nom, téléphone, email, département, poste)
+                const cible = row.querySelector('.mentor-infos') || row;
+                const affiche = cible.textContent.toLowerCase().includes(val);
+                row.style.display = affiche ? '' : 'none';
+                // Dans le tableau, la ligne des stagiaires affectés suit la ligne du mentor
+                const suivante = row.nextElementSibling;
+                if (suivante && suivante.classList.contains('mentor-stagiaires')) {
+                    suivante.style.display = affiche ? '' : 'none';
+                }
             });
+            const lignes = document.querySelectorAll('#mentorTable .mentor-row');
+            const visibles = Array.from(lignes).filter(r => r.style.display !== 'none').length;
+            document.getElementById('mentorNoResult')?.classList.toggle('hidden', lignes.length === 0 || visibles > 0);
         });
     </script>
 @endpush

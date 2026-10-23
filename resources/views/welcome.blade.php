@@ -26,6 +26,11 @@
                         '88': '22rem',
                         '120': '30rem',
                         '144': '36rem',
+                    },
+                    // Palette DOCOS (identique aux espaces Admin, Mentor et Stagiaire)
+                    colors: {
+                        brand: { 50: '#eff5fa', 100: '#dce8f2', 200: '#b9d1e4', 600: '#1d5c8d', 700: '#174a73', 800: '#103860', 900: '#0b2540' },
+                        accent: { 50: '#e8f6ef', 100: '#cdebdc', 500: '#22a06b', 600: '#1a8a5c', 700: '#146e4a' },
                     }
                 }
             }
@@ -38,63 +43,162 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    <!-- Google Font (Poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <!-- Google Font (Inter, comme les espaces de l'application) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Styles personnalisés -->
     <style>
         * {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             overflow-x: hidden;
         }
 
-        /* Gradient de fond */
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        ::selection {
+            background: #b9d1e4;
+            color: #0b2540;
         }
 
-        /* Dégradé de texte */
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        /* Logotype : le fichier source est une image large avec marges, on en recadre la partie utile */
+        .logotype {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            flex-shrink: 0;
         }
 
-        /* Effet de verre */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .logotype img {
+            position: absolute;
+            max-width: none;
+            mix-blend-mode: multiply;
+            filter: brightness(1.05) contrast(1.08);
         }
 
-        /* Animation de flottement */
-        @keyframes float {
+        /* ---------- Signature : le cycle du dossier de stage ---------- */
+        .cycle-arc {
+            stroke-dasharray: 1120;
+            stroke-dashoffset: 0;
+        }
 
-            0%,
-            100% {
-                transform: translateY(0px);
+        .cycle-pointe {
+            opacity: 1;
+        }
+
+        .js .cycle-arc {
+            stroke-dashoffset: 1120;
+            animation: traceArc 1.5s cubic-bezier(.65, 0, .35, 1) .45s forwards;
+        }
+
+        .js .cycle-pointe {
+            opacity: 0;
+            animation: apparait .35s ease 1.85s forwards;
+        }
+
+        @keyframes traceArc {
+            to {
+                stroke-dashoffset: 0;
             }
+        }
 
-            50% {
-                transform: translateY(-20px);
+        @keyframes apparait {
+            to {
+                opacity: 1;
             }
         }
 
-        .floating {
-            animation: float 6s ease-in-out infinite;
+        .fiche {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 54%;
+            aspect-ratio: 4 / 5;
+            border-radius: 14px;
+            transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translate(var(--x, 0), var(--y, 0));
+        }
+
+        /* Entrée orchestrée du héros (une seule fois, contenu visible sans JavaScript) */
+        .js .entree {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: entree .7s cubic-bezier(.22, 1, .36, 1) forwards;
+            animation-delay: var(--d, 0ms);
+        }
+
+        .js .fiche.entree {
+            transform: translate(-50%, -46%) rotate(var(--r, 0deg)) translate(var(--x, 0), var(--y, 0));
+            animation-name: ficheEntree;
+        }
+
+        @keyframes entree {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes ficheEntree {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translate(var(--x, 0), var(--y, 0));
+            }
+        }
+
+        /* L'entrée attend la disparition du loader, puis se joue une seule fois */
+        .js:not(.pret) .entree,
+        .js:not(.pret) .cycle-arc,
+        .js:not(.pret) .cycle-pointe {
+            animation-play-state: paused;
+        }
+
+        /* État final garanti (animations suspendues par le navigateur, onglet en arrière-plan…) */
+        .entree-finie .entree {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        .entree-finie .fiche.entree {
+            transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translate(var(--x, 0), var(--y, 0)) !important;
+        }
+
+        .entree-finie .cycle-arc {
+            animation: none !important;
+            stroke-dashoffset: 0 !important;
+        }
+
+        .entree-finie .cycle-pointe {
+            animation: none !important;
+            opacity: 1 !important;
+        }
+
+        /* Fiches à onglet (section fonctionnalités) */
+        .onglet::before {
+            content: "";
+            position: absolute;
+            left: -1px;
+            top: -12px;
+            width: 92px;
+            height: 13px;
+            background: inherit;
+            border: 1px solid #dce8f2;
+            border-bottom: 0;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .onglet:hover::before {
+            border-color: #b9d1e4;
         }
 
         /* Loader */
         .loader {
             position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0b2540;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -107,40 +211,6 @@
             visibility: hidden;
         }
 
-        /* Amélioration du survol des cartes */
-        .hover-lift {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Bouton primaire */
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Ajustements pour l'accessibilité tactile */
-        @media (max-width: 640px) {
-
-            .btn-primary,
-            .glass-effect {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
-                padding-top: 0.75rem;
-                padding-bottom: 0.75rem;
-                font-size: 1rem;
-            }
-        }
-
         /* Désactiver les animations AOS sur petits écrans pour économiser des ressources */
         @media (max-width: 640px) {
             [data-aos] {
@@ -149,22 +219,76 @@
                 pointer-events: auto !important;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .js .cycle-arc {
+                animation: none;
+                stroke-dashoffset: 0;
+            }
+
+            .js .cycle-pointe,
+            .js .entree {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+
+            .js .fiche.entree {
+                transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translate(var(--x, 0), var(--y, 0));
+            }
+
+            .loader,
+            .loader * {
+                transition: none !important;
+                animation: none !important;
+            }
+
+            [data-aos] {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+        }
     </style>
+
+    {{-- Les animations d'entrée ne masquent du contenu que si JavaScript est actif --}}
+    <script>
+        document.documentElement.classList.add('js');
+    </script>
+    <noscript>
+        <style>
+            #loader {
+                display: none !important;
+            }
+
+            [data-aos] {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        </style>
+    </noscript>
 </head>
 
-<body>
+<body class="bg-brand-50 text-slate-900 antialiased">
 
     <!-- ============================================
     LOADER
     ============================================ -->
     <div id="loader" class="loader" role="status" aria-label="Chargement">
         <div class="text-center">
-            <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="relative rounded-3xl shadow-2xl w-32 xs:w-48 md:w-64 mb-6 floating" loading="lazy">
+            <span class="inline-block rounded-2xl bg-white px-4 py-2 mb-6" aria-hidden="true">
+                <span class="logotype w-[198px] h-[76px]">
+                    <img src="{{ asset('logo.png') }}" alt="" class="w-[273px] left-[-38px] top-[-36px]" loading="eager">
+                </span>
+            </span>
             <div class="flex space-x-2 justify-center" aria-hidden="true">
-                <div class="w-3 h-3 bg-white rounded-full animate-bounce"></div>
-                <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                <div class="w-3 h-3 bg-white rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2.5 h-2.5 bg-white rounded-full animate-bounce"></div>
+                <div class="w-2.5 h-2.5 bg-white rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2.5 h-2.5 bg-accent-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
             </div>
         </div>
     </div>
@@ -172,198 +296,220 @@
     <!-- ============================================
     HEADER / NAVIGATION
     ============================================ -->
-    <header class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 md:h-20">
-                <!-- Logo + Nom -->
-                <div class="flex items-center space-x-3">
-                    <img src="{{ asset('logo.png') }}" alt="DOCOS" class="h-10 md:h-12 w-auto rounded-xl shadow-md"
-                        loading="lazy">
-                    <span class="text-xl md:text-2xl font-bold gradient-text">DOCOS</span>
-                </div>
-
-                <!-- Bouton de connexion -->
-                <a href="{{ route('login') }}"
-                    class="btn-primary text-white px-5 py-2.5 md:px-8 md:py-3 rounded-full font-semibold flex items-center space-x-2 text-sm md:text-base transition-all hover:shadow-xl">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span class="hidden xs:inline">Se Connecter</span>
-                    <span class="xs:hidden">Connexion</span>
+    <header class="fixed inset-x-0 top-0 z-50 bg-brand-900/95 backdrop-blur border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between gap-4 h-16 md:h-[72px]">
+                <a href="#haut"
+                    class="inline-flex rounded-lg bg-white px-2.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900"
+                    aria-label="DOCOS, retour en haut de page">
+                    <span class="logotype w-[120px] h-[46px] md:w-[140px] md:h-[54px]" aria-hidden="true">
+                        <img src="{{ asset('logo.png') }}" alt=""
+                            class="w-[165px] left-[-23px] top-[-22px] md:w-[193px] md:left-[-27px] md:top-[-25px]">
+                    </span>
                 </a>
+
+                <nav class="flex items-center gap-2 sm:gap-6" aria-label="Navigation principale">
+                    <a href="#features"
+                        class="hidden sm:inline rounded text-sm font-medium text-brand-100 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">Fonctionnalités</a>
+                    <!-- Bouton de connexion -->
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-brand-900 whitespace-nowrap hover:bg-brand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">
+                        <i class="fas fa-sign-in-alt text-xs text-accent-600" aria-hidden="true"></i>
+                        <span class="hidden xs:inline">Se Connecter</span>
+                        <span class="xs:hidden">Connexion</span>
+                    </a>
+                </nav>
             </div>
         </div>
     </header>
 
-    <!-- ============================================
-    SECTION HERO
-    ============================================ -->
-    <section class="min-h-screen flex items-center gradient-bg pt-16 md:pt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-            <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+    <main id="haut">
+        <!-- ============================================
+        SECTION HERO
+        ============================================ -->
+        <section class="relative overflow-hidden bg-brand-900 text-white pt-28 md:pt-32 pb-28 md:pb-36">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[1.08fr_1fr] gap-12 lg:gap-10 items-center">
 
-                <!-- Texte -->
-                <div data-aos="fade-right" data-aos-duration="800" data-aos-once="true">
-                    <h1 class="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
-                        Gestion Professionnelle des
-                        <span class="text-yellow-300">Stagiaires</span>
-                    </h1>
-                    <p class="text-base xs:text-lg md:text-xl text-white/90 mt-4 md:mt-6 max-w-2xl">
-                        Solution complète et moderne pour gérer efficacement vos stagiaires, mentors et projets au sein
-                        de votre entreprise.
-                    </p>
-                    <div class="flex flex-wrap gap-3 sm:gap-4 mt-6 md:mt-8">
+                    <!-- Texte -->
+                    <div>
+                        <p class="entree inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[.14em] text-accent-100"
+                            style="--d:80ms">
+                            <span class="h-px w-8 bg-accent-500" aria-hidden="true"></span>
+                            Gestion numérique des documents des stagiaires
+                        </p>
+                        <h1 class="entree mt-6 text-[2.5rem] leading-[1.04] xs:text-5xl sm:text-6xl xl:text-[4.4rem] font-extrabold tracking-[-0.035em] text-balance"
+                            style="--d:180ms">
+                            Gestion Professionnelle des
+                            <span class="relative whitespace-nowrap text-accent-100">Stagiaires<svg
+                                    class="absolute left-0 -bottom-2 w-full h-3 text-accent-500" viewBox="0 0 200 12"
+                                    preserveAspectRatio="none" fill="none" aria-hidden="true">
+                                    <path d="M2 9 C 60 2, 140 2, 198 7" stroke="currentColor" stroke-width="4"
+                                        stroke-linecap="round" />
+                                </svg></span>
+                        </h1>
+                        <p class="entree mt-7 text-base sm:text-lg leading-relaxed text-brand-100 max-w-xl" style="--d:280ms">
+                            Solution complète et moderne pour gérer efficacement vos stagiaires, mentors et projets au
+                            sein de votre entreprise.
+                        </p>
+                        <div class="entree flex flex-col xs:flex-row flex-wrap gap-3 mt-9" style="--d:380ms">
+                            <a href="{{ route('login') }}"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-6 py-3.5 text-base font-semibold text-brand-900 whitespace-nowrap hover:bg-accent-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">
+                                Débuter l'expérience
+                                <i class="fas fa-arrow-right text-sm" aria-hidden="true"></i>
+                            </a>
+                            <a href="#features"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-3.5 text-base font-semibold text-white whitespace-nowrap hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">
+                                Découvrir
+                                <i class="fas fa-chevron-down text-sm" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Illustration : le dossier de stage dans la flèche circulaire du logo -->
+                    <div class="relative mx-auto w-full max-w-[300px] xs:max-w-[340px] sm:max-w-[420px] lg:max-w-[470px]"
+                        role="img"
+                        aria-label="Illustration : les documents du stagiaire (présence, rapports, attestations) réunis dans le cycle DOCOS">
+                        <div class="relative aspect-square">
+                            <svg class="absolute inset-0 h-full w-full" viewBox="0 0 480 480" fill="none" aria-hidden="true">
+                                <circle cx="240" cy="240" r="200" stroke="rgba(185,209,228,.12)" stroke-width="1" />
+                                <path class="cycle-arc" d="M308.4 52.1 A200 200 0 1 1 171.6 52.1" stroke="#22a06b"
+                                    stroke-width="14" stroke-linecap="round" />
+                                <path class="cycle-pointe" d="M190.5 45.4 L170.4 66.7 L163.2 41.6 Z" fill="#22a06b" />
+                            </svg>
+
+                            <!-- Fiches empilées (arrière-plan) -->
+                            <div class="fiche entree bg-brand-700 border border-white/10" style="--r:-11deg;--x:-6%;--y:2%;--d:520ms" aria-hidden="true"></div>
+                            <div class="fiche entree bg-brand-200" style="--r:7deg;--x:7%;--y:-1%;--d:600ms" aria-hidden="true"></div>
+
+                            <!-- Fiche principale -->
+                            <div class="fiche entree bg-white shadow-[0_28px_60px_-24px_rgba(0,0,0,.55)] p-[7%] flex flex-col"
+                                style="--d:700ms" aria-hidden="true">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-md bg-brand-900 text-white text-xs">
+                                        <i class="fas fa-folder-open"></i>
+                                    </span>
+                                    <span class="h-2 w-[42%] rounded-full bg-brand-100"></span>
+                                </div>
+                                <div class="mt-[9%] grid gap-[6%] flex-1 content-start">
+                                    @foreach ([['calendar-check', 'Présence'], ['file-alt', 'Rapports'], ['award', 'Attestations']] as [$icone, $libelle])
+                                        <div class="flex items-center gap-2.5 rounded-lg border border-brand-100 bg-brand-50 px-2.5 py-2">
+                                            <i class="fas fa-{{ $icone }} w-4 text-center text-[13px] text-brand-800"></i>
+                                            <span class="text-[12px] sm:text-[13px] font-semibold text-brand-900">{{ $libelle }}</span>
+                                            <span class="ml-auto flex h-4 w-4 items-center justify-center rounded-full bg-accent-500 text-white">
+                                                <i class="fas fa-check text-[8px]"></i>
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="mt-auto grid gap-1.5">
+                                    <span class="h-1.5 w-full rounded-full bg-brand-100"></span>
+                                    <span class="h-1.5 w-[70%] rounded-full bg-brand-100"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transition courbe vers la section suivante -->
+            <svg class="absolute inset-x-0 bottom-[-1px] w-full h-12 sm:h-20 text-brand-50" viewBox="0 0 1440 80"
+                preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
+                <path d="M0 80 L0 40 C 360 0, 1080 0, 1440 40 L1440 80 Z" />
+            </svg>
+        </section>
+
+        <!-- ============================================
+        SECTION FONCTIONNALITÉS
+        ============================================ -->
+        <section id="features" class="scroll-mt-20 py-16 sm:py-20 md:py-24">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-10 lg:gap-14">
+                    <div class="lg:sticky lg:top-28 lg:self-start" data-aos="fade-up" data-aos-once="true">
+                        <span class="block h-1 w-12 rounded-full bg-accent-500" aria-hidden="true"></span>
+                        <h2 class="mt-5 text-3xl sm:text-4xl font-extrabold tracking-[-0.025em] text-brand-900">
+                            Fonctionnalités clés
+                        </h2>
+                        <p class="mt-3 text-base sm:text-lg leading-relaxed text-slate-600">
+                            Tout ce dont vous avez besoin pour gérer vos stagiaires efficacement.
+                        </p>
+                    </div>
+
+                    <!-- Fiches : 1 colonne sur mobile, 2 à partir de la tablette -->
+                    @php
+                        $fonctionnalites = [
+                            ['users', 'Gestion des Stagiaires', "Suivez l'ensemble de vos stagiaires, leur progression et performances en temps réel."],
+                            ['tasks', 'Projets & Tâches', 'Assignez et suivez les projets avec un système de tâches complet et intuitif.'],
+                            ['chart-line', 'Rapports & Stats', 'Générez des rapports détaillés et visualisez les statistiques de performance.'],
+                            ['calendar-check', 'Présence', 'Suivez la présence des stagiaires avec un système fiable et sans faille.'],
+                            ['file-alt', 'Documents', 'Stockez, partagez et téléchargez tous vos documents en toute sécurité.'],
+                            ['award', 'Attestations', "Gérez les demandes et l'envoi d'attestations et conventions de stage."],
+                        ];
+                    @endphp
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-9 pt-3">
+                        @foreach ($fonctionnalites as $i => [$icone, $titre, $texte])
+                            <li class="onglet relative rounded-xl rounded-tl-none border border-brand-100 bg-white p-6 transition-colors hover:border-brand-200"
+                                data-aos="fade-up" data-aos-delay="{{ 60 * ($i % 2) }}" data-aos-once="true">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-900 text-white"
+                                        aria-hidden="true">
+                                        <i class="fas fa-{{ $icone }} text-sm"></i>
+                                    </span>
+                                    <h3 class="text-lg font-semibold tracking-tight text-brand-900">{{ $titre }}</h3>
+                                </div>
+                                <p class="mt-3 text-[15px] leading-relaxed text-slate-600">{{ $texte }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+        SECTION APPEL À L'ACTION (CTA)
+        ============================================ -->
+        <section class="pb-20 sm:pb-24">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="relative" data-aos="fade-up" data-aos-once="true">
+                    <!-- Feuilles empilées sous la feuille principale -->
+                    <div class="absolute inset-0 rounded-2xl bg-brand-200 rotate-[-2.2deg] translate-y-2" aria-hidden="true"></div>
+                    <div class="absolute inset-0 rounded-2xl bg-brand-100 rotate-[1.4deg]" aria-hidden="true"></div>
+                    <div
+                        class="relative rounded-2xl border border-brand-100 bg-white px-6 py-10 sm:px-12 sm:py-12 text-center">
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-[-0.025em] text-brand-900">Prêt à Commencer ?</h2>
+                        <p class="mt-3 text-base sm:text-lg text-slate-600">
+                            Rejoignez-nous et gérez vos stagiaires de manière professionnelle.
+                        </p>
                         <a href="{{ route('login') }}"
-                            class="bg-white text-purple-600 px-6 sm:px-8 py-3 md:py-4 rounded-full font-bold text-sm sm:text-base md:text-lg hover:shadow-2xl hover:scale-105 transition-all inline-flex items-center">
-                            Débuter l'expérience
-                            <i class="fas fa-arrow-right ml-2 hidden sm:inline"></i>
-                        </a>
-                        <a href="#features"
-                            class="glass-effect text-white px-6 sm:px-8 py-3 md:py-4 rounded-full font-bold text-sm sm:text-base md:text-lg hover:bg-white/20 transition-all inline-flex items-center">
-                            Découvrir
-                            <i class="fas fa-chevron-down ml-2"></i>
+                            class="mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-7 py-3.5 text-base font-semibold text-white whitespace-nowrap hover:bg-brand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+                            Accéder à la Plateforme
+                            <i class="fas fa-arrow-right text-sm text-accent-100" aria-hidden="true"></i>
                         </a>
                     </div>
                 </div>
-
-                <!-- Image (flottante) -->
-                <div data-aos="fade-left" data-aos-duration="800" data-aos-once="true"
-                    class="flex justify-center lg:justify-end">
-                    <div class="relative w-48 xs:w-56 sm:w-72 md:w-80 lg:w-96 xl:w-104 2xl:w-120">
-                        <div class="absolute inset-0 bg-yellow-300/30 rounded-3xl blur-3xl -z-10"></div>
-                        <img src="{{ asset('logo.png') }}" alt="DOCOS - Illustration"
-                            class="relative rounded-3xl shadow-2xl w-full h-auto floating" loading="lazy">
-                    </div>
-                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- ============================================
-    SECTION FONCTIONNALITÉS
-    ============================================ -->
-    <section id="features" class="py-16 sm:py-20 md:py-24 lg:py-28 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16" data-aos="fade-up" data-aos-once="true">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text">Fonctionnalités clés</h2>
-                <p class="text-base sm:text-lg md:text-xl text-gray-600 mt-3 max-w-2xl mx-auto">
-                    Tout ce dont vous avez besoin pour gérer vos stagiaires efficacement.
-                </p>
-            </div>
-
-            <!-- Grille responsive : 1 colonne sur mobile, 2 sur tablette, 3 sur desktop -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-
-                <!-- Carte 1 -->
-                <div class="hover-lift bg-gradient-to-br from-blue-50 to-blue-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="100" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-users text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Gestion des Stagiaires</h3>
-                    <p class="text-sm md:text-base text-gray-600">Suivez l'ensemble de vos stagiaires, leur progression
-                        et performances en temps réel.</p>
-                </div>
-
-                <!-- Carte 2 -->
-                <div class="hover-lift bg-gradient-to-br from-purple-50 to-purple-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="150" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-tasks text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Projets & Tâches</h3>
-                    <p class="text-sm md:text-base text-gray-600">Assignez et suivez les projets avec un système de
-                        tâches complet et intuitif.</p>
-                </div>
-
-                <!-- Carte 3 -->
-                <div class="hover-lift bg-gradient-to-br from-pink-50 to-pink-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="200" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-pink-500 to-red-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-chart-line text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Rapports & Stats</h3>
-                    <p class="text-sm md:text-base text-gray-600">Générez des rapports détaillés et visualisez les
-                        statistiques de performance.</p>
-                </div>
-
-                <!-- Carte 4 -->
-                <div class="hover-lift bg-gradient-to-br from-green-50 to-green-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="250" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-calendar-check text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Présence</h3>
-                    <p class="text-sm md:text-base text-gray-600">Suivez la présence des stagiaires avec un système
-                        fiable et sans faille.</p>
-                </div>
-
-                <!-- Carte 5 -->
-                <div class="hover-lift bg-gradient-to-br from-yellow-50 to-yellow-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="300" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-file-alt text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Documents</h3>
-                    <p class="text-sm md:text-base text-gray-600">Stockez, partagez et téléchargez tous vos documents
-                        en toute sécurité.</p>
-                </div>
-
-                <!-- Carte 6 -->
-                <div class="hover-lift bg-gradient-to-br from-indigo-50 to-indigo-100/60 p-6 md:p-8 rounded-3xl"
-                    data-aos="fade-up" data-aos-delay="350" data-aos-once="true">
-                    <div
-                        class="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 md:mb-6">
-                        <i class="fas fa-award text-2xl md:text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Attestations</h3>
-                    <p class="text-sm md:text-base text-gray-600">Gérez les demandes et l'envoi d'attestations et
-                        conventions de stage.</p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================
-    SECTION APPEL À L'ACTION (CTA)
-    ============================================ -->
-    <section class="py-16 sm:py-20 md:py-24 gradient-bg relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <div
-                class="absolute top-0 left-0 w-72 h-72 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2">
-            </div>
-            <div
-                class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/3 translate-y-1/3">
-            </div>
-        </div>
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10" data-aos="zoom-in"
-            data-aos-once="true">
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 md:mb-6">Prêt à Commencer ?</h2>
-            <p class="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8">
-                Rejoignez-nous et gérez vos stagiaires de manière professionnelle.
-            </p>
-            <a href="{{ route('login') }}"
-                class="inline-block bg-white text-purple-600 px-8 sm:px-12 py-3.5 md:py-4 rounded-full font-bold text-base sm:text-lg md:text-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                Accéder à la Plateforme
-                <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <!-- ============================================
     FOOTER
     ============================================ -->
-    <footer class="bg-gray-900 text-white py-8 md:py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="relative rounded-3xl shadow-2xl h-12 md:h-16 w-auto mx-auto mb-4" loading="lazy">
-            <p class="text-xs sm:text-sm text-gray-400">
+    <footer class="bg-brand-900 text-brand-100">
+        <div
+            class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center md:items-center justify-between gap-6">
+            <span class="inline-flex rounded-lg bg-white px-2.5 py-1" role="img" aria-label="DOCOS">
+                <span class="logotype w-[120px] h-[46px]" aria-hidden="true">
+                    <img src="{{ asset('logo.png') }}" alt="" class="w-[165px] left-[-23px] top-[-22px]">
+                </span>
+            </span>
+            <nav class="flex items-center gap-6 text-sm" aria-label="Pied de page">
+                <a href="#features"
+                    class="rounded hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">Fonctionnalités</a>
+                <a href="{{ route('login') }}"
+                    class="rounded hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-900">Se Connecter</a>
+            </nav>
+            <p class="text-xs sm:text-sm text-brand-200">
                 &copy; {{ date('Y') }} DOCOS. Tous droits réservés.
-
             </p>
         </div>
     </footer>
@@ -376,28 +522,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <script>
+        const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         // ---- Loader ----
+        let loaderMasque = false;
+        const masquerLoader = () => {
+            if (loaderMasque) return;
+            loaderMasque = true;
+            document.getElementById('loader').classList.add('hidden');
+            // Lance l'entrée du héros, puis fige l'état final quelle que soit la suite
+            document.documentElement.classList.add('pret');
+            setTimeout(() => document.documentElement.classList.add('entree-finie'), 2600);
+        };
         window.addEventListener('load', function() {
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 1500);
+            setTimeout(masquerLoader, mouvementReduit ? 0 : 1500);
         });
+        // Animations limitées : pas d'attente du chargement complet des ressources externes
+        if (mouvementReduit) document.addEventListener('DOMContentLoaded', masquerLoader);
+        // Filet de sécurité : le loader ne bloque jamais la page si une ressource tarde
+        setTimeout(masquerLoader, 6000);
 
         // ---- AOS ----
-        // Désactiver les animations sur les petits écrans pour économiser les ressources
+        // Désactiver les animations sur les petits écrans (et si l'utilisateur limite les animations)
         const isMobile = window.innerWidth < 640;
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100,
-            disable: isMobile ? true : false, // désactive AOS sur mobile (<640px)
-        });
+        if (window.AOS) {
+            AOS.init({
+                duration: 700,
+                once: true,
+                offset: 80,
+                disable: isMobile || mouvementReduit,
+            });
+        }
 
         // ---- GSAP (optionnel, pour des animations supplémentaires) ----
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Exemple : animation au scroll des cartes (déjà gérées par AOS, mais on peut ajouter un effet)
-        // Ici on ne fait rien de plus pour éviter le conflit avec AOS.
+        if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
     </script>
 </body>
 

@@ -1,161 +1,188 @@
 @extends('layouts.mentor')
 @section('titre', 'Tableau de bord Mentor')
 @section('content')
-    <div class="space-y-4 sm:space-y-6">
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $btnPetitPrimaire = 'inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnPetitDanger = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+        $btnPetitSecondaire = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        // Variantes sur le bandeau marine
+        $focusMarine = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $panneau = 'bg-white border border-brand-100 rounded-xl overflow-hidden';
+        $enTete = 'px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3';
 
-        <!-- Bannière bienvenue -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden"
-            data-aos="fade-down">
-            <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
-            <div class="absolute left-0 bottom-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
-            <div class="relative z-10">
-                <h2 class="text-2xl sm:text-3xl font-black mb-2">Bienvenue, {{ Auth::user()->prenom }} 👋</h2>
-                <p class="text-emerald-200 text-sm sm:text-base">Vous encadrez <span
-                        class="text-white font-bold">{{ $stats['stagiaires'] }}</span> stagiaire(s) actuellement</p>
+        $chiffres = [
+            ['Stagiaires', $stats['stagiaires']],
+            ['Projets', $stats['projets']],
+            ['Rapports à évaluer', $stats['rapports_soumis']],
+            ['Permissions en attente', $stats['permissions_en_attente']],
+            ['Attestations à valider', $stats['attestations_a_valider']],
+        ];
+    @endphp
+
+    <div class="space-y-5 max-w-6xl mx-auto">
+
+        <!-- Accueil et chiffres clés (bandeau marine) -->
+        <section class="rounded-xl bg-brand-800 text-white p-5 sm:p-6">
+            <h2 class="text-2xl font-semibold text-white tracking-tight">Bonjour, {{ Auth::user()->prenom }}</h2>
+            <p class="mt-1 text-sm text-brand-100">
+                Vous encadrez <span class="font-medium text-white tabular-nums">{{ $stats['stagiaires'] }}</span>
+                stagiaire(s) actuellement.
+            </p>
+
+            <dl class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-4">
+                @foreach ($chiffres as [$label, $val])
+                    <div class="min-w-0">
+                        <dd class="text-2xl font-semibold text-white tabular-nums">{{ $val }}</dd>
+                        <dt class="mt-0.5 text-xs text-brand-100">{{ $label }}</dt>
+                    </div>
+                @endforeach
+            </dl>
+
+            <!-- Raccourcis -->
+            <div class="mt-6 pt-5 border-t border-white/15 grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
+                <a href="{{ route('mentor.projects.create') }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-brand-800 hover:bg-brand-50 transition-colors {{ $focusMarine }}">
+                    <i class="fas fa-plus text-xs" aria-hidden="true"></i>Créer un projet
+                </a>
+                @foreach ([[route('mentor.tasks.create'), 'tasks', 'Créer une tâche'], [route('mentor.reports.index'), 'file-alt', 'Voir les rapports'], [route('mentor.stagiaires.index'), 'user-graduate', 'Mes stagiaires']] as [$route, $icon, $label])
+                    <a href="{{ $route }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10 transition-colors {{ $focusMarine }}">
+                        <i class="fas fa-{{ $icon }} text-xs text-brand-100" aria-hidden="true"></i>{{ $label }}
+                    </a>
+                @endforeach
             </div>
-        </div>
+        </section>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            @foreach ([[$stats['stagiaires'], 'Stagiaires', 'fas fa-user-graduate', 'from-emerald-400 to-teal-500'], [$stats['projets'], 'Projets', 'fas fa-project-diagram', 'from-blue-400 to-indigo-500'], [$stats['rapports_soumis'], 'Rapports à évaluer', 'fas fa-file-alt', 'from-amber-400 to-orange-500'], [$stats['permissions_en_attente'], 'Permissions en attente', 'fas fa-calendar-check', 'from-purple-400 to-pink-500'], [$stats['attestations_a_valider'], 'Attestations à valider', 'fas fa-certificate', 'from-rose-400 to-red-500']] as $i => [$val, $label, $icon, $grad])
-                <div class="bg-gradient-to-br {{ $grad }} text-white rounded-2xl p-5 relative overflow-hidden card"
-                    data-aos="fade-up" data-aos-delay="{{ $i * 80 }}">
-                    <div class="absolute right-2 top-2 opacity-20"><i class="{{ $icon }} text-3xl"></i></div>
-                    <p class="text-white/80 text-xs font-medium leading-tight">{{ $label }}</p>
-                    <p class="text-white font-black text-2xl sm:text-3xl mt-1">{{ $val }}</p>
-                </div>
-            @endforeach
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Avancement stagiaires -->
-            <div class="card p-5 sm:p-6" data-aos="fade-right">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-slate-800 font-bold text-lg"><i
-                            class="fas fa-chart-line text-emerald-500 mr-2"></i>Avancement de mes stagiaires</h3>
-                    <a href="{{ route('mentor.stagiaires.index') }}" class="text-emerald-600 text-sm hover:underline">Voir
-                        tous →</a>
+            <!-- Avancement des stagiaires -->
+            <section class="{{ $panneau }} lg:col-span-2">
+                <div class="{{ $enTete }}">
+                    <h3 class="text-base font-semibold text-slate-900">Avancement de mes stagiaires</h3>
+                    <a href="{{ route('mentor.stagiaires.index') }}" class="flex-shrink-0 {{ $lien }}">Voir tout →</a>
                 </div>
-                @forelse($avancementStagiaires as $stag)
-                    <div class="mb-5 last:mb-0">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div
-                                class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                @if ($stag->user->photo)
-                                    <img src="{{ asset('storage/' . $stag->user->photo) }}"
-                                        class="w-full h-full rounded-xl object-cover" loading="lazy">
-                                @else
-                                    <span
-                                        class="text-white font-bold text-sm">{{ strtoupper(substr($stag->user->prenom, 0, 1)) }}</span>
-                                @endif
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-center">
-                                    <p class="text-slate-800 font-semibold text-sm">{{ $stag->user->nom_complet }}</p>
-                                    <span class="text-emerald-600 font-bold text-sm">{{ $stag->progression }}%</span>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse($avancementStagiaires as $stag)
+                        <li class="py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    @if ($stag->user->photo)
+                                        <img src="{{ asset('storage/' . $stag->user->photo) }}" alt=""
+                                            class="h-full w-full object-cover" loading="lazy">
+                                    @else
+                                        <span class="text-sm font-semibold text-brand-800"
+                                            aria-hidden="true">{{ strtoupper(substr($stag->user->prenom, 0, 1)) }}</span>
+                                    @endif
                                 </div>
-                                <p class="text-slate-400 text-xs">{{ $stag->matricule }}</p>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-baseline justify-between gap-3">
+                                        <p class="text-sm font-medium text-slate-900 truncate">{{ $stag->user->nom_complet }}</p>
+                                        <p class="text-sm font-medium text-slate-900 tabular-nums flex-shrink-0">
+                                            {{ $stag->progression }} %</p>
+                                    </div>
+                                    <p class="text-xs text-slate-500 font-mono">{{ $stag->matricule }}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden ml-12">
-                            <div class="h-2.5 rounded-full transition-all duration-1000 {{ $stag->progression >= 75 ? 'bg-gradient-to-r from-emerald-400 to-green-500' : ($stag->progression >= 40 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-red-400 to-pink-400') }}"
-                                style="width:{{ $stag->progression }}%"></div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-8">
-                        <i class="fas fa-user-graduate text-4xl text-slate-200 mb-3"></i>
-                        <p class="text-slate-400 text-sm">Aucun stagiaire assigné</p>
-                    </div>
-                @endforelse
-            </div>
-
-            <div class="space-y-5">
-                <!-- Rapports à évaluer -->
-                <div class="card p-5 sm:p-6" data-aos="fade-left">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-slate-800 font-bold"><i class="fas fa-file-alt text-amber-500 mr-2"></i>Rapports à
-                            évaluer</h3>
-                        <a href="{{ route('mentor.reports.index') }}" class="text-emerald-600 text-sm hover:underline">Voir
-                            tous →</a>
-                    </div>
-                    @forelse($rapportsRecents as $rapport)
-                        <div
-                            class="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
-                            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-file-alt text-amber-600 text-xs"></i>
+                            <div class="mt-2 ml-12 h-2 rounded-full bg-slate-100 overflow-hidden" role="progressbar"
+                                aria-label="Progression des tâches de {{ $stag->user->nom_complet }}" aria-valuemin="0"
+                                aria-valuemax="100" aria-valuenow="{{ $stag->progression }}">
+                                <div class="h-2 rounded-full bg-accent-500 transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                                    style="width:{{ $stag->progression }}%"></div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-slate-700 font-medium text-sm truncate">{{ $rapport->titre }}</p>
-                                <p class="text-slate-400 text-xs">{{ $rapport->stagiaire->user->nom_complet ?? '—' }}</p>
-                            </div>
-                            <a href="{{ route('mentor.reports.show', $rapport) }}"
-                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1 rounded-lg font-medium transition">Évaluer</a>
-                        </div>
+                        </li>
                     @empty
-                        <p class="text-slate-400 text-sm text-center py-4">Aucun rapport en attente</p>
+                        <li class="py-8 text-center">
+                            <p class="text-sm font-medium text-slate-700">Aucun stagiaire assigné</p>
+                            <p class="mt-1 text-sm text-slate-500">Les stagiaires que l'administration vous affecte
+                                apparaîtront ici.</p>
+                        </li>
                     @endforelse
-                </div>
+                </ul>
+            </section>
 
-                <!-- Permissions en attente -->
-                <div class="card p-5 sm:p-6" data-aos="fade-left" data-aos-delay="100">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-slate-800 font-bold"><i
-                                class="fas fa-calendar-check text-purple-500 mr-2"></i>Permissions à valider</h3>
-                        <a href="{{ route('mentor.presences.index') }}"
-                            class="text-emerald-600 text-sm hover:underline">Voir →</a>
+            <!-- Colonne de droite : rapports et permissions -->
+            <div class="space-y-5">
+
+                <!-- Rapports à évaluer -->
+                <section class="{{ $panneau }}">
+                    <div class="{{ $enTete }}">
+                        <h3 class="text-base font-semibold text-slate-900">Rapports à évaluer</h3>
+                        <a href="{{ route('mentor.reports.index') }}" class="flex-shrink-0 {{ $lien }}">Voir tout →</a>
                     </div>
-                    @forelse($permissionsEnAttente as $perm)
-                        <div class="p-3 bg-purple-50 rounded-xl mb-2 last:mb-0">
-                            <div class="flex flex-col sm:flex-row items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-slate-800 font-semibold text-sm">
-                                        {{ $perm->stagiaire->user->nom_complet ?? '—' }}</p>
-                                    <p class="text-slate-500 text-xs">{{ $perm->date_debut->format('d/m/Y') }} →
-                                        {{ $perm->date_fin->format('d/m/Y') }}</p>
-                                    <p class="text-slate-400 text-xs mt-0.5 truncate">{{ $perm->motif }}</p>
+                    <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                        @forelse($rapportsRecents as $rapport)
+                            <li class="flex items-center gap-3 py-3">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-900 truncate">{{ $rapport->titre }}</p>
+                                    <p class="text-xs text-slate-500 truncate">
+                                        {{ $rapport->stagiaire->user->nom_complet ?? '—' }}</p>
                                 </div>
-                                <div class="flex gap-1.5 flex-shrink-0">
+                                <a href="{{ route('mentor.reports.show', $rapport) }}"
+                                    class="flex-shrink-0 {{ $btnPetitSecondaire }}">Évaluer</a>
+                            </li>
+                        @empty
+                            <li class="py-6 text-center">
+                                <p class="text-sm font-medium text-slate-700">Aucun rapport en attente</p>
+                                <p class="mt-1 text-sm text-slate-500">Les rapports soumis par vos stagiaires
+                                    apparaîtront ici.</p>
+                            </li>
+                        @endforelse
+                    </ul>
+                </section>
+
+                <!-- Permissions à valider -->
+                <section class="{{ $panneau }}">
+                    <div class="{{ $enTete }}">
+                        <h3 class="text-base font-semibold text-slate-900">Permissions à valider</h3>
+                        <a href="{{ route('mentor.presences.index') }}" class="flex-shrink-0 {{ $lien }}">Voir →</a>
+                    </div>
+                    <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                        @forelse($permissionsEnAttente as $perm)
+                            <li class="py-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <p class="text-sm font-medium text-slate-900 min-w-0 truncate">
+                                        {{ $perm->stagiaire->user->nom_complet ?? '—' }}</p>
+                                    <span
+                                        class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 bg-amber-50 text-amber-800">En
+                                        attente</span>
+                                </div>
+                                <p class="mt-0.5 text-xs text-slate-500 tabular-nums">
+                                    {{ $perm->date_debut->format('d/m/Y') }} → {{ $perm->date_fin->format('d/m/Y') }}</p>
+                                <p class="mt-1 text-sm text-slate-600 truncate" title="{{ $perm->motif }}">{{ $perm->motif }}
+                                </p>
+                                <div class="mt-3 flex gap-2">
                                     <form action="{{ route('mentor.presences.validerPermission', $perm) }}" method="POST"
                                         class="no-loader">
                                         @csrf @method('PATCH')
                                         <input type="hidden" name="statut" value="valide">
-                                        <button type="submit"
-                                            class="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg flex items-center justify-center transition"
-                                            title="Valider">
-                                            <i class="fas fa-check text-xs"></i>
+                                        <button type="submit" class="{{ $btnPetitPrimaire }}"
+                                            aria-label="Valider la permission de {{ $perm->stagiaire->user->nom_complet ?? 'ce stagiaire' }}">
+                                            <i class="fas fa-check" aria-hidden="true"></i>Valider
                                         </button>
                                     </form>
                                     <form action="{{ route('mentor.presences.validerPermission', $perm) }}" method="POST"
                                         class="no-loader">
                                         @csrf @method('PATCH')
                                         <input type="hidden" name="statut" value="refuse">
-                                        <button type="submit"
-                                            class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition"
-                                            title="Refuser">
-                                            <i class="fas fa-times text-xs"></i>
+                                        <button type="submit" class="{{ $btnPetitDanger }}"
+                                            aria-label="Refuser la permission de {{ $perm->stagiaire->user->nom_complet ?? 'ce stagiaire' }}">
+                                            <i class="fas fa-times" aria-hidden="true"></i>Refuser
                                         </button>
                                     </form>
                                 </div>
-                            </div>
-                        </div>
-                    @empty
-                        <p class="text-slate-400 text-sm text-center py-4">Aucune permission en attente</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
-        <!-- Actions rapides -->
-        <div class="card p-5 sm:p-6">
-            <h3 class="text-slate-800 font-bold text-lg mb-4"><i class="fas fa-bolt text-amber-500 mr-2"></i>Raccourcis</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                @foreach ([[route('mentor.projects.create'), 'fas fa-plus-circle', 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100', 'Créer un projet'], [route('mentor.tasks.create'), 'fas fa-tasks', 'bg-blue-50 text-blue-700 hover:bg-blue-100', 'Créer une tâche'], [route('mentor.reports.index'), 'fas fa-file-alt', 'bg-amber-50 text-amber-700 hover:bg-amber-100', 'Voir les rapports'], [route('mentor.stagiaires.index'), 'fas fa-user-graduate', 'bg-purple-50 text-purple-700 hover:bg-purple-100', 'Mes stagiaires']] as [$route, $icon, $cls, $label])
-                    <a href="{{ $route }}"
-                        class="{{ $cls }} flex flex-col items-center gap-2 py-5 rounded-2xl font-medium text-sm transition-all hover:-translate-y-1 hover:shadow-md">
-                        <i class="{{ $icon }} text-2xl"></i>{{ $label }}
-                    </a>
-                @endforeach
+                            </li>
+                        @empty
+                            <li class="py-6 text-center">
+                                <p class="text-sm font-medium text-slate-700">Aucune permission en attente</p>
+                                <p class="mt-1 text-sm text-slate-500">Les demandes d'absence de vos stagiaires
+                                    apparaîtront ici.</p>
+                            </li>
+                        @endforelse
+                    </ul>
+                </section>
             </div>
         </div>
     </div>
