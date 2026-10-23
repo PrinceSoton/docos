@@ -2,6 +2,14 @@
 @section('titre', 'Document')
 @section('breadcrumb', 'Documents > Détail')
 @section('content')
+    {{-- Rôles stagiaire, mentor et admin : présentations dédiées (refonte). Autre rôle : rendu d'origine ci-dessous, inchangé. --}}
+    @if (Auth::user()->role === 'stagiaire')
+        @include('stagiaire.documents.show')
+    @elseif (Auth::user()->role === 'mentor')
+        @include('mentor.documents.show')
+    @elseif (Auth::user()->role === 'admin')
+        @include('admin.documents.show')
+    @else
     <div class="max-w-4xl mx-auto px-4 sm:px-0">
         <div class="card p-5 sm:p-8" data-aos="fade-up">
             <!-- En-tête -->
@@ -173,4 +181,5 @@ $fileUrl = Storage::url($document->fichier);
             </div>
         </div>
     </div>
+    @endif
 @endsection

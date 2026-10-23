@@ -2,6 +2,14 @@
 @section('titre', 'Modifier le profil')
 @section('breadcrumb', 'Profil > Modifier')
 @section('content')
+    {{-- Rôles stagiaire, mentor et admin : présentations dédiées (refonte). Autre rôle : rendu d'origine ci-dessous, inchangé. --}}
+    @if (Auth::user()->role === 'stagiaire')
+        @include('stagiaire.profile.edit')
+    @elseif (Auth::user()->role === 'mentor')
+        @include('mentor.profile.edit')
+    @elseif (Auth::user()->role === 'admin')
+        @include('admin.profile.edit')
+    @else
     <div class="max-w-2xl mx-auto">
         <div class="card p-8" data-aos="fade-up">
             <div class="flex items-center gap-3 mb-6">
@@ -71,7 +79,9 @@
             </form>
         </div>
     </div>
+    @endif
 @endsection
+@if (! in_array(Auth::user()->role, ['stagiaire', 'mentor', 'admin']))
 @push('scripts')
     <script>
         document.getElementById('photoInput')?.addEventListener('change', function() {
@@ -90,3 +100,4 @@
         });
     </script>
 @endpush
+@endif

@@ -2,6 +2,14 @@
 @section('titre', 'Mon Profil')
 @section('breadcrumb', 'Profil utilisateur')
 @section('content')
+    {{-- Rôles stagiaire, mentor et admin : présentations dédiées (refonte). Autre rôle : rendu d'origine ci-dessous, inchangé. --}}
+    @if (Auth::user()->role === 'stagiaire')
+        @include('stagiaire.profile.index')
+    @elseif (Auth::user()->role === 'mentor')
+        @include('mentor.profile.index')
+    @elseif (Auth::user()->role === 'admin')
+        @include('admin.profile.index')
+    @else
     <div class="max-w-4xl mx-auto space-y-6">
         <!-- Card profil -->
         <div class="card p-0 overflow-hidden" data-aos="fade-up">
@@ -126,4 +134,5 @@
             </form>
         </div>
     </div>
+    @endif
 @endsection

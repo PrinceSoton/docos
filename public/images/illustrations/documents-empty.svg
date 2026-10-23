@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Aucun document</title>
+  <desc id="desc">Illustration d'un dossier ouvert avec des documents rangés</desc>
+  <rect x="16" y="14" width="208" height="152" rx="28" fill="#eff5fa"/>
+  <circle cx="190" cy="48" r="18" fill="#e8f6ef"/>
+  <circle cx="49" cy="126" r="8" fill="#b9d1e4"/>
+  <path d="M70 59a9 9 0 0 1 9-9h31l12 13h40a9 9 0 0 1 9 9v7H70V59Z" fill="#dce8f2" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M83 39h37l15 15v50H83a8 8 0 0 1-8-8V47a8 8 0 0 1 8-8Z" fill="#fff" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M120 40v10a5 5 0 0 0 5 5h10" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M88 68h37M88 79h29" stroke="#b9d1e4" stroke-width="4" stroke-linecap="round"/>
+  <path d="m54 87 8 9h25v43a9 9 0 0 0 9 9h69a9 9 0 0 0 9-9V91a9 9 0 0 0-9-9h-35l-11 10H62a9 9 0 0 0-8 5Z" fill="#cdebdc" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m54 96 14 35a10 10 0 0 0 9 6h96a10 10 0 0 0 9-7l11-34a7 7 0 0 0-7-9h-42l-12 10H61a8 8 0 0 0-7  -1Z" fill="#fff" stroke="#103860" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M92 117h47" stroke="#22a06b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M97 127h31" stroke="#b9d1e4" stroke-width="3" stroke-linecap="round"/>
+</svg>
