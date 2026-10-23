@@ -2,147 +2,129 @@
 @section('titre', "Demande d'attestation")
 @section('breadcrumb', 'Attestations > Demande')
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-certificate text-amber-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Demande officielle</h2>
-                    <p class="text-sm text-slate-400">Attestation de stage ou convention de stage</p>
-                </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+
+        // Carte d'option (radio) : l'entrée réelle est masquée visuellement mais reste focusable ;
+        // l'état sélectionné/focus/désactivé est porté par les classes "peer-*".
+        // Non sélectionnée : blanche, bordure brand-100 ; sélectionnée : border-brand-600 bg-brand-50 ;
+        // désactivée : fond slate-50, texte inchangé (lisible).
+        $carte = 'block h-full rounded-lg border border-brand-100 bg-white p-4 pr-11 cursor-pointer transition-colors hover:border-brand-200 peer-checked:border-brand-600 peer-checked:bg-brand-50 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-600 peer-focus-visible:ring-offset-2 peer-disabled:cursor-not-allowed peer-disabled:border-slate-200 peer-disabled:bg-slate-50 peer-disabled:hover:border-slate-200';
+        $pastille = 'pointer-events-none absolute right-4 top-4 h-4 w-4 rounded-full border border-slate-400 bg-white peer-checked:border-[5px] peer-checked:border-brand-600 peer-disabled:border-slate-300 peer-disabled:bg-slate-100';
+    @endphp
+
+    <div class="max-w-3xl mx-auto space-y-5">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <h3 class="text-base font-semibold text-slate-900">Demande officielle</h3>
+            <p class="mt-0.5 text-sm text-slate-500">Attestation de stage ou convention de stage</p>
+
+            <!-- Processus (bloc teinté) -->
+            <div class="mt-5 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                <p class="text-xs font-medium text-slate-900">Processus de validation</p>
+                <ol class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-3 text-sm text-slate-600">
+                    <li><span class="font-medium text-slate-900 tabular-nums">1.</span> Votre demande</li>
+                    <li><span class="font-medium text-slate-900 tabular-nums">2.</span> Validation mentor</li>
+                    <li><span class="font-medium text-slate-900 tabular-nums">3.</span> Envoi admin</li>
+                </ol>
             </div>
 
-            <!-- Processus -->
-            <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 mb-6">
-                <p class="text-sm text-blue-700 font-medium mb-2"><i class="fas fa-info-circle mr-1"></i>Processus de
-                    validation</p>
-                <div class="flex flex-wrap items-center gap-2 text-xs text-blue-600">
-                    <span class="bg-blue-200 px-2 py-1 rounded-lg">1. Votre demande</span>
-                    <i class="fas fa-arrow-right hidden xs:inline"></i>
-                    <span class="bg-blue-200 px-2 py-1 rounded-lg">2. Validation mentor</span>
-                    <i class="fas fa-arrow-right hidden xs:inline"></i>
-                    <span class="bg-blue-200 px-2 py-1 rounded-lg">3. Envoi admin</span>
-                </div>
-            </div>
-
-            <form action="{{ route('stagiaire.attestations.store') }}" method="POST" class="space-y-5">
+            <form action="{{ route('stagiaire.attestations.store') }}" method="POST" class="mt-6 space-y-6">
                 @csrf
                 <!-- Choix du type -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-3">Type de document *</label>
-                    <div class="grid grid-cols-1 xs:grid-cols-2 gap-4">
-                        <label
-                            class="flex flex-col items-center gap-3 p-4 sm:p-5 border-2 rounded-2xl cursor-pointer transition hover:border-blue-400
-                            {{ $attestationExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
-                            <input type="radio" name="type" value="attestation"
-                                {{ $attestationExiste ? 'disabled' : '' }} class="sr-only" required>
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-certificate text-blue-600 text-xl"></i>
-                            </div>
-                            <div class="text-center">
-                                <p class="font-bold text-slate-800 text-sm">Attestation de stage</p>
+                <fieldset>
+                    <legend class="block text-sm font-medium text-slate-700 mb-2">Type de document <span class="text-red-700" aria-hidden="true">*</span></legend>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="relative">
+                            <input type="radio" id="type_attestation" name="type" value="attestation"
+                                {{ $attestationExiste ? 'disabled' : '' }} @checked(old('type') === 'attestation') class="peer sr-only" required>
+                            <span class="{{ $pastille }}" aria-hidden="true"></span>
+                            <label for="type_attestation" class="{{ $carte }}">
+                                <span class="block text-sm font-medium text-slate-900">Attestation de stage</span>
                                 @if ($attestationExiste)
-                                    <span class="text-xs text-green-600 font-medium"><i class="fas fa-check mr-1"></i>Déjà
-                                        demandée</span>
+                                    <span class="mt-1.5 inline-block text-xs font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800">Déjà demandée</span>
                                 @else
-                                    <p class="text-slate-400 text-xs">Atteste votre présence en stage</p>
+                                    <span class="mt-0.5 block text-xs text-slate-600">Atteste votre présence en stage</span>
                                 @endif
-                            </div>
-                        </label>
-                        <label
-                            class="flex flex-col items-center gap-3 p-4 sm:p-5 border-2 rounded-2xl cursor-pointer transition hover:border-purple-400
-                            {{ $conventionExiste ? 'opacity-50 cursor-not-allowed border-slate-200' : 'border-slate-200' }}">
-                            <input type="radio" name="type" value="convention"
-                                {{ $conventionExiste ? 'disabled' : '' }} class="sr-only">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-file-contract text-purple-600 text-xl"></i>
-                            </div>
-                            <div class="text-center">
-                                <p class="font-bold text-slate-800 text-sm">Convention de stage</p>
+                            </label>
+                        </div>
+                        <div class="relative">
+                            <input type="radio" id="type_convention" name="type" value="convention"
+                                {{ $conventionExiste ? 'disabled' : '' }} @checked(old('type') === 'convention') class="peer sr-only">
+                            <span class="{{ $pastille }}" aria-hidden="true"></span>
+                            <label for="type_convention" class="{{ $carte }}">
+                                <span class="block text-sm font-medium text-slate-900">Convention de stage</span>
                                 @if ($conventionExiste)
-                                    <span class="text-xs text-green-600 font-medium"><i class="fas fa-check mr-1"></i>Déjà
-                                        demandée</span>
+                                    <span class="mt-1.5 inline-block text-xs font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800">Déjà demandée</span>
                                 @else
-                                    <p class="text-slate-400 text-xs">Document officiel de convention</p>
+                                    <span class="mt-0.5 block text-xs text-slate-600">Document officiel de convention</span>
                                 @endif
-                            </div>
-                        </label>
+                            </label>
+                        </div>
                     </div>
+                    @error('type')
+                        <p class="mt-2 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                     @if ($attestationExiste && $conventionExiste)
-                        <div class="mt-4 p-4 bg-green-50 rounded-xl border border-green-100 text-center">
-                            <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
-                            <p class="text-green-700 font-semibold text-sm">Vous avez déjà effectué toutes vos demandes</p>
+                        <div class="mt-4 rounded-lg bg-accent-50 border border-accent-100 p-4 text-sm font-medium text-accent-700">
+                            Vous avez déjà effectué toutes vos demandes
                         </div>
                     @endif
-                </div>
+                </fieldset>
 
                 @if (!$attestationExiste || !$conventionExiste)
-                    <!-- Infos stagiaire -->
-                    <div class="p-5 bg-slate-50 rounded-2xl">
-                        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Vos informations de
-                            stage</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <p class="text-slate-400 text-xs">Matricule</p>
-                                <p class="font-bold text-slate-800 font-mono">{{ $stagiaire->matricule }}</p>
+                    <!-- Infos stagiaire (bloc teinté) -->
+                    <section aria-labelledby="infos-stage" class="rounded-lg bg-brand-50 border border-brand-100 p-4">
+                        <h4 id="infos-stage" class="text-xs font-medium text-slate-900">Vos informations de stage</h4>
+                        <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                            <div class="min-w-0">
+                                <dt class="text-xs text-slate-600">Matricule</dt>
+                                <dd class="mt-0.5 text-sm font-medium text-slate-900 font-mono break-words">{{ $stagiaire->matricule }}</dd>
+                            </div>
+                            <div class="min-w-0">
+                                <dt class="text-xs text-slate-600">École</dt>
+                                <dd class="mt-0.5 text-sm font-medium text-slate-900 break-words">{{ $stagiaire->ecole ?: '—' }}</dd>
                             </div>
                             <div>
-                                <p class="text-slate-400 text-xs">École</p>
-                                <p class="font-semibold text-slate-700">{{ $stagiaire->ecole ?: '—' }}</p>
+                                <dt class="text-xs text-slate-600">Début du stage</dt>
+                                <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">{{ $stagiaire->date_debut->format('d/m/Y') }}</dd>
                             </div>
                             <div>
-                                <p class="text-slate-400 text-xs">Début du stage</p>
-                                <p class="font-semibold text-slate-700">{{ $stagiaire->date_debut->format('d/m/Y') }}</p>
+                                <dt class="text-xs text-slate-600">Fin du stage</dt>
+                                <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">{{ $stagiaire->date_fin->format('d/m/Y') }}</dd>
                             </div>
-                            <div>
-                                <p class="text-slate-400 text-xs">Fin du stage</p>
-                                <p class="font-semibold text-slate-700">{{ $stagiaire->date_fin->format('d/m/Y') }}</p>
-                            </div>
-                        </div>
-                    </div>
+                        </dl>
+                    </section>
 
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Motif de la demande <span
-                                class="text-slate-400 font-normal">(optionnel)</span></label>
-                        <textarea name="motif_demande" rows="3"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm resize-none"
+                        <label for="motif_demande" class="block text-sm font-medium text-slate-700 mb-1">Motif de la demande <span
+                                class="text-slate-500 font-normal">(optionnel)</span></label>
+                        <textarea id="motif_demande" name="motif_demande" rows="3" aria-describedby="motif_aide"
+                            class="{{ $champ }} resize-none"
                             placeholder="Expliquez pourquoi vous avez besoin de ce document...">{{ old('motif_demande') }}</textarea>
+                        @error('motif_demande')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
+                        <p id="motif_aide" class="mt-1 text-xs text-slate-500">500 caractères maximum.</p>
                     </div>
 
-                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 text-sm">
-                        <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>
-                        <strong>Important :</strong> Une seule demande par type de document est autorisée.
-                    </div>
+                    <p class="rounded-lg bg-brand-50 border border-brand-100 p-4 text-sm text-slate-700">
+                        <strong class="font-semibold text-slate-900">Important :</strong> Une seule demande par type de document est autorisée.
+                    </p>
 
-                    <button type="submit"
-                        class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold text-sm sm:text-base hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-paper-plane mr-2"></i>Soumettre ma demande
+                    <button type="submit" class="{{ $btnPrimaire }} w-full sm:w-auto">
+                        <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>Soumettre ma demande
                     </button>
                 @endif
             </form>
 
-            <a href="{{ route('stagiaire.attestations.index') }}"
-                class="mt-4 inline-flex items-center gap-2 text-amber-600 hover:text-amber-800 font-medium text-sm">
-                <i class="fas fa-arrow-left"></i>Voir mes demandes
-            </a>
+            <div class="mt-6 pt-4 border-t border-brand-100">
+                <a href="{{ route('stagiaire.attestations.index') }}" class="{{ $lien }} inline-flex items-center gap-2">
+                    <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Voir mes demandes
+                </a>
+            </div>
         </div>
     </div>
 @endsection
-@push('scripts')
-    <script>
-        document.querySelectorAll('input[name=type]').forEach(r => {
-            r.addEventListener('change', function() {
-                document.querySelectorAll('label:has(input[name=type])').forEach(l => {
-                    l.classList.remove('border-blue-400', 'bg-blue-50', 'border-purple-400',
-                        'bg-purple-50');
-                    l.classList.add('border-slate-200');
-                });
-                const c = this.value === 'attestation' ? 'blue' : 'purple';
-                this.closest('label').classList.add('border-' + c + '-400', 'bg-' + c + '-50');
-                this.closest('label').classList.remove('border-slate-200');
-            });
-        });
-    </script>
-@endpush

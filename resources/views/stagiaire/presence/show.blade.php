@@ -2,53 +2,65 @@
 @section('titre', 'Détail présence')
 @section('breadcrumb', 'Présence > Détail')
 @section('content')
-    <div class="max-w-xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                @php $sc = ['present' => ['bg-green-100', 'text-green-600', 'user-check'], 'retard' => ['bg-amber-100', 'text-amber-600', 'clock'], 'absent' => ['bg-red-100', 'text-red-600', 'user-times']]; @endphp
-                <div
-                    class="w-12 h-12 {{ $sc[$presence->statut][0] ?? 'bg-slate-100' }} rounded-2xl flex items-center justify-center">
-                    <i
-                        class="fas fa-{{ $sc[$presence->statut][2] ?? 'circle' }} {{ $sc[$presence->statut][1] ?? '' }} text-xl"></i>
+    @php
+        // Libellé, badge et pastille par statut
+        $statutsPresence = [
+            'present' => ['Présent', 'bg-emerald-50 text-emerald-800', 'bg-emerald-500'],
+            'retard' => ['Retard', 'bg-amber-50 text-amber-800', 'bg-amber-500'],
+            'absent' => ['Absent', 'bg-red-50 text-red-800', 'bg-red-500'],
+        ];
+        [$libelle, $cls, $dot] = $statutsPresence[$presence->statut] ?? [ucfirst($presence->statut), 'bg-slate-100 text-slate-700', 'bg-slate-400'];
+
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto space-y-5">
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <h2 class="text-base font-semibold text-slate-900">{{ $presence->date->translatedFormat('l d F Y') }}</h2>
+                    <p class="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                        <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                        Présence du jour
+                    </p>
                 </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl capitalize">{{ $presence->statut }}</h2>
-                    <p class="text-slate-400 text-sm">{{ $presence->date->translatedFormat('l d F Y') }}</p>
-                </div>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $cls }}">{{ $libelle }}</span>
             </div>
 
-            <div class="space-y-3">
-                <div class="p-4 bg-slate-50 rounded-xl">
-                    <p class="text-xs text-slate-400 uppercase font-medium">Heure d'arrivée</p>
-                    <p class="font-bold text-slate-800 mt-1">
-                        {{ $presence->heure_arrivee ? substr($presence->heure_arrivee, 0, 5) : '—' }}</p>
+            <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                <div>
+                    <dt class="text-xs text-slate-600">Heure d'arrivée</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">
+                        {{ $presence->heure_arrivee ? substr($presence->heure_arrivee, 0, 5) : '—' }}</dd>
                 </div>
-                <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                    <p class="text-xs text-blue-400 uppercase font-medium">Heure de départ</p>
-                    <p class="font-bold text-slate-800 mt-1">
-                        {{ $presence->heure_depart ? substr($presence->heure_depart, 0, 5) : 'Non marqué' }}</p>
+                <div>
+                    <dt class="text-xs text-slate-600">Heure de départ</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">
+                        {{ $presence->heure_depart ? substr($presence->heure_depart, 0, 5) : 'Non marqué' }}</dd>
                 </div>
                 @if ($presence->motif)
-                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
-                        <p class="text-xs text-amber-400 uppercase font-medium">Motif</p>
-                        <p class="text-slate-700 text-sm mt-1">{{ $presence->motif }}</p>
+                    <div class="sm:col-span-2">
+                        <dt class="text-xs text-slate-600">Motif</dt>
+                        <dd class="mt-0.5 text-sm text-slate-900 break-words">{{ $presence->motif }}</dd>
                     </div>
                 @endif
                 @if ($presence->justificatif)
-                    <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                        <p class="text-xs text-indigo-400 uppercase font-medium mb-2">Justificatif</p>
-                        <a href="{{ route('stagiaire.presence.telechargerJustificatif', $presence) }}" download
-                            class="flex items-center gap-2 text-indigo-700 hover:text-indigo-900 font-medium text-sm">
-                            <i class="fas fa-download"></i>Télécharger le justificatif
-                        </a>
+                    <div class="sm:col-span-2">
+                        <dt class="text-xs text-slate-600">Justificatif</dt>
+                        <dd class="mt-1">
+                            <a href="{{ route('stagiaire.presence.telechargerJustificatif', $presence) }}" download
+                                class="inline-flex items-center gap-1.5 {{ $lien }}">
+                                <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger le justificatif
+                            </a>
+                        </dd>
                     </div>
                 @endif
-            </div>
+            </dl>
+        </section>
 
-            <a href="{{ route('stagiaire.presence.index') }}"
-                class="mt-6 inline-flex items-center gap-2 text-amber-600 hover:text-amber-800 font-medium text-sm">
-                <i class="fas fa-arrow-left"></i>Retour à mes présences
-            </a>
-        </div>
+        <a href="{{ route('stagiaire.presence.index') }}" class="inline-flex items-center gap-2 {{ $lien }}">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour à mes présences
+        </a>
     </div>
 @endsection

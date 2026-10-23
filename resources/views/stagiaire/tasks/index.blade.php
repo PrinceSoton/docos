@@ -2,154 +2,194 @@
 @section('titre', 'Mes Tâches')
 @section('breadcrumb', 'Mon espace > Tâches')
 @section('content')
-    <div class="space-y-4 sm:space-y-5">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-aos="fade-down">
-            <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Mes Tâches</h2>
-                <p class="text-sm text-slate-500">
-                    {{ $aFaire->count() + $enCours->count() + $terminees->count() }} tâche(s) au total
-                </p>
-            </div>
-            @php
-                $totalT = $aFaire->count() + $enCours->count() + $terminees->count();
-                $pctT = $totalT > 0 ? round(($terminees->count() / $totalT) * 100) : 0;
-            @endphp
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full transition-all duration-1000"
-                        style="width:{{ $pctT }}%"></div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        // Champ de recherche posé sur le bandeau marine : fond blanc, focus blanc visible sur le marine
+        $champBandeau = 'w-full rounded-lg border border-white/30 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $btnCarte = 'inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ' . $focus;
+        $btnCartePrimaire = $btnCarte . ' bg-brand-800 text-white hover:bg-brand-700';
+        $btnCarteSecondaire = $btnCarte . ' border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300';
+
+        $totalT = $aFaire->count() + $enCours->count() + $terminees->count();
+        $pctT = $totalT > 0 ? round(($terminees->count() / $totalT) * 100) : 0;
+
+        $colonnes = [
+            ['a_faire', $aFaire, 'À faire', 'bg-slate-400'],
+            ['en_cours', $enCours, 'En cours', 'bg-amber-500'],
+            ['termine', $terminees, 'Terminé', 'bg-emerald-500'],
+        ];
+        $priorites = [
+            'faible' => ['Faible', 'bg-slate-400'],
+            'normale' => ['Normale', 'bg-sky-500'],
+            'haute' => ['Haute', 'bg-amber-500'],
+            'urgente' => ['Urgente', 'bg-red-500'],
+        ];
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+        <!-- Bandeau de synthèse : total, progression et recherche -->
+        <div class="rounded-xl bg-brand-800 text-white p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <p class="text-sm text-brand-100">Tâches assignées</p>
+                    <p class="mt-1 text-sm text-brand-100 tabular-nums">
+                        <span class="text-2xl font-semibold text-white">{{ $totalT }}</span> tâche(s) au total
+                    </p>
                 </div>
-                <span class="font-bold text-slate-700 text-sm">{{ $pctT }}%</span>
+                <div class="w-full sm:w-72">
+                    <div class="flex items-center justify-between gap-3 text-sm">
+                        <span class="text-brand-100">Tâches terminées</span>
+                        <span class="font-medium text-white tabular-nums">{{ $pctT }}%</span>
+                    </div>
+                    <div class="mt-2 h-2 rounded-full bg-white/15 overflow-hidden" role="progressbar"
+                        aria-label="Tâches terminées" aria-valuemin="0" aria-valuemax="100"
+                        aria-valuenow="{{ $pctT }}">
+                        <div class="h-2 rounded-full bg-accent-500" style="width:{{ $pctT }}%"></div>
+                    </div>
+                </div>
             </div>
+            @if ($totalT > 0)
+                <div class="mt-5">
+                    <input type="search" id="search" placeholder="Rechercher une tâche, projet..."
+                        aria-label="Rechercher une tâche ou un projet" class="sm:w-72 {{ $champBandeau }}">
+                </div>
+            @endif
         </div>
 
-        <div class="card p-4" data-aos="fade-up">
-            <input type="text" id="search" placeholder="Rechercher une tâche, projet..."
-                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 text-sm">
-        </div>
+        @if ($totalT === 0)
+            <div class="rounded-xl border border-dashed border-brand-200 bg-brand-50 px-6 py-10 text-center">
+                <p class="text-sm font-medium text-slate-900">Aucune tâche pour le moment</p>
+                <p class="mt-1 text-sm text-slate-600">Les tâches qui vous sont assignées apparaîtront ici, classées par statut.</p>
+            </div>
+        @else
+            <p id="aucunResultat" class="hidden text-sm text-slate-600 text-center py-2">Aucun résultat pour cette recherche.</p>
 
-        {{-- Kanban 3 colonnes --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-            @foreach ([['a_faire', $aFaire, 'À Faire', 'slate', 'clock'], ['en_cours', $enCours, 'En Cours', 'amber', 'spinner'], ['termine', $terminees, 'Terminé', 'green', 'check-circle']] as [$statut, $liste, $label, $color, $icon])
-                <div data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-8 h-8 bg-{{ $color }}-100 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-{{ $icon }} text-{{ $color }}-500 text-sm"></i>
+            <!-- Colonnes par statut (empilées sur téléphone) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+                @foreach ($colonnes as [$statut, $liste, $label, $pastille])
+                    <section aria-labelledby="col-{{ $statut }}"
+                        class="min-w-0 rounded-xl bg-brand-50 border border-brand-100 overflow-hidden">
+                        <div class="flex items-center gap-2 px-4 py-3 border-b border-brand-100">
+                            <span class="h-2 w-2 rounded-full {{ $pastille }}" aria-hidden="true"></span>
+                            <h2 id="col-{{ $statut }}" class="text-base font-semibold text-slate-900">{{ $label }}</h2>
+                            <span class="ml-auto text-sm font-medium text-slate-600 tabular-nums">{{ $liste->count() }}</span>
                         </div>
-                        <h3 class="font-bold text-slate-800">{{ $label }}</h3>
-                        <span
-                            class="ml-auto w-6 h-6 bg-{{ $color }}-100 text-{{ $color }}-700 text-xs font-bold rounded-full flex items-center justify-center">
-                            {{ $liste->count() }}
-                        </span>
-                    </div>
-                    <div class="space-y-3">
-                        @forelse($liste as $tache)
-                            <div
-                                class="bg-white rounded-2xl p-4 shadow-sm border {{ $tache->estIndependante() ? 'border-amber-300 border-l-4' : 'border-slate-100' }} hover:shadow-md hover:-translate-y-0.5 transition-all tache-card">
-                                <div class="flex items-start justify-between gap-2 mb-2">
-                                    <h4 class="font-semibold text-slate-800 text-sm leading-tight">{{ $tache->titre }}</h4>
-                                    @php $pc = ['faible'=>'text-slate-400','normale'=>'text-blue-500','haute'=>'text-amber-500','urgente'=>'text-red-600']; @endphp
-                                    <i class="fas fa-flag {{ $pc[$tache->priorite] ?? '' }} text-xs flex-shrink-0"
-                                        title="{{ ucfirst($tache->priorite) }}"></i>
-                                </div>
-                                @if ($tache->description)
-                                    <p class="text-slate-400 text-xs mb-2 line-clamp-2">{{ $tache->description }}</p>
-                                @endif
-                                <div class="flex flex-wrap items-center gap-2 mb-3">
-                                    <span
-                                        class="text-xs px-2 py-0.5 rounded-full {{ $tache->difficulte === 'difficile' ? 'bg-red-50 text-red-600' : ($tache->difficulte === 'moyen' ? 'bg-amber-50 text-amber-600' : 'bg-green-50 text-green-600') }}">
-                                        {{ ucfirst($tache->difficulte) }}
-                                    </span>
-                                    @if ($tache->date_echeance)
-                                        <span
-                                            class="text-xs {{ $tache->date_echeance->isPast() && $tache->statut !== 'termine' ? 'text-red-500 font-semibold' : 'text-slate-400' }}">
-                                            <i
-                                                class="fas fa-calendar mr-0.5"></i>{{ $tache->date_echeance->format('d/m') }}
+                        <div class="p-3 space-y-3">
+                            @forelse($liste as $tache)
+                                @php
+                                    [$libPriorite, $dotPriorite] = $priorites[$tache->priorite] ?? [ucfirst((string) $tache->priorite), 'bg-slate-300'];
+                                    $enRetard = $tache->date_echeance && $tache->date_echeance->isPast() && $tache->statut !== 'termine';
+                                @endphp
+                                <article class="bg-white border border-brand-100 rounded-xl p-4 tache-card">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h3 class="min-w-0 text-sm font-semibold text-slate-900 leading-snug break-words">{{ $tache->titre }}</h3>
+                                        <span class="flex items-center gap-1.5 flex-shrink-0 text-xs text-slate-600">
+                                            <span class="h-2 w-2 rounded-full {{ $dotPriorite }}" aria-hidden="true"></span>
+                                            <span class="sr-only">Priorité :</span>{{ $libPriorite }}
                                         </span>
-                                    @endif
-                                </div>
-
-                                {{-- Contexte : projet OU indépendante --}}
-                                @if ($tache->project)
-                                    <p class="text-indigo-500 text-xs font-medium mb-3">
-                                        <i class="fas fa-folder mr-1"></i>{{ $tache->project->titre }}
-                                    </p>
-                                @else
-                                    <p class="text-amber-600 text-xs font-medium mb-3">
-                                        <i class="fas fa-inbox mr-1"></i>Tâche indépendante
-                                    </p>
-                                @endif
-
-                                {{-- Actions selon statut --}}
-                                @if ($tache->statut === 'a_faire')
-                                    <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
-                                        class="no-loader">
-                                        @csrf @method('PATCH')
-                                        <input type="hidden" name="statut" value="en_cours">
-                                        <button type="submit"
-                                            class="w-full bg-amber-50 hover:bg-amber-100 text-amber-700 py-1.5 rounded-xl text-xs font-medium transition">
-                                            <i class="fas fa-play mr-1"></i>Commencer
-                                        </button>
-                                    </form>
-                                @elseif ($tache->statut === 'en_cours')
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
-                                            class="no-loader">
-                                            @csrf @method('PATCH')
-                                            <input type="hidden" name="statut" value="a_faire">
-                                            <button type="submit"
-                                                class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 py-1.5 rounded-xl text-xs font-medium transition">
-                                                <i class="fas fa-undo mr-1"></i>Retour
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
-                                            class="no-loader">
-                                            @csrf @method('PATCH')
-                                            <input type="hidden" name="statut" value="termine">
-                                            <button type="submit"
-                                                class="w-full bg-green-50 hover:bg-green-100 text-green-700 py-1.5 rounded-xl text-xs font-medium transition">
-                                                <i class="fas fa-check mr-1"></i>Terminer
-                                            </button>
-                                        </form>
                                     </div>
-                                @else
-                                    <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
-                                        class="no-loader">
-                                        @csrf @method('PATCH')
-                                        <input type="hidden" name="statut" value="en_cours">
-                                        <button type="submit"
-                                            class="w-full bg-slate-50 hover:bg-slate-100 text-slate-500 py-1.5 rounded-xl text-xs font-medium transition">
-                                            <i class="fas fa-undo mr-1"></i>Rouvrir
-                                        </button>
-                                    </form>
-                                @endif
+                                    @if ($tache->description)
+                                        <p class="mt-1.5 text-sm text-slate-500 line-clamp-2 break-words">{{ $tache->description }}</p>
+                                    @endif
+                                    <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                                        <span class="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                                            {{ ucfirst($tache->difficulte) }}
+                                        </span>
+                                        @if ($tache->date_echeance)
+                                            <span class="text-xs tabular-nums {{ $enRetard ? 'text-red-700 font-medium' : 'text-slate-500' }}">
+                                                Échéance {{ $tache->date_echeance->format('d/m') }}@if ($enRetard) · En retard @endif
+                                            </span>
+                                        @endif
+                                    </div>
 
-                                {{-- Voir le détail --}}
-                                <a href="{{ route('stagiaire.tasks.show', $tache) }}"
-                                    class="mt-2 block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 rounded-xl text-xs font-medium transition">
-                                    <i class="fas fa-eye mr-1"></i>Voir le détail
-                                </a>
-                            </div>
-                        @empty
-                            <div class="text-center py-8 text-slate-300">
-                                <i class="fas fa-inbox text-3xl mb-2"></i>
-                                <p class="text-xs">Aucune tâche</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            @endforeach
-        </div>
+                                    {{-- Contexte : projet OU indépendante --}}
+                                    <div class="mt-3">
+                                        @if ($tache->project)
+                                            <p class="text-xs text-slate-600 truncate" title="{{ $tache->project->titre }}">
+                                                <span class="text-slate-500">Projet :</span>
+                                                <span class="font-medium">{{ $tache->project->titre }}</span>
+                                            </p>
+                                        @else
+                                            <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">Tâche indépendante</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Actions selon statut --}}
+                                    <div class="mt-4 space-y-2">
+                                        @if ($tache->statut === 'a_faire')
+                                            <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
+                                                class="no-loader">
+                                                @csrf @method('PATCH')
+                                                <input type="hidden" name="statut" value="en_cours">
+                                                <button type="submit" class="{{ $btnCartePrimaire }}">
+                                                    <i class="fas fa-play text-xs" aria-hidden="true"></i>Commencer
+                                                </button>
+                                            </form>
+                                        @elseif ($tache->statut === 'en_cours')
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
+                                                    class="no-loader">
+                                                    @csrf @method('PATCH')
+                                                    <input type="hidden" name="statut" value="a_faire">
+                                                    <button type="submit" class="{{ $btnCarteSecondaire }}">
+                                                        <i class="fas fa-undo text-xs" aria-hidden="true"></i>Retour
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
+                                                    class="no-loader">
+                                                    @csrf @method('PATCH')
+                                                    <input type="hidden" name="statut" value="termine">
+                                                    <button type="submit" class="{{ $btnCartePrimaire }}">
+                                                        <i class="fas fa-check text-xs" aria-hidden="true"></i>Terminer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <form action="{{ route('stagiaire.tasks.updateStatut', $tache) }}" method="POST"
+                                                class="no-loader">
+                                                @csrf @method('PATCH')
+                                                <input type="hidden" name="statut" value="en_cours">
+                                                <button type="submit" class="{{ $btnCarteSecondaire }}">
+                                                    <i class="fas fa-undo text-xs" aria-hidden="true"></i>Rouvrir
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        {{-- Voir le détail --}}
+                                        <a href="{{ route('stagiaire.tasks.show', $tache) }}"
+                                            class="block text-center py-1 {{ $lien }}">Voir le détail</a>
+                                    </div>
+                                </article>
+                            @empty
+                                <div class="rounded-lg border border-dashed border-brand-200 px-4 py-6 text-center">
+                                    <p class="text-sm text-slate-600">Aucune tâche</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </section>
+                @endforeach
+            </div>
+        @endif
     </div>
 @endsection
 
 @push('scripts')
     <script>
-        document.getElementById('search').addEventListener('input', function() {
-            const val = this.value.toLowerCase();
-            document.querySelectorAll('.tache-card').forEach(card => {
-                card.style.display = card.textContent.toLowerCase().includes(val) ? '' : 'none';
+        (function() {
+            const champ = document.getElementById('search');
+            if (!champ) return;
+            const vide = document.getElementById('aucunResultat');
+            champ.addEventListener('input', function() {
+                const val = this.value.toLowerCase();
+                let visibles = 0;
+                document.querySelectorAll('.tache-card').forEach(card => {
+                    const ok = card.textContent.toLowerCase().includes(val);
+                    card.style.display = ok ? '' : 'none';
+                    if (ok) visibles++;
+                });
+                if (vide) vide.classList.toggle('hidden', visibles > 0);
             });
-        });
+        })();
     </script>
 @endpush

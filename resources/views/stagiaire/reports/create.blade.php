@@ -2,88 +2,104 @@
 @section('titre', 'Déposer un rapport')
 @section('breadcrumb', 'Rapports > Nouveau')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-file-upload text-indigo-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Déposer un rapport</h2>
-                    <p class="text-slate-400 text-sm">Soumettez votre rapport à votre mentor</p>
-                </div>
-            </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $fichier = 'w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border file:border-solid file:border-brand-200 file:!bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:!text-brand-800 hover:file:!bg-brand-100';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <p class="text-sm text-slate-500 mb-5">Soumettez votre rapport à votre mentor.</p>
+
             <form action="{{ route('stagiaire.reports.store') }}" method="POST" enctype="multipart/form-data"
                 class="space-y-5">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Titre du rapport *</label>
-                    <input type="text" name="titre" value="{{ old('titre') }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition text-sm">
+                    <label for="titre" class="block text-sm font-medium text-slate-700 mb-1">Titre du rapport *</label>
+                    <input type="text" id="titre" name="titre" value="{{ old('titre') }}" required
+                        class="{{ $champ }}">
+                    @error('titre')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Type de rapport *</label>
-                        <select name="type" id="type_select" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
+                        <label for="type_select" class="block text-sm font-medium text-slate-700 mb-1">Type de rapport *</label>
+                        <select name="type" id="type_select" required class="{{ $champ }}">
                             @foreach (['journalier' => 'Journalier', 'hebdomadaire' => 'Hebdomadaire', 'mensuel' => 'Mensuel', 'final' => 'Final', 'autre' => 'Autre'] as $v => $l)
                                 <option value="{{ $v }}" {{ old('type') === $v ? 'selected' : '' }}>
                                     {{ $l }}</option>
                             @endforeach
                         </select>
+                        @error('type')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
 
-                    <div id="type_autre_div" style="{{ old('type') == 'autre' ? '' : 'display:none;' }}" class="mt-3">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Précisez le type *</label>
-                        <input type="text" name="type_autre" value="{{ old('type_autre') }}"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm"
-                            placeholder="Ex: Rapport technique, Bilan mi-parcours...">
-                    </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Projet lié</label>
-                        <select name="project_id"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
+                        <label for="project_id" class="block text-sm font-medium text-slate-700 mb-1">Projet lié</label>
+                        <select name="project_id" id="project_id" class="{{ $champ }}">
                             <option value="">-- Aucun projet --</option>
                             @foreach ($projets as $p)
                                 <option value="{{ $p->id }}" {{ old('project_id') == $p->id ? 'selected' : '' }}>
                                     {{ $p->titre }}</option>
                             @endforeach
                         </select>
+                        @error('project_id')
+                            <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                    <textarea name="description" rows="3"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm resize-none">{{ old('description') }}</textarea>
+                <div id="type_autre_div" style="{{ old('type') == 'autre' ? '' : 'display:none;' }}">
+                    <label for="type_autre" class="block text-sm font-medium text-slate-700 mb-1">Précisez le type *</label>
+                    <input type="text" id="type_autre" name="type_autre" value="{{ old('type_autre') }}"
+                        class="{{ $champ }}"
+                        placeholder="Ex: Rapport technique, Bilan mi-parcours...">
+                    @error('type_autre')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <!-- Zone de fichier obligatoire -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-paperclip mr-1 text-indigo-500"></i>Fichier du rapport *
-                        <span class="text-slate-400 font-normal">(PDF, DOC, DOCX... — Max 20 Mo)</span>
-                    </label>
-                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-indigo-400 transition cursor-pointer"
-                        id="dropZone">
-                        <input type="file" name="fichier" id="fichierInput" required class="hidden">
-                        <div id="dropContent">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-slate-300 mb-3"></i>
-                            <p class="text-slate-500 text-sm font-medium">Glissez votre rapport ici ou
-                                <span class="text-indigo-600 hover:underline">parcourez</span>
-                            </p>
+                    <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea name="description" id="description" rows="4" class="{{ $champ }} resize-y">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Fichier obligatoire : zone de dépôt -->
+                <div>
+                    <div id="dropZone"
+                        class="rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 p-5 sm:p-6 transition-colors">
+                        <div class="flex flex-col sm:flex-row items-center gap-5">
+                            <img src="{{ asset('images/illustrations/document-upload.svg') }}" alt=""
+                                class="w-28 sm:w-32 h-auto flex-shrink-0">
+                            <div class="w-full min-w-0 text-center sm:text-left">
+                                <label for="fichierInput" class="block text-sm font-medium text-slate-900">Fichier du rapport *</label>
+                                <p class="mt-1 text-xs text-slate-600">PDF, DOC, DOCX... — Max 20 Mo</p>
+                                <input type="file" name="fichier" id="fichierInput" required class="mt-3 {{ $fichier }}">
+                                <p id="dropContent" class="mt-2 text-xs text-slate-600" aria-live="polite">
+                                    Vous pouvez aussi glisser votre fichier dans ce cadre.
+                                </p>
+                            </div>
                         </div>
                     </div>
+                    @error('fichier')
+                        <p class="mt-1 text-xs text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div class="flex gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-paper-plane mr-2"></i>Déposer le rapport
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+                    <a href="{{ route('stagiaire.reports.index') }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>Déposer le rapport
                     </button>
-                    <a href="{{ route('stagiaire.reports.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>
@@ -93,15 +109,26 @@
     <script>
         const dz = document.getElementById('dropZone');
         const fi = document.getElementById('fichierInput');
-        dz.addEventListener('click', () => fi.click());
+        // États visuels de la zone : repos (marine clair), survol actif (vert), fichier prêt (bordure verte)
+        const repos = ['border-brand-200', 'bg-brand-50'];
+        const survol = ['border-accent-500', 'bg-accent-50'];
+        let fichierPret = false;
+
+        function etatZone(actif) {
+            dz.classList.remove(...repos, ...survol);
+            if (actif) dz.classList.add(...survol);
+            else if (fichierPret) dz.classList.add('border-accent-500', 'bg-brand-50');
+            else dz.classList.add(...repos);
+        }
+
         dz.addEventListener('dragover', e => {
             e.preventDefault();
-            dz.classList.add('border-indigo-400', 'bg-indigo-50/50');
+            etatZone(true);
         });
-        dz.addEventListener('dragleave', () => dz.classList.remove('border-indigo-400', 'bg-indigo-50/50'));
+        dz.addEventListener('dragleave', () => etatZone(false));
         dz.addEventListener('drop', e => {
             e.preventDefault();
-            dz.classList.remove('border-indigo-400', 'bg-indigo-50/50');
+            etatZone(false);
             if (e.dataTransfer.files[0]) {
                 fi.files = e.dataTransfer.files;
                 showFile(e.dataTransfer.files[0].name);
@@ -113,16 +140,16 @@
             div.style.display = this.value === 'autre' ? 'block' : 'none';
         });
 
-
-
         fi.addEventListener('change', function() {
             if (this.files[0]) showFile(this.files[0].name);
         });
 
         function showFile(name) {
-            document.getElementById('dropContent').innerHTML =
-                `<i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i><p class="text-slate-700 font-semibold text-sm">${name}</p><p class="text-green-500 text-xs mt-1">Fichier prêt</p>`;
-            dz.classList.add('border-green-400', 'bg-green-50/50');
+            const info = document.getElementById('dropContent');
+            info.className = 'mt-2 text-xs font-medium text-accent-700 break-all';
+            info.textContent = 'Fichier prêt : ' + name;
+            fichierPret = true;
+            etatZone(false);
         }
     </script>
 @endpush
