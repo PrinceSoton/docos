@@ -2,114 +2,124 @@
 @section('titre', 'Archive')
 @section('breadcrumb', 'Archives > Détail')
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-0 space-y-5">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
-                        <i class="fas fa-archive text-indigo-600 text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-slate-800 font-bold text-xl">{{ $archive->titre }}</h2>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                            <span
-                                class="px-2 py-0.5 rounded-lg text-xs font-semibold {{ $archive->type === 'stagiaire' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600' }}">
-                                {{ ucfirst($archive->type) }}
-                            </span>
-                            <span class="text-slate-400 text-xs">Créé le {{ $archive->created_at->format('d/m/Y') }} par
-                                {{ $archive->creePar?->nom_complet }}</span>
-                        </div>
-                    </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        $btnDanger = 'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+        $btnPetitSecondaire = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+        $btnIconeDanger = 'inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-red-200 bg-white text-red-700 hover:bg-red-50 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto space-y-5">
+
+        <!-- En-tête de l'archive -->
+        <section class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-md {{ $archive->type === 'stagiaire' ? 'bg-brand-50 text-brand-800' : 'bg-slate-100 text-slate-700' }}">
+                        {{ ucfirst($archive->type) }}
+                    </span>
+                    <h2 class="mt-2 text-lg font-semibold text-slate-900 leading-snug break-words">{{ $archive->titre }}</h2>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Créé le <span class="tabular-nums">{{ $archive->created_at->format('d/m/Y') }}</span> par
+                        {{ $archive->creePar?->nom_complet }}
+                    </p>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('admin.archives.edit', $archive) }}"
-                        class="flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-600 transition">
-                        <i class="fas fa-edit"></i>Modifier
+                <div class="flex flex-wrap gap-2 flex-shrink-0">
+                    <a href="{{ route('admin.archives.edit', $archive) }}" class="{{ $btnSecondaire }} whitespace-nowrap">
+                        <i class="fas fa-pen text-xs" aria-hidden="true"></i>Modifier
                     </a>
                     <form action="{{ route('admin.archives.destroy', $archive) }}" method="POST">
                         @csrf @method('DELETE')
-                        <button type="button"
-                            class="btn-delete flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-600 transition">
-                            <i class="fas fa-trash"></i>Supprimer
+                        <button type="button" class="btn-delete {{ $btnDanger }} whitespace-nowrap">
+                            <i class="fas fa-trash text-xs" aria-hidden="true"></i>Supprimer
                         </button>
                     </form>
                 </div>
             </div>
 
             @if ($archive->description)
-                <div class="p-4 bg-slate-50 rounded-xl mb-5">
-                    <p class="text-xs text-slate-400 uppercase font-medium mb-1">Description</p>
-                    <p class="text-slate-700 text-sm">{{ $archive->description }}</p>
+                <div class="mt-5 pt-5 border-t border-brand-100">
+                    <h3 class="text-xs font-medium text-slate-500">Description</h3>
+                    <p class="mt-1 text-sm text-slate-700 leading-relaxed break-words">{{ $archive->description }}</p>
                 </div>
             @endif
 
             @if ($archive->stagiaire)
-                <div class="p-5 bg-indigo-50 rounded-2xl mb-5">
-                    <p class="text-xs text-indigo-400 uppercase font-medium mb-3">Stagiaire</p>
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-indigo-200 flex items-center justify-center font-bold text-indigo-700 flex-shrink-0">
-                            {{ strtoupper(substr($archive->stagiaire->user->prenom ?? '', 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800">{{ $archive->stagiaire->user->nom_complet ?? '—' }}</p>
-                            <p class="text-slate-500 text-sm">{{ $archive->stagiaire->matricule }} •
-                                {{ $archive->stagiaire->ecole ?: '' }}</p>
-                            <p class="text-slate-400 text-xs">{{ $archive->stagiaire->date_debut->format('d/m/Y') }} →
-                                {{ $archive->stagiaire->date_fin->format('d/m/Y') }}</p>
+                <!-- Stagiaire lié (bloc teinté) -->
+                <div class="mt-5 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                    <h3 class="text-xs font-medium text-slate-600">Stagiaire</h3>
+                    <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <span class="h-10 w-10 flex-shrink-0 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center text-sm font-semibold" aria-hidden="true">
+                                {{ strtoupper(substr($archive->stagiaire->user->prenom ?? '', 0, 1)) }}
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-900 break-words">{{ $archive->stagiaire->user->nom_complet ?? '—' }}</p>
+                                <p class="text-sm text-slate-600 break-words">
+                                    <span class="tabular-nums">{{ $archive->stagiaire->matricule }}</span> •
+                                    {{ $archive->stagiaire->ecole ?: '' }}
+                                </p>
+                                <p class="text-xs text-slate-600 tabular-nums">
+                                    {{ $archive->stagiaire->date_debut->format('d/m/Y') }} →
+                                    {{ $archive->stagiaire->date_fin->format('d/m/Y') }}
+                                </p>
+                            </div>
                         </div>
                         @if ($archive->stagiaire->cv)
                             <a href="{{ asset('storage/' . $archive->stagiaire->cv) }}" download
-                                class="ml-auto flex items-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-2 rounded-xl text-xs font-medium transition">
-                                <i class="fas fa-download"></i>CV
+                                class="{{ $btnPetitSecondaire }} whitespace-nowrap self-start sm:self-center">
+                                <i class="fas fa-download text-xs" aria-hidden="true"></i>CV
                             </a>
                         @endif
                     </div>
                 </div>
             @endif
+        </section>
 
-            <div>
-                <h3 class="text-slate-800 font-bold text-lg mb-4"><i
-                        class="fas fa-paperclip text-amber-500 mr-2"></i>Fichiers ({{ $archive->fichiers->count() }})</h3>
-                @if ($archive->fichiers->isEmpty())
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun fichier dans cette archive</p>
-                @else
-                    <div class="space-y-2">
-                        @foreach ($archive->fichiers as $fichier)
-                            <div
-                                class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 hover:bg-indigo-50 rounded-xl transition group">
-                                <div
-                                    class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-file text-indigo-500"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-slate-800 font-medium text-sm truncate">{{ $fichier->nom_original }}</p>
-                                    <p class="text-slate-400 text-xs">{{ strtoupper($fichier->type_fichier) }} •
-                                        {{ $fichier->taille ? round($fichier->taille / 1024, 1) . 'Ko' : '' }}</p>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.archives.telecharger', $fichier) }}"
-                                        class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-medium transition hover:shadow-md">
-                                        <i class="fas fa-download"></i>Télécharger
-                                    </a>
-                                    <form action="{{ route('admin.archives.supprimerFichier', $fichier) }}" method="POST">
-                                        @csrf @method('DELETE')
-                                        <button type="button"
-                                            class="btn-delete w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition">
-                                            <i class="fas fa-trash text-xs"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+        <!-- Fichiers -->
+        <section class="bg-white border border-brand-100 rounded-xl overflow-hidden">
+            <div class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100">
+                <h3 class="text-base font-semibold text-slate-900">
+                    Fichiers <span class="font-normal text-slate-600 tabular-nums">({{ $archive->fichiers->count() }})</span>
+                </h3>
             </div>
-        </div>
+            @if ($archive->fichiers->isEmpty())
+                <div class="px-6 py-8 text-center">
+                    <p class="text-sm font-medium text-slate-700">Aucun fichier dans cette archive</p>
+                    <p class="mt-1 text-sm text-slate-500">Ajoutez des fichiers depuis la page de modification.</p>
+                </div>
+            @else
+                <ul class="divide-y divide-slate-100">
+                    @foreach ($archive->fichiers as $fichier)
+                        <li class="flex flex-col sm:flex-row sm:items-center gap-3 px-5 sm:px-6 py-3.5 hover:bg-brand-50/60 transition-colors">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate" title="{{ $fichier->nom_original }}">{{ $fichier->nom_original }}</p>
+                                <p class="mt-0.5 text-xs text-slate-500 tabular-nums">{{ strtoupper($fichier->type_fichier) }} •
+                                    {{ $fichier->taille ? round($fichier->taille / 1024, 1) . 'Ko' : '' }}</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <a href="{{ route('admin.archives.telecharger', $fichier) }}"
+                                    class="{{ $btnPetitSecondaire }} whitespace-nowrap">
+                                    <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
+                                </a>
+                                <form action="{{ route('admin.archives.supprimerFichier', $fichier) }}" method="POST">
+                                    @csrf @method('DELETE')
+                                    <button type="button" class="btn-delete {{ $btnIconeDanger }}"
+                                        aria-label="Supprimer le fichier {{ $fichier->nom_original }}" title="Supprimer">
+                                        <i class="fas fa-trash text-xs" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
 
-        <a href="{{ route('admin.archives.index') }}"
-            class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour aux archives
+        <a href="{{ route('admin.archives.index') }}" class="{{ $lien }} inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour aux archives
         </a>
     </div>
 @endsection

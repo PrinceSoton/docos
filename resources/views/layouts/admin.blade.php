@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('titre', 'Admin') - DOCOS</title>
+
+    <!-- Tailwind avec configuration responsive personnalisée -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,69 +21,83 @@
                     '2xl': '1536px',
                 },
                 extend: {
+                    spacing: {
+                        '18': '4.5rem',
+                        '88': '22rem',
+                        '120': '30rem',
+                    },
+                    // Palette DOCOS tirée du logo : bleu marine (structure, actions principales)
+                    // et vert (accent, progression). Les couleurs de statut restent sémantiques.
                     colors: {
-                        primary: {
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8'
+                        brand: {
+                            50: '#eff5fa',
+                            100: '#dce8f2',
+                            200: '#b9d1e4',
+                            600: '#1d5c8d',
+                            700: '#174a73',
+                            800: '#103860',
+                            900: '#0b2540',
                         },
                         accent: {
-                            500: '#6366f1',
-                            600: '#4f46e5'
-                        }
+                            50: '#e8f6ef',
+                            100: '#cdebdc',
+                            500: '#22a06b',
+                            600: '#1a8a5c',
+                            700: '#146e4a',
+                        },
                     }
                 }
             }
         }
     </script>
+
+    <!-- Flowbite, FontAwesome, SweetAlert2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css" rel="stylesheet" />
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
         * {
             font-family: 'Inter', sans-serif;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-
+        /* Sidebar – claire, fixe et pleine hauteur dès 768px (md) */
         .sidebar {
-            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%);
-            min-height: 100vh;
-            transition: width .3s ease, transform .3s ease;
-            overflow-y: auto;
+            background: #fff;
+            border-right: 1px solid #dce8f2;
+            width: 264px;
+            height: 100vh;
             z-index: 60;
         }
 
-        /* Version mobile : menu latéral masqué */
+        /* Mobile (< 768px) : menu latéral masqué par défaut, ouvert via le bouton hamburger */
         @media (max-width: 767px) {
             .sidebar {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 280px;
-                height: 100vh;
+                max-width: 85vw;
                 transform: translateX(-100%);
-                transition: transform .3s ease;
-                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+                visibility: hidden;
+                transition: transform .3s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .3s;
+                box-shadow: 0 0 24px rgba(15, 23, 42, .18);
             }
 
             .sidebar.open {
                 transform: translateX(0);
+                visibility: visible;
+                transition-delay: 0s;
             }
 
+            /* Overlay pour fermer le menu */
             .sidebar-overlay {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0, 0, 0, 0.5);
+                background: rgba(11, 37, 64, .45);
                 z-index: 50;
             }
 
@@ -91,20 +107,88 @@
         }
 
         .sidebar-item {
-            transition: all .25s ease;
-            border-radius: 12px;
-            margin: 2px 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 2px 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color .2s ease, color .2s ease;
         }
 
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, .15);
-            padding-left: 1.25rem;
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+            color: #94a3b8;
+            transition: color .2s ease;
+        }
+
+        .sidebar-item:hover {
+            background: #eff5fa;
+            color: #0b2540;
+        }
+
+        .sidebar-item:hover i {
+            color: #475569;
         }
 
         .sidebar-item.active {
-            background: linear-gradient(135deg, rgba(99, 102, 241, .4), rgba(59, 130, 246, .4));
-            border-left: 3px solid #818cf8;
+            background: #103860;
+            color: #fff;
+        }
+
+        .sidebar-item.active i {
+            color: #fff;
+        }
+
+        .sidebar-item:focus-visible,
+        .sidebar-btn:focus-visible {
+            outline: 2px solid #1d5c8d;
+            outline-offset: 2px;
+        }
+
+        .sidebar-item.sidebar-danger:hover,
+        .sidebar-item.sidebar-danger:hover i {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: -48px;
+            z-index: 10000;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: #103860;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .skip-link:focus {
+            top: 12px;
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .sidebar,
+            .sidebar-item,
+            .sidebar-item i {
+                transition: none;
+            }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .card {
@@ -120,14 +204,22 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: #103860;
             border: none;
-            transition: all .3s ease;
+            transition: background-color .2s ease;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(99, 102, 241, .4);
+            background: #174a73;
+        }
+
+        .sidebar-section {
+            margin: 14px 24px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #64748b;
         }
 
         .loader-overlay {
@@ -141,6 +233,22 @@
             flex-direction: column;
         }
 
+        .loader-logo {
+            width: 180px;
+            height: 100px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .loader-spinner {
+            width: 28px;
+            height: 28px;
+            margin: 12px 0;
+            border: 3px solid #dce8f2;
+            border-top-color: #103860;
+            border-radius: 50%;
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -151,321 +259,455 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Loader : disparaît à la fin du chargement (transition CSS, sans dépendre d'une bibliothèque) */
+        .loader-overlay {
+            transition: opacity .25s ease;
+        }
+
+        .loader-overlay.is-done {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Révélation à l'entrée : l'état initial n'est posé que par le script, le contenu reste visible sans JS */
+        .reveal {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .reveal.is-revealed {
+            opacity: 1;
+            transform: none;
+            transition: opacity .45s cubic-bezier(.22, 1, .36, 1), transform .45s cubic-bezier(.22, 1, .36, 1);
+            transition-delay: var(--reveal-delay, 0ms);
+        }
+
+        /* État final garanti même si le navigateur suspend les animations (onglet en arrière-plan, etc.) */
+        .reveal.is-revealed.reveal-fini {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+
+        /* Notifications (toasts) */
+        .toast {
+            transition: opacity .25s ease, transform .25s cubic-bezier(.22, 1, .36, 1);
+        }
+
+        .toast.is-entering,
+        .toast.is-leaving {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .loader-overlay,
+            .toast,
+            .reveal.is-revealed {
+                transition: none;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
         ::-webkit-scrollbar {
             width: 5px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(#6366f1, #3b82f6);
+            background: #cbd5e1;
             border-radius: 3px;
         }
 
-        @keyframes fadeSlide {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        ::selection {
+            background: #b9d1e4;
+            color: #0b2540;
         }
 
-        .fade-slide {
-            animation: fadeSlide .4s ease forwards;
-        }
-
-        @media (max-width: 640px) {
-            [data-aos] {
-                opacity: 1 !important;
-                transform: none !important;
-                pointer-events: auto !important;
-            }
+        input,
+        textarea,
+        select {
+            caret-color: #103860;
         }
     </style>
     @stack('styles')
+    {{-- Sans JavaScript, le loader ne doit jamais masquer la page --}}
+    <noscript>
+        <style>
+            #appLoader {
+                display: none !important;
+            }
+        </style>
+    </noscript>
 </head>
 
-<body class="bg-gray-50 overflow-x-hidden">
+<body class="bg-brand-50 text-slate-900">
+
+    <a href="#contenu" class="skip-link">Aller au contenu</a>
 
     <!-- Loader -->
     <div class="loader-overlay" id="appLoader">
-        <div class="relative mb-4">
-            <div class="w-20 h-20 rounded-full border-4 border-indigo-100 spin border-t-indigo-600 absolute inset-0">
-            </div>
-            <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                class="relative rounded-3xl shadow-2xl w-16 h-16 object-contain mx-auto" loading="lazy">
-        </div>
-        <p class="text-indigo-700 font-bold text-xl mt-4">DOCOS</p>
-        <p class="text-slate-400 text-sm">Administration</p>
+        <img src="{{ asset('logo.png') }}" alt="DOCOS" class="loader-logo" loading="eager">
+        <div class="loader-spinner spin" aria-hidden="true"></div>
+        <p class="text-slate-600 text-sm">Administration</p>
     </div>
 
     <div class="flex h-screen overflow-hidden">
-        <!-- Overlay mobile -->
+
+        <!-- Overlay pour mobile (fermeture du menu) -->
         <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col shadow-2xl">
-            <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-                <img src="{{ asset('logo.png') }}" alt="DOCOS"
-                    class="w-10 h-10 rounded-xl object-contain flex-shrink-0" loading="lazy">
-                <div class="sidebar-logo-text">
-                    <p class="text-white font-bold text-lg leading-none">DOCOS</p>
+        <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col" aria-label="Navigation principale">
+            <!-- Logo -->
+            <div class="flex items-center justify-between gap-2 px-5 py-3 flex-shrink-0 border-b border-slate-200">
+                <!-- Le logo source est une image large avec marges : on en recadre le logotype (symbole + DOCOS) -->
+                <div class="relative w-[188px] h-[72px] overflow-hidden flex-shrink-0" role="img"
+                    aria-label="DOCOS, administration">
+                    <img src="{{ asset('logo.png') }}" alt="" aria-hidden="true"
+                        class="absolute max-w-none w-[259px] mix-blend-multiply"
+                        style="left:-36px;top:-34px;filter:brightness(1.05) contrast(1.08)" loading="lazy">
                 </div>
-
-                {{-- Bouton de fermeture : visible UNIQUEMENT sur mobile (< md) --}}
-                <button id="closeSidebarBtn" class="ml-auto text-white/60 hover:text-white md:hidden"
-                    aria-label="Fermer le menu" onclick="toggleSidebar(false)">
-                    <i class="fas fa-times"></i>
+                <!-- Fermeture du menu (mobile uniquement) -->
+                <button id="closeSidebarBtn" type="button"
+                    class="sidebar-btn md:hidden inline-flex items-center justify-center h-10 w-10 -mr-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    aria-label="Fermer le menu">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
 
+            <!-- Profil de l'administrateur -->
+            <div class="mx-3 mt-3 mb-1 p-3 rounded-xl bg-brand-50 border border-brand-100 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-brand-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        @if (Auth::user()->photo)
+                            <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt=""
+                                class="w-full h-full object-cover" loading="lazy">
+                        @else
+                            <span
+                                class="text-white font-semibold text-sm">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
+                        @endif
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-slate-900 font-semibold text-sm truncate">{{ Auth::user()->nom_complet }}</p>
+                        <p class="text-slate-600 text-xs truncate">Administrateur</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Navigation -->
-            <nav class="flex-1 py-4 overflow-y-auto">
-                <a href="{{ route('admin.dashboard') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-chart-pie w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Tableau de bord</span>
-                </a>
-                <div class="px-5 py-2 mt-2">
-                    <p class="text-indigo-300/60 text-xs uppercase tracking-widest sidebar-label">Gestion</p>
-                </div>
-                <a href="{{ route('admin.users.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <i class="fas fa-users w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Utilisateurs</span>
-                </a>
-                <a href="{{ route('admin.mentors.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.mentors.*') ? 'active' : '' }}">
-                    <i class="fas fa-chalkboard-teacher w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Mentors</span>
-                </a>
-                <a href="{{ route('admin.stagiaires.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.stagiaires.*') ? 'active' : '' }}">
-                    <i class="fas fa-user-graduate w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Stagiaires</span>
-                </a>
-                <div class="px-5 py-2 mt-2">
-                    <p class="text-indigo-300/60 text-xs uppercase tracking-widest sidebar-label">Suivi</p>
-                </div>
-                <a href="{{ route('admin.presences.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.presences.*') ? 'active' : '' }}">
-                    <i class="fas fa-clipboard-check w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Présences</span>
-                </a>
-                <a href="{{ route('admin.attestations.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.attestations.*') ? 'active' : '' }}">
-                    <i class="fas fa-certificate w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Attestations</span>
-                </a>
-                <a href="{{ route('admin.archives.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.archives.*') ? 'active' : '' }}">
-                    <i class="fas fa-archive w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Archives</span>
-                </a>
-                <div class="px-5 py-2 mt-2">
-                    <p class="text-indigo-300/60 text-xs uppercase tracking-widest sidebar-label">Système</p>
-                </div>
-                <a href="{{ route('admin.evenements.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.evenements.*') ? 'active' : '' }}">
-                    <i class="fas fa-bullhorn w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Événements</span>
-                </a>
-                <a href="{{ route('admin.calendars.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.calendars.*') ? 'active' : '' }}">
-                    <i class="fas fa-calendar-alt w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Calendrier</span>
-                </a>
-                <a href="{{ route('documents.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white">
-                    <i class="fas fa-folder-open w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Documents</span>
-                </a>
-                <a href="{{ route('admin.statistics.index') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 text-white/80 hover:text-white {{ request()->routeIs('admin.statistics.*') ? 'active' : '' }}">
-                    <i class="fas fa-chart-bar w-5 text-center flex-shrink-0"></i>
-                    <span class="sidebar-label text-sm font-medium">Statistiques</span>
-                </a>
+            <nav class="flex-1 py-2 overflow-y-auto" aria-label="Menu administration">
+                @php
+                    // [route, motif d'état actif, icône, libellé] ; null = lien sans titre de groupe
+                    $groupes = [
+                        null => [['admin.dashboard', 'admin.dashboard', 'chart-pie', 'Tableau de bord']],
+                        'Gestion' => [
+                            ['admin.users.index', 'admin.users.*', 'users', 'Utilisateurs'],
+                            ['admin.mentors.index', 'admin.mentors.*', 'chalkboard-teacher', 'Mentors'],
+                            ['admin.stagiaires.index', 'admin.stagiaires.*', 'user-graduate', 'Stagiaires'],
+                        ],
+                        'Suivi' => [
+                            ['admin.presences.index', 'admin.presences.*', 'clipboard-check', 'Présences'],
+                            ['admin.attestations.index', 'admin.attestations.*', 'certificate', 'Attestations'],
+                            ['admin.archives.index', 'admin.archives.*', 'archive', 'Archives'],
+                        ],
+                        'Système' => [
+                            ['admin.evenements.index', 'admin.evenements.*', 'bullhorn', 'Événements'],
+                            ['admin.calendars.index', 'admin.calendars.*', 'calendar-alt', 'Calendrier'],
+                            ['documents.index', 'documents.*', 'folder-open', 'Documents'],
+                            ['admin.statistics.index', 'admin.statistics.*', 'chart-bar', 'Statistiques'],
+                        ],
+                    ];
+                @endphp
+                @foreach ($groupes as $titreGroupe => $liens)
+                    @if ($titreGroupe)
+                        <p class="sidebar-section">{{ $titreGroupe }}</p>
+                    @endif
+                    @foreach ($liens as [$route, $motif, $icon, $label])
+                        @php $actif = request()->routeIs($motif); @endphp
+                        <a href="{{ route($route) }}" class="sidebar-item {{ $actif ? 'active' : '' }}"
+                            @if ($actif) aria-current="page" @endif>
+                            <i class="fas fa-{{ $icon }}" aria-hidden="true"></i>
+                            <span>{{ $label }}</span>
+                        </a>
+                    @endforeach
+                @endforeach
             </nav>
 
-            <div class="p-4 border-t border-white/10">
+            <!-- Pied de menu -->
+            <div class="py-3 border-t border-brand-100 flex-shrink-0">
+                <a href="{{ route('profile.index') }}" class="sidebar-item {{ request()->routeIs('profile.*') ? 'active' : '' }}"
+                    @if (request()->routeIs('profile.*')) aria-current="page" @endif>
+                    <i class="fas fa-user-cog" aria-hidden="true"></i>
+                    <span>Mon Profil</span>
+                </a>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit"
-                        class="sidebar-item flex items-center gap-3 px-4 py-3 text-red-300 hover:text-red-200 w-full text-left">
-                        <i class="fas fa-sign-out-alt w-5 text-center flex-shrink-0"></i>
-                        <span class="sidebar-label text-sm font-medium">Déconnexion</span>
+                    <button type="submit" class="sidebar-item sidebar-danger w-[calc(100%-24px)] text-left">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                        <span>Déconnexion</span>
                     </button>
                 </form>
             </div>
         </aside>
 
-        <!-- Main -->
-        <div class="flex-1 flex flex-col overflow-hidden" id="mainContent">
+        <!-- Contenu principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
             <header
-                class="glass border-b border-white/20 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40">
-                <div class="flex items-center gap-3">
-                    {{-- Hamburger : visible UNIQUEMENT sous md (mobile) --}}
-                    <button id="openSidebarBtn" class="md:hidden text-slate-600 hover:text-indigo-600 transition"
-                        aria-label="Ouvrir le menu">
-                        <i class="fas fa-bars text-xl"></i>
+                class="bg-white border-b border-brand-100 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+                <div class="flex items-center gap-3 min-w-0">
+                    <!-- Bouton d'ouverture du menu sur mobile -->
+                    <button id="openSidebarBtn" type="button"
+                        class="md:hidden inline-flex items-center justify-center h-10 w-10 -ml-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        aria-label="Ouvrir le menu" aria-controls="sidebar" aria-expanded="false">
+                        <i class="fas fa-bars text-lg" aria-hidden="true"></i>
                     </button>
-                    <div>
-                        <h1 class="text-slate-800 font-bold text-lg sm:text-xl">@yield('titre', 'Tableau de bord')</h1>
-                        <p class="text-slate-400 text-xs">@yield('breadcrumb', 'Administration')</p>
+                    <div class="min-w-0" data-reveal-titre>
+                        <h1 class="text-slate-900 font-semibold text-lg leading-tight truncate">@yield('titre', 'Tableau de bord')</h1>
+                        <p class="text-slate-500 text-xs truncate">@yield('breadcrumb', 'Administration')</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <a href="{{ route('profile.index') }}"
-                        class="flex items-center gap-2 hover:bg-indigo-50 px-3 py-2 rounded-xl transition">
-                        <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center overflow-hidden">
-                            @if (Auth::user()->photo)
-                                <img src="{{ asset('storage/' . Auth::user()->photo) }}"
-                                    class="w-full h-full rounded-full object-cover" loading="lazy">
-                            @else
-                                <span
-                                    class="text-white text-xs font-bold">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
-                            @endif
-                        </div>
-                        <span class="text-slate-700 font-medium text-sm hidden md:block">
-                            <p>{{ Auth::user()->nom_complet }}</p>
-                            <p class="text-indigo-300 text-xs">Administrateur</p>
-                        </span>
-                    </a>
-                </div>
+                <a href="{{ route('profile.index') }}"
+                    class="flex items-center gap-2 flex-shrink-0 rounded-lg px-2 py-1.5 hover:bg-brand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    aria-label="Mon profil : {{ Auth::user()->nom_complet }}">
+                    <span class="w-8 h-8 rounded-full bg-brand-800 flex items-center justify-center flex-shrink-0 overflow-hidden"
+                        aria-hidden="true">
+                        @if (Auth::user()->photo)
+                            <img src="{{ asset('storage/' . Auth::user()->photo) }}" alt=""
+                                class="w-full h-full object-cover" loading="lazy">
+                        @else
+                            <span class="text-white text-xs font-semibold">{{ strtoupper(substr(Auth::user()->prenom, 0, 1)) }}</span>
+                        @endif
+                    </span>
+                    <span class="hidden md:block text-left leading-tight" aria-hidden="true">
+                        <span class="block text-sm font-medium text-slate-900">{{ Auth::user()->nom_complet }}</span>
+                        <span class="block text-xs text-slate-500">Administrateur</span>
+                    </span>
+                </a>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <!-- Main -->
+            <main id="contenu" tabindex="-1"
+                class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 focus:outline-none">
                 @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl" data-aos="fade-down">
-                        <ul class="list-disc list-inside text-red-600 text-sm space-y-1">
+                    {{-- Résumé des erreurs de validation : reste affiché (pas de toast), le détail est aussi près des champs --}}
+                    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl max-w-6xl mx-auto" role="alert"
+                        aria-labelledby="resume-erreurs-titre">
+                        <p id="resume-erreurs-titre" class="text-red-800 text-sm font-medium mb-1">Certaines informations
+                            sont à corriger :</p>
+                        <ul class="list-disc list-inside text-red-700 text-sm">
                             @foreach ($errors->all() as $e)
                                 <li>{{ $e }}</li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
-                <div class="fade-slide">@yield('content')</div>
+                <div id="page-contenu">@yield('content')</div>
             </main>
         </div>
     </div>
 
+    <!-- Notifications : messages flash existants (succes / erreur), non bloquants -->
+    <div id="toasts" aria-live="polite"
+        class="fixed z-[70] inset-x-3 bottom-3 sm:inset-x-auto sm:bottom-auto sm:top-[76px] sm:right-6 sm:w-[380px] flex flex-col gap-2 pointer-events-none">
+        @foreach ([['succes', 'Succès', 'status', 6000, 'fa-check', 'bg-emerald-50 text-emerald-700'], ['erreur', 'Action impossible', 'alert', 10000, 'fa-exclamation', 'bg-red-50 text-red-700']] as [$cle, $titreToast, $roleToast, $dureeToast, $iconeToast, $pastilleToast])
+            @if (session($cle))
+                <div class="toast pointer-events-auto flex items-start gap-3 rounded-xl border border-brand-100 bg-white p-4 shadow-[0_12px_32px_-12px_rgba(11,37,64,.35)]"
+                    role="{{ $roleToast }}" data-duree="{{ $dureeToast }}">
+                    <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full {{ $pastilleToast }}"
+                        aria-hidden="true"><i class="fas {{ $iconeToast }} text-xs"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-slate-900">{{ $titreToast }}</p>
+                        <p class="mt-0.5 text-sm text-slate-600 break-words">{{ session($cle) }}</p>
+                    </div>
+                    <button type="button"
+                        class="toast-fermer -mr-1 -mt-1 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-brand-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        aria-label="Fermer la notification">
+                        <i class="fas fa-times text-sm" aria-hidden="true"></i>
+                    </button>
+                </div>
+            @endif
+        @endforeach
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
 
     <script>
-        window.addEventListener('load', () => {
-            gsap.to('#appLoader', {
-                opacity: 0,
-                duration: .6,
-                delay: .5,
-                onComplete: () => {
-                    document.getElementById('appLoader').style.display = 'none';
+        const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ---- Révélation à l'entrée et au défilement ----
+        // Les blocs de premier niveau de la page (en-têtes, sections, grilles) apparaissent une seule fois,
+        // par groupes, avec un léger décalage. Rien n'est masqué si le script ne s'exécute pas.
+        const Revelation = (() => {
+            const racine = document.getElementById('page-contenu');
+            if (mouvementReduit || !racine || !('IntersectionObserver' in window)) return { demarrer() {} };
+
+            const unites = [];
+            const titre = document.querySelector('[data-reveal-titre]');
+            if (titre) unites.push(titre);
+            const estConteneur = el => el.children.length > 1
+                && !el.matches('section, article, form, ul, ol, table, dl, fieldset, a, button, li, nav, header')
+                && /(^|\s)(grid|space-y-\d+|max-w-\S+)(\s|$)/.test(el.className);
+            (function parcourir(el, profondeur) {
+                for (const enfant of el.children) {
+                    if (enfant.matches('script, style, template, [data-sans-revelation]')) continue;
+                    if (profondeur < 4 && estConteneur(enfant)) parcourir(enfant, profondeur + 1);
+                    else unites.push(enfant);
                 }
+            })(racine, 0);
+            unites.forEach(el => el.classList.add('reveal'));
+
+            let demarre = false;
+            return {
+                demarrer() {
+                    if (demarre) return;
+                    demarre = true;
+                    const observateur = new IntersectionObserver(entrees => {
+                        const visibles = entrees.filter(e => e.isIntersecting);
+                        visibles.forEach((e, i) => {
+                            const delai = Math.min(i, 6) * 70;
+                            e.target.style.setProperty('--reveal-delay', delai + 'ms');
+                            e.target.classList.add('is-revealed');
+                            observateur.unobserve(e.target);
+                            setTimeout(() => e.target.classList.add('reveal-fini'), delai + 700);
+                        });
+                    }, { root: null, rootMargin: '0px', threshold: 0 });
+                    unites.forEach(el => observateur.observe(el));
+                    // Filet de sécurité : un bloc non observable (ex. impression) ne reste jamais invisible
+                    window.addEventListener('beforeprint', () => unites.forEach(el => el.classList.add('is-revealed')));
+                }
+            };
+        })();
+
+        // ---- Notifications (toasts) ----
+        const Toasts = (() => {
+            const zone = document.getElementById('toasts');
+            const toasts = zone ? [...zone.querySelectorAll('.toast')] : [];
+            const fermer = toast => {
+                if (!toast.isConnected || toast.classList.contains('is-leaving')) return;
+                toast.classList.add('is-leaving');
+                setTimeout(() => toast.remove(), mouvementReduit ? 0 : 260);
+            };
+            toasts.forEach(toast => {
+                toast.querySelector('.toast-fermer')?.addEventListener('click', () => fermer(toast));
+                toast.addEventListener('keydown', e => { if (e.key === 'Escape') fermer(toast); });
             });
-        });
+            return {
+                demarrer() {
+                    toasts.forEach(toast => {
+                        // Réinsertion pour que les lecteurs d'écran annoncent le message
+                        toast.classList.add('is-entering');
+                        zone.appendChild(toast);
+                        void toast.offsetHeight; // applique l'état initial avant la transition (sans dépendre de requestAnimationFrame)
+                        toast.classList.remove('is-entering');
+                        let restant = parseInt(toast.dataset.duree, 10) || 6000;
+                        let debut = Date.now();
+                        let minuterie = setTimeout(() => fermer(toast), restant);
+                        const pause = () => { clearTimeout(minuterie); restant -= Date.now() - debut; };
+                        const reprise = () => { debut = Date.now(); clearTimeout(minuterie); minuterie = setTimeout(() => fermer(toast), Math.max(restant, 1500)); };
+                        toast.addEventListener('mouseenter', pause);
+                        toast.addEventListener('mouseleave', reprise);
+                        toast.addEventListener('focusin', pause);
+                        toast.addEventListener('focusout', reprise);
+                    });
+                }
+            };
+        })();
 
-        const isMobile = window.innerWidth < 640;
-        AOS.init({
-            duration: 600,
-            once: true,
-            offset: 30,
-            disable: isMobile
-        });
+        // ---- Loader : masqué à la fin du chargement, avec un filet de sécurité si une ressource tarde ----
+        (() => {
+            const loader = document.getElementById('appLoader');
+            let termine = false;
+            const terminer = () => {
+                if (termine) return;
+                termine = true;
+                if (loader) {
+                    loader.classList.add('is-done');
+                    setTimeout(() => { loader.style.display = 'none'; }, mouvementReduit ? 0 : 260);
+                }
+                Revelation.demarrer();
+                Toasts.demarrer();
+            };
+            if (document.readyState === 'complete') terminer();
+            else window.addEventListener('load', terminer);
+            setTimeout(terminer, 4000);
+        })();
 
-        // Toggle sidebar : uniquement mobile (< 768px)
+        // ---- Menu latéral : ouvert/fermé uniquement sur mobile (< 768px), fixe au-delà ----
         function toggleSidebar(open) {
-            if (window.innerWidth >= 768) return; // Aucun effet sur PC/tablette
-
+            if (window.innerWidth >= 768) return;
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            if (open === undefined) {
-                const isOpen = sidebar.classList.contains('open');
-                sidebar.classList.toggle('open', !isOpen);
-                overlay.classList.toggle('active', !isOpen);
+            const opener = document.getElementById('openSidebarBtn');
+            const isOpen = open === undefined ? !sidebar.classList.contains('open') : open;
+            sidebar.classList.toggle('open', isOpen);
+            overlay.classList.toggle('active', isOpen);
+            opener?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            if (isOpen) {
+                document.getElementById('closeSidebarBtn')?.focus();
             } else {
-                sidebar.classList.toggle('open', open);
-                overlay.classList.toggle('active', open);
+                opener?.focus();
             }
         }
 
         document.getElementById('openSidebarBtn')?.addEventListener('click', () => toggleSidebar(true));
         document.getElementById('closeSidebarBtn')?.addEventListener('click', () => toggleSidebar(false));
-
-        // Fermeture automatique de la sidebar mobile lors du passage en desktop
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('sidebarOverlay');
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.getElementById('sidebar').classList.contains('open')) {
+                toggleSidebar(false);
             }
         });
 
-        // Alertes
-        @if (session('succes'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Succès !',
-                text: @json(session('succes')),
-                toast: true,
-                position: 'top-end',
-                timer: 3500,
-                showConfirmButton: false,
-                background: '#f0fdf4',
-                color: '#166534'
-            });
-        @endif
-        @if (session('erreur'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Erreur',
-                text: @json(session('erreur')),
-                toast: true,
-                position: 'top-end',
-                timer: 4000,
-                showConfirmButton: false
-            });
-        @endif
+        // Réinitialise le menu mobile quand on repasse en mode ordinateur
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+                document.getElementById('openSidebarBtn')?.setAttribute('aria-expanded', 'false');
+            }
+        });
 
-        // Boutons de suppression
+        // ---- Gestion des boutons de suppression (avec confirmation) ----
         document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.preventDefault();
                 const formId = btn.dataset.form;
                 const form = formId ? document.getElementById(formId) : btn.closest('form');
                 Swal.fire({
-                        title: 'Confirmer',
-                        text: 'Supprimer cet élément ?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Oui, supprimer',
-                        cancelButtonText: 'Annuler'
-                    })
-                    .then(r => {
-                        if (r.isConfirmed && form) form.submit();
-                    });
+                    title: 'Supprimer ?',
+                    text: 'Supprimer cet élément ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#b91c1c',
+                    cancelButtonColor: '#103860',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonText: 'Supprimer'
+                }).then(r => {
+                    if (r.isConfirmed && form) form.submit();
+                });
             });
         });
 
-        // Désactivation des boutons lors de la soumission
+        // ---- Désactivation du bouton d'envoi pendant la soumission (sauf formulaires .no-loader) ----
         document.querySelectorAll('form:not(.no-loader)').forEach(f => {
             f.addEventListener('submit', function() {
                 const btn = this.querySelector('[type=submit]');
                 if (btn) {
                     btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Patientez...';
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>Patientez...';
                 }
             });
         });
     </script>
+
     @stack('scripts')
 </body>
 

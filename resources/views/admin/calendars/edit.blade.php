@@ -2,51 +2,75 @@
 @section('titre', 'Modifier jour')
 @section('breadcrumb', 'Calendrier > Modifier')
 @section('content')
-    <div class="max-w-xl mx-auto px-4 sm:px-0">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-edit text-amber-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Modifier le jour</h2>
-                    <p class="text-slate-400 text-sm">{{ $calendar->libelle }}</p>
-                </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $champErreur = 'w-full rounded-lg border border-red-400 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <div class="mb-5 rounded-lg bg-brand-50 border border-brand-100 p-4">
+                <h2 class="text-sm font-semibold text-slate-900">Modifier le jour</h2>
+                <p class="mt-1 text-sm text-slate-600 break-words">{{ $calendar->libelle }}</p>
             </div>
+
             <form action="{{ route('admin.calendars.update', $calendar) }}" method="POST" class="space-y-5">
                 @csrf @method('PUT')
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Date *</label>
-                    <input type="date" name="date" value="{{ old('date', $calendar->date->format('Y-m-d')) }}"
-                        required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-slate-700 mb-1">
+                            Date <span class="text-red-700" aria-hidden="true">*</span>
+                        </label>
+                        <input type="date" id="date" name="date" value="{{ old('date', $calendar->date->format('Y-m-d')) }}"
+                            required class="{{ $errors->has('date') ? $champErreur : $champ }} tabular-nums"
+                            @error('date') aria-invalid="true" @enderror>
+                        @error('date')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-slate-700 mb-1">
+                            Type <span class="text-red-700" aria-hidden="true">*</span>
+                        </label>
+                        <select id="type" name="type" required
+                            class="{{ $errors->has('type') ? $champErreur : $champ }}"
+                            @error('type') aria-invalid="true" @enderror>
+                            <option value="ferie" {{ $calendar->type === 'ferie' ? 'selected' : '' }}>Jour férié</option>
+                            <option value="sejour" {{ $calendar->type === 'sejour' ? 'selected' : '' }}>Jour de séjour</option>
+                            <option value="autre" {{ $calendar->type === 'autre' ? 'selected' : '' }}>Autre</option>
+                        </select>
+                        @error('type')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Libellé *</label>
-                    <input type="text" name="libelle" value="{{ old('libelle', $calendar->libelle) }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm">
+                    <label for="libelle" class="block text-sm font-medium text-slate-700 mb-1">
+                        Libellé <span class="text-red-700" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text" id="libelle" name="libelle" value="{{ old('libelle', $calendar->libelle) }}" required
+                        class="{{ $errors->has('libelle') ? $champErreur : $champ }}"
+                        @error('libelle') aria-invalid="true" @enderror>
+                    @error('libelle')
+                        <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Type *</label>
-                    <select name="type" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm">
-                        <option value="ferie" {{ $calendar->type === 'ferie' ? 'selected' : '' }}>Jour férié</option>
-                        <option value="sejour" {{ $calendar->type === 'sejour' ? 'selected' : '' }}>Jour de séjour</option>
-                        <option value="autre" {{ $calendar->type === 'autre' ? 'selected' : '' }}>Autre</option>
-                    </select>
+                    <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea id="description" name="description" rows="3"
+                        class="{{ $errors->has('description') ? $champErreur : $champ }} resize-y">{{ old('description', $calendar->description) }}</textarea>
+                    @error('description')
+                        <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                    @enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                    <textarea name="description" rows="3"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 transition text-sm resize-none">{{ old('description', $calendar->description) }}</textarea>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-save mr-2"></i>Mettre à jour
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-brand-100">
+                    <a href="{{ route('admin.calendars.index') }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-save text-xs" aria-hidden="true"></i>Mettre à jour
                     </button>
-                    <a href="{{ route('admin.calendars.index') }}"
-                        class="flex-1 sm:flex-none px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>

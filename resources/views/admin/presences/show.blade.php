@@ -2,138 +2,211 @@
 @section('titre', 'Présences - ' . $stagiaire->user->nom_complet)
 @section('breadcrumb', 'Présences > Fiche complète')
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-5">
-        <!-- En-tête stagiaire -->
-        <div class="card p-6 flex items-center gap-5 flex-wrap" data-aos="fade-down">
-            <div
-                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden shadow">
-                @if ($stagiaire->user->photo)
-                    <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" class="w-full h-full object-cover">
-                @else
-                    <span
-                        class="text-white font-black text-2xl">{{ strtoupper(substr($stagiaire->user->prenom, 0, 1)) }}</span>
-                @endif
-            </div>
-            <div class="flex-1">
-                <h2 class="text-slate-800 font-black text-2xl">{{ $stagiaire->user->nom_complet }}</h2>
-                <p class="text-slate-500 text-sm">{{ $stagiaire->matricule }} • {{ $stagiaire->ecole ?: '—' }}</p>
-                <p class="text-slate-400 text-xs">Stage : {{ $stagiaire->date_debut->format('d/m/Y') }} →
-                    {{ $stagiaire->date_fin->format('d/m/Y') }} ({{ $stagiaire->dureeStageDays() }} jours)</p>
-            </div>
-            <div class="flex gap-2 flex-wrap">
-                <a href="{{ route('admin.presences.formMarquage', ['date' => now()->toDateString()]) }}"
-                    class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-lg text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-                    <i class="fas fa-user-check mr-1"></i>Marquer
-                </a>
-                <a href="{{ route('admin.presences.index', ['stagiaire_id' => $stagiaire->id]) }}"
-                    class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-sm font-medium transition">
-                    <i class="fas fa-filter mr-1"></i>Filtrer par mois
-                </a>
-            </div>
-        </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        $lienFichier = 'inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 hover:underline underline-offset-4 rounded whitespace-nowrap ' . $focus;
+        $focusMarine = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $panneau = 'bg-white border border-brand-100 rounded-xl overflow-hidden';
+        $enTete = 'px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100';
 
-        <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up">
-            @foreach ([[$stats['present'], 'Présent', 'from-green-400 to-emerald-500', 'user-check'], [$stats['retard'], 'Retard', 'from-amber-400 to-orange-500', 'clock'], [$stats['absent'], 'Absent', 'from-red-400 to-pink-500', 'user-times'], [$permissions->count(), 'Permissions', 'from-indigo-400 to-purple-500', 'calendar-check']] as [$val, $label, $grad, $icon])
-                <div class="bg-gradient-to-br {{ $grad }} rounded-2xl p-5 text-white relative overflow-hidden">
-                    <div class="absolute right-3 top-3 opacity-20"><i class="fas fa-{{ $icon }} text-3xl"></i>
-                    </div>
-                    <p class="text-white/80 text-xs font-medium">{{ $label }}</p>
-                    <p class="text-white font-black text-3xl mt-1">{{ $val }}</p>
+        $statutsPresence = [
+            'present' => ['Présent', 'bg-emerald-50 text-emerald-800'],
+            'retard' => ['Retard', 'bg-amber-50 text-amber-800'],
+            'absent' => ['Absent', 'bg-red-50 text-red-800'],
+        ];
+        $statutsPermission = [
+            'en_attente' => ['En attente', 'bg-amber-50 text-amber-800'],
+            'valide' => ['Validée', 'bg-emerald-50 text-emerald-800'],
+            'refuse' => ['Refusée', 'bg-red-50 text-red-800'],
+        ];
+    @endphp
+
+    <div class="max-w-5xl mx-auto space-y-5">
+
+        <!-- Identité, stage et synthèse (bandeau marine) -->
+        <section class="rounded-xl bg-brand-800 text-white p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
+                <div
+                    class="h-16 w-16 rounded-full bg-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    @if ($stagiaire->user->photo)
+                        <img src="{{ asset('storage/' . $stagiaire->user->photo) }}" alt=""
+                            class="h-full w-full object-cover">
+                    @else
+                        <span class="text-2xl font-semibold text-white"
+                            aria-hidden="true">{{ strtoupper(substr($stagiaire->user->prenom, 0, 1)) }}</span>
+                    @endif
                 </div>
-            @endforeach
-        </div>
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-semibold text-white tracking-tight break-words">
+                        {{ $stagiaire->user->nom_complet }}</h2>
+                    <p class="mt-1 text-sm text-brand-100 break-words">
+                        <span class="font-mono">{{ $stagiaire->matricule }}</span> · {{ $stagiaire->ecole ?: '—' }}</p>
+                    <p class="mt-0.5 text-sm text-brand-100 tabular-nums">Stage : {{ $stagiaire->date_debut->format('d/m/Y') }}
+                        → {{ $stagiaire->date_fin->format('d/m/Y') }} ({{ $stagiaire->dureeStageDays() }} jours)</p>
+                </div>
+                <div class="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 flex-shrink-0">
+                    <a href="{{ route('admin.presences.formMarquage', ['date' => now()->toDateString()]) }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-brand-800 hover:bg-brand-50 transition-colors whitespace-nowrap {{ $focusMarine }}">
+                        <i class="fas fa-user-check text-xs" aria-hidden="true"></i>Marquer
+                    </a>
+                    <a href="{{ route('admin.presences.index', ['stagiaire_id' => $stagiaire->id]) }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10 transition-colors whitespace-nowrap {{ $focusMarine }}">
+                        <i class="fas fa-filter text-xs text-brand-100" aria-hidden="true"></i>Filtrer par mois
+                    </a>
+                </div>
+            </div>
+
+            <dl class="mt-6 pt-5 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4">
+                @foreach ([[$stats['present'], 'Présent'], [$stats['retard'], 'Retard'], [$stats['absent'], 'Absent'], [$permissions->count(), 'Permissions']] as [$val, $label])
+                    <div>
+                        <dd class="text-2xl font-semibold text-white tabular-nums">{{ $val }}</dd>
+                        <dt class="mt-0.5 text-xs text-brand-100">{{ $label }}</dt>
+                    </div>
+                @endforeach
+            </dl>
+        </section>
 
         <!-- Permissions -->
         @if ($permissions->count() > 0)
-            <div class="card p-6" data-aos="fade-up">
-                <h3 class="text-slate-800 font-bold text-lg mb-4"><i
-                        class="fas fa-calendar-check text-indigo-500 mr-2"></i>Permissions</h3>
-                <div class="space-y-2">
+            <section class="{{ $panneau }}">
+                <div class="{{ $enTete }}">
+                    <h3 class="text-base font-semibold text-slate-900">Permissions</h3>
+                </div>
+                <ul class="divide-y divide-slate-100">
                     @foreach ($permissions as $perm)
-                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
-                            <div class="flex-1">
-                                <p class="text-slate-800 font-medium text-sm">{{ $perm->date_debut->format('d/m/Y') }} →
-                                    {{ $perm->date_fin->format('d/m/Y') }}</p>
-                                <p class="text-slate-500 text-xs mt-0.5">{{ $perm->motif }}</p>
+                        @php [$libelle, $cls] = $statutsPermission[$perm->statut] ?? [ucfirst($perm->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="px-5 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="text-sm font-medium text-slate-900 tabular-nums">
+                                        {{ $perm->date_debut->format('d/m/Y') }} → {{ $perm->date_fin->format('d/m/Y') }}</p>
+                                    <span class="text-xs font-medium px-2 py-0.5 rounded-md {{ $cls }}">{{ $libelle }}</span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-600 break-words">{{ $perm->motif }}</p>
                             </div>
-                            @php $pb = ['en_attente'=>'bg-amber-100 text-amber-700','valide'=>'bg-green-100 text-green-700','refuse'=>'bg-red-100 text-red-600']; @endphp
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-semibold {{ $pb[$perm->statut] ?? '' }}">{{ ucfirst($perm->statut) }}</span>
                             @if ($perm->justificatif)
                                 <a href="{{ asset('storage/' . $perm->justificatif) }}" download
-                                    class="w-8 h-8 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg flex items-center justify-center transition">
-                                    <i class="fas fa-download text-xs"></i>
+                                    class="flex-shrink-0 {{ $lienFichier }}"
+                                    aria-label="Télécharger le justificatif de la permission du {{ $perm->date_debut->format('d/m/Y') }}">
+                                    <i class="fas fa-download" aria-hidden="true"></i>Justificatif
                                 </a>
                             @endif
-                        </div>
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
+            </section>
         @endif
 
-        <!-- Tableau présences -->
-        <div class="card overflow-hidden" data-aos="fade-up">
-            <div class="px-5 py-4 border-b border-slate-100">
-                <h3 class="font-bold text-slate-800">Historique complet des présences ({{ $presences->total() }})</h3>
+        <!-- Historique des présences -->
+        <section class="{{ $panneau }}">
+            <div class="{{ $enTete }}">
+                <h3 class="text-base font-semibold text-slate-900">Historique complet des présences
+                    <span class="font-normal text-slate-600 tabular-nums">({{ $presences->total() }})</span>
+                </h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Date</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Statut</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Arrivée</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Départ</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Motif</th>
-                            <th class="px-5 py-3 text-left font-semibold text-slate-600">Marqué par</th>
-                            <th class="px-5 py-3 text-center font-semibold text-slate-600">Justificatif</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        @foreach ($presences as $p)
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="px-5 py-3 font-medium text-slate-800">
-                                    {{ $p->date->translatedFormat('D d M Y') }}</td>
-                                <td class="px-5 py-3">
-                                    @php $sc = ['present'=>'bg-green-100 text-green-700','retard'=>'bg-amber-100 text-amber-700','absent'=>'bg-red-100 text-red-600']; @endphp
-                                    <span
-                                        class="px-3 py-1 rounded-full text-xs font-semibold {{ $sc[$p->statut] ?? '' }}">{{ ucfirst($p->statut) }}</span>
-                                </td>
-                                <td class="px-5 py-3 text-slate-600 font-mono">
-                                    {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
-                                <td class="px-5 py-3 text-blue-600 font-mono">
-                                    {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
-                                <td class="px-5 py-3 text-slate-500 text-xs max-w-xs truncate">{{ $p->motif ?: '—' }}</td>
-                                <td class="px-5 py-3">
-                                    @if ($p->marquePar)
-                                        <span
-                                            class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-xs font-medium">
-                                            <i class="fas fa-user-edit"></i>{{ $p->marquePar->nom_complet }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400 text-xs">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3 text-center">
-                                    @if ($p->justificatif)
-                                        <a href="{{ asset('storage/' . $p->justificatif) }}" download
-                                            class="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-xs font-medium transition">
-                                            <i class="fas fa-download"></i>
-                                        </a>
-                                    @else<span class="text-slate-300">—</span>
-                                    @endif
-                                </td>
+
+            @if ($presences->count() > 0)
+                <!-- Tableau (grands écrans) -->
+                <div class="hidden xl:block">
+                    <table class="w-full table-fixed text-sm">
+                        <colgroup>
+                            <col class="w-40">
+                            <col class="w-28">
+                            <col class="w-20">
+                            <col class="w-20">
+                            <col>
+                            <col class="w-44">
+                            <col class="w-32">
+                        </colgroup>
+                        <thead class="bg-brand-50 border-b border-brand-100">
+                            <tr class="text-left text-xs font-medium text-slate-600">
+                                <th scope="col" class="px-5 py-2.5">Date</th>
+                                <th scope="col" class="px-3 py-2.5">Statut</th>
+                                <th scope="col" class="px-3 py-2.5">Arrivée</th>
+                                <th scope="col" class="px-3 py-2.5">Départ</th>
+                                <th scope="col" class="px-3 py-2.5">Motif</th>
+                                <th scope="col" class="px-3 py-2.5">Marqué par</th>
+                                <th scope="col" class="px-5 py-2.5 text-right">Justificatif</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="px-5 py-4 border-t border-slate-100">{{ $presences->links() }}</div>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach ($presences as $p)
+                                @php [$libelle, $cls] = $statutsPresence[$p->statut] ?? [ucfirst($p->statut), 'bg-slate-100 text-slate-700']; @endphp
+                                <tr class="hover:bg-brand-50/60">
+                                    <td class="px-5 py-3 font-medium text-slate-900 whitespace-nowrap tabular-nums">
+                                        {{ $p->date->translatedFormat('D d M Y') }}</td>
+                                    <td class="px-3 py-3">
+                                        <span class="text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap {{ $cls }}">{{ $libelle }}</span>
+                                    </td>
+                                    <td class="px-3 py-3 text-slate-700 tabular-nums">
+                                        {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}</td>
+                                    <td class="px-3 py-3 text-slate-700 tabular-nums">
+                                        {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}</td>
+                                    <td class="px-3 py-3 text-slate-500 truncate" title="{{ $p->motif }}">
+                                        {{ $p->motif ?: '—' }}</td>
+                                    <td class="px-3 py-3 text-slate-700 truncate"
+                                        title="{{ $p->marquePar ? $p->marquePar->nom_complet : '' }}">
+                                        {{ $p->marquePar ? $p->marquePar->nom_complet : '—' }}</td>
+                                    <td class="px-5 py-3 text-right">
+                                        @if ($p->justificatif)
+                                            <a href="{{ asset('storage/' . $p->justificatif) }}" download
+                                                class="{{ $lienFichier }}"
+                                                aria-label="Télécharger le justificatif du {{ $p->date->format('d/m/Y') }}">
+                                                <i class="fas fa-download" aria-hidden="true"></i>Télécharger
+                                            </a>
+                                        @else
+                                            <span class="text-slate-500">—</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Liste (téléphone et tablette) -->
+                <ul class="xl:hidden divide-y divide-slate-100">
+                    @foreach ($presences as $p)
+                        @php [$libelle, $cls] = $statutsPresence[$p->statut] ?? [ucfirst($p->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="px-5 sm:px-6 py-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="text-sm font-medium text-slate-900 tabular-nums">
+                                    {{ $p->date->translatedFormat('D d M Y') }}</p>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $cls }}">{{ $libelle }}</span>
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600 tabular-nums">
+                                Arrivée {{ $p->heure_arrivee ? substr($p->heure_arrivee, 0, 5) : '—' }}
+                                · Départ {{ $p->heure_depart ? substr($p->heure_depart, 0, 5) : '—' }}
+                            </p>
+                            @if ($p->motif)
+                                <p class="mt-1 text-sm text-slate-500 break-words">{{ $p->motif }}</p>
+                            @endif
+                            @if ($p->marquePar)
+                                <p class="mt-1 text-xs text-slate-500">Marqué par {{ $p->marquePar->nom_complet }}</p>
+                            @endif
+                            @if ($p->justificatif)
+                                <a href="{{ asset('storage/' . $p->justificatif) }}" download class="mt-2 {{ $lienFichier }}">
+                                    <i class="fas fa-download" aria-hidden="true"></i>Télécharger le justificatif
+                                </a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="px-6 py-10 text-center">
+                    <p class="text-sm font-medium text-slate-700">Aucune présence enregistrée</p>
+                    <p class="mt-1 text-sm text-slate-500">L'historique apparaîtra ici dès la première présence marquée.</p>
+                </div>
+            @endif
+
+            <div class="px-5 sm:px-6 py-4 border-t border-brand-100">{{ $presences->links() }}</div>
+        </section>
+
+        <div>
+            <a href="{{ route('admin.presences.index') }}" class="inline-flex items-center gap-2 {{ $lien }}">
+                <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour
+            </a>
         </div>
-        <a href="{{ route('admin.presences.index') }}"
-            class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-            <i class="fas fa-arrow-left"></i>Retour
-        </a>
     </div>
 @endsection

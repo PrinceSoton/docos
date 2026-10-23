@@ -1,138 +1,167 @@
 @extends('layouts.admin')
 @section('titre', 'Tableau de bord')
 @section('content')
-    <div class="space-y-6">
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $lien = 'text-sm font-medium text-brand-700 hover:underline underline-offset-4 rounded ' . $focus;
+        // Variantes sur le bandeau marine
+        $focusMarine = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-800';
+        $panneau = 'bg-white border border-brand-100 rounded-xl overflow-hidden';
+        $enTete = 'px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex items-center justify-between gap-3';
 
-        <!-- Bienvenue -->
-        {{-- <div class="bg-gradient-to-r from-indigo-600 to-purple-700 rounded-3xl p-8 text-white relative overflow-hidden"
-            data-aos="fade-down">
-            <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="relative z-10">
-                {{--   <p class="text-indigo-200 text-sm font-medium mb-1">{{ now()->translatedFormat('l d F Y') }}</p>
-        <h2 class="text-white font-black text-3xl mb-2">Bienvenue, {{ Auth::user()->prenom }} </h2>
-        {{-- <p class="text-indigo-200">Vue d'ensemble du système DOCOS</p>
-    </div>
-    </div> --}}
+        // Chiffres clés du bandeau
+        $chiffres = [
+            ['Utilisateurs', $stats['total_users']],
+            ['Stagiaires actifs', $stats['stagiaires_actifs']],
+            ['Mentors', $stats['total_mentors']],
+            ['Projets', $stats['total_projets']],
+        ];
 
-        <!-- Stats principales -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            @foreach ([['bg-gradient-to-br from-blue-500 to-indigo-600', 'fas fa-users', 'Utilisateurs', $stats['total_users'], 'route'], ['bg-gradient-to-br from-emerald-500 to-teal-600', 'fas fa-user-graduate', 'Stagiaires actifs', $stats['stagiaires_actifs'], 'route'], ['bg-gradient-to-br from-purple-500 to-pink-600', 'fas fa-chalkboard-teacher', 'Mentors', $stats['total_mentors'], 'route'], ['bg-gradient-to-br from-amber-500 to-orange-600', 'fas fa-project-diagram', 'Projets', $stats['total_projets'], 'route']] as $i => [$gradient, $icon, $label, $value])
-                <div class="{{ $gradient }} text-white rounded-2xl p-6 relative overflow-hidden card" data-aos="fade-up"
-                    data-aos-delay="{{ $i * 75 }}">
-                    <div class="absolute right-3 top-3 opacity-20">
-                        <i class="{{ $icon }} text-4xl"></i>
+        // Indicateurs de suivi : [libellé, valeur, icône, pastille, précision]
+        $indicateurs = [
+            ['Rapports à valider', $stats['rapports_en_attente'], 'file-alt', 'bg-brand-50 text-brand-700', 'Rapports au statut « soumis »'],
+            ['Attestations à traiter', $stats['attestations_en_attente'], 'certificate', 'bg-brand-50 text-brand-700', 'Validées par le mentor'],
+            ["Présences aujourd'hui", $stats['presences_aujourd_hui'], 'user-check', 'bg-accent-50 text-accent-700', 'Pointages du jour'],
+            ['Total stagiaires', $stats['total_stagiaires'], 'graduation-cap', 'bg-accent-50 text-accent-700', 'Tous statuts confondus'],
+        ];
+
+        $statutsStagiaire = [
+            'en_cours' => ['En cours', 'bg-sky-50 text-sky-800'],
+            'termine' => ['Terminé', 'bg-emerald-50 text-emerald-800'],
+            'suspendu' => ['Suspendu', 'bg-red-50 text-red-800'],
+        ];
+        $statutsRapport = [
+            'soumis' => ['Soumis', 'bg-amber-50 text-amber-800'],
+            'valide' => ['Validé', 'bg-emerald-50 text-emerald-800'],
+            'rejete' => ['Rejeté', 'bg-red-50 text-red-800'],
+            'en_revision' => ['En révision', 'bg-sky-50 text-sky-800'],
+        ];
+    @endphp
+
+    <div class="max-w-6xl mx-auto space-y-5">
+
+        <!-- Accueil et chiffres clés (bandeau marine) -->
+        <section class="rounded-xl bg-brand-800 text-white p-5 sm:p-6" aria-labelledby="accueil-titre">
+            <h2 id="accueil-titre" class="text-2xl font-semibold text-white tracking-tight">Bonjour, {{ Auth::user()->prenom }}</h2>
+            <p class="mt-1 text-sm text-brand-100">Vue d'ensemble de la plateforme DOCOS.</p>
+
+            <dl class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                @foreach ($chiffres as [$label, $val])
+                    <div class="min-w-0 flex flex-col-reverse">
+                        <dt class="mt-0.5 text-xs text-brand-100">{{ $label }}</dt>
+                        <dd class="text-2xl font-semibold text-white tabular-nums">{{ $val }}</dd>
                     </div>
-                    <p class="text-white/80 text-sm font-medium">{{ $label }}</p>
-                    <p class="text-white font-black text-3xl mt-1">{{ $value }}</p>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </dl>
 
-        <!-- Stats secondaires -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="card p-5 text-center" data-aos="fade-up">
-                <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-file-alt text-red-600 text-xl"></i>
+            <!-- Raccourci pour la création des modules -->
+            <div class="mt-6 pt-5 border-t border-white/15">
+                <p class="text-xs font-medium text-brand-100">Créer rapidement</p>
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2">
+                    <a href="{{ route('admin.stagiaires.create') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-brand-800 hover:bg-brand-50 transition-colors whitespace-nowrap {{ $focusMarine }}">
+                        <i class="fas fa-user-graduate text-xs" aria-hidden="true"></i>Ajouter stagiaire
+                    </a>
+                    @foreach ([[route('admin.users.create'), 'user-plus', 'Ajouter utilisateur'], [route('admin.evenements.create'), 'bullhorn', 'Créer événement'], [route('admin.archives.create'), 'archive', 'Créer archive']] as [$route, $icon, $label])
+                        <a href="{{ $route }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10 transition-colors whitespace-nowrap {{ $focusMarine }}">
+                            <i class="fas fa-{{ $icon }} text-xs text-brand-100" aria-hidden="true"></i>{{ $label }}
+                        </a>
+                    @endforeach
                 </div>
-                <p class="text-2xl font-black text-slate-800">{{ $stats['rapports_en_attente'] }}</p>
-                <p class="text-slate-400 text-xs mt-1">Rapports à valider</p>
             </div>
-            <div class="card p-5 text-center" data-aos="fade-up" data-aos-delay="75">
-                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-certificate text-amber-600 text-xl"></i>
-                </div>
-                <p class="text-2xl font-black text-slate-800">{{ $stats['attestations_en_attente'] }}</p>
-                <p class="text-slate-400 text-xs mt-1">Attestations à traiter</p>
-            </div>
-            <div class="card p-5 text-center" data-aos="fade-up" data-aos-delay="150">
-                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-user-check text-green-600 text-xl"></i>
-                </div>
-                <p class="text-2xl font-black text-slate-800">{{ $stats['presences_aujourd_hui'] }}</p>
-                <p class="text-slate-400 text-xs mt-1">Présences aujourd'hui</p>
-            </div>
-            <div class="card p-5 text-center" data-aos="fade-up" data-aos-delay="225">
-                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-graduation-cap text-indigo-600 text-xl"></i>
-                </div>
-                <p class="text-2xl font-black text-slate-800">{{ $stats['total_stagiaires'] }}</p>
-                <p class="text-slate-400 text-xs mt-1">Total stagiaires</p>
-            </div>
-        </div>
+        </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Indicateurs de suivi -->
+        <section aria-labelledby="suivi-titre">
+            <h2 id="suivi-titre" class="sr-only">Suivi de l'activité</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                @foreach ($indicateurs as [$label, $val, $icon, $pastille, $precision])
+                    <div class="bg-white border border-brand-100 rounded-xl p-4 sm:p-5 flex items-start gap-3">
+                        <span class="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 {{ $pastille }}"
+                            aria-hidden="true"><i class="fas fa-{{ $icon }} text-sm"></i></span>
+                        <div class="min-w-0 flex flex-col-reverse">
+                            <dt class="mt-0.5">
+                                <span class="block text-sm font-medium text-slate-700">{{ $label }}</span>
+                                <span class="block text-xs text-slate-500">{{ $precision }}</span>
+                            </dt>
+                            <dd class="text-2xl font-semibold text-slate-900 tabular-nums">{{ $val }}</dd>
+                        </div>
+                    </div>
+                @endforeach
+            </dl>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+
             <!-- Stagiaires récents -->
-            <div class="card p-6" data-aos="fade-right">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-slate-800 font-bold text-lg"><i
-                            class="fas fa-user-graduate text-indigo-500 mr-2"></i>Stagiaires récents</h3>
-                    <a href="{{ route('admin.stagiaires.index') }}" class="text-indigo-600 text-sm hover:underline">Voir
+            <section class="{{ $panneau }}" aria-labelledby="stagiaires-recents-titre">
+                <div class="{{ $enTete }}">
+                    <h3 id="stagiaires-recents-titre" class="text-base font-semibold text-slate-900">Stagiaires récents</h3>
+                    <a href="{{ route('admin.stagiaires.index') }}" class="flex-shrink-0 whitespace-nowrap {{ $lien }}">Voir
                         tous →</a>
                 </div>
-                @forelse($stagiairesRecents as $stag)
-                    <div
-                        class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl px-2 transition">
-                        <div
-                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center flex-shrink-0">
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse($stagiairesRecents as $stag)
+                        @php [$libelle, $cls] = $statutsStagiaire[$stag->statut] ?? [ucfirst($stag->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="flex items-center gap-3 py-3">
+                            <div
+                                class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                @if ($stag->user->photo)
+                                    <img src="{{ asset('storage/' . $stag->user->photo) }}" alt=""
+                                        class="h-full w-full object-cover" loading="lazy">
+                                @else
+                                    <span class="text-sm font-semibold text-brand-800"
+                                        aria-hidden="true">{{ strtoupper(substr($stag->user->prenom, 0, 1)) }}</span>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate" title="{{ $stag->user->nom_complet }}">
+                                    {{ $stag->user->nom_complet }}</p>
+                                <p class="text-xs text-slate-500 truncate" title="{{ $stag->ecole }}">
+                                    <span class="font-mono">{{ $stag->matricule }}</span> · {{ $stag->ecole ?: '—' }}</p>
+                            </div>
                             <span
-                                class="text-white font-bold text-sm">{{ strtoupper(substr($stag->user->prenom, 0, 1)) }}</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-800 font-semibold text-sm truncate">{{ $stag->user->nom_complet }}</p>
-                            <p class="text-slate-400 text-xs">{{ $stag->matricule }} • {{ $stag->ecole ?: '—' }}</p>
-                        </div>
-                        <span
-                            class="text-xs px-2 py-1 rounded-full font-medium {{ $stag->statut === 'en_cours' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600' }}">
-                            {{ $stag->statut === 'en_cours' ? 'En cours' : ucfirst($stag->statut) }}
-                        </span>
-                    </div>
-                @empty
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun stagiaire</p>
-                @endforelse
-            </div>
+                                class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 whitespace-nowrap {{ $cls }}">{{ $libelle }}</span>
+                        </li>
+                    @empty
+                        <li class="py-8 text-center">
+                            <p class="text-sm font-medium text-slate-700">Aucun stagiaire</p>
+                            <p class="mt-1 text-sm text-slate-500">Les derniers stagiaires enregistrés apparaîtront ici.</p>
+                            <a href="{{ route('admin.stagiaires.create') }}" class="mt-2 inline-block {{ $lien }}">Ajouter un
+                                stagiaire</a>
+                        </li>
+                    @endforelse
+                </ul>
+            </section>
 
-            <!-- Rapports récents -->
-            <div class="card p-6" data-aos="fade-left">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-slate-800 font-bold text-lg"><i
-                            class="fas fa-file-alt text-purple-500 mr-2"></i>Rapports
-                        soumis</h3>
-                    <a href="{{ route('admin.statistics.index') }}" class="text-indigo-600 text-sm hover:underline">Autres
+            <!-- Rapports soumis -->
+            <section class="{{ $panneau }}" aria-labelledby="rapports-recents-titre">
+                <div class="{{ $enTete }}">
+                    <h3 id="rapports-recents-titre" class="text-base font-semibold text-slate-900">Rapports soumis</h3>
+                    <a href="{{ route('admin.statistics.index') }}" class="flex-shrink-0 whitespace-nowrap {{ $lien }}">Autres
                         →</a>
                 </div>
-                @forelse($rapportsRecents as $rapport)
-                    <div
-                        class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-xl px-2 transition">
-                        <div
-                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-file-alt text-white text-sm"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-800 font-semibold text-sm truncate">{{ $rapport->titre }}</p>
-                            <p class="text-slate-400 text-xs">{{ $rapport->stagiaire->user->nom_complet ?? '—' }}</p>
-                        </div>
-                        <span class="text-xs px-2 py-1 rounded-full font-medium bg-amber-100 text-amber-700">Soumis</span>
-                    </div>
-                @empty
-                    <p class="text-slate-400 text-sm text-center py-6">Aucun rapport</p>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Actions rapides -->
-        <div class="card p-6">
-            <h3 class="text-slate-800 font-bold text-lg mb-4">
-                {{-- <iclass="fasfa-bolttext-amber-500mr-2"></i> --}}
-                Raccourci pour la création des modules
-            </h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                @foreach ([[route('admin.users.create'), 'fas fa-user-plus', 'bg-blue-50 text-blue-700 hover:bg-blue-100', 'Ajouter utilisateur'], [route('admin.stagiaires.create'), 'fas fa-user-graduate', 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100', 'Ajouter stagiaire'], [route('admin.evenements.create'), 'fas fa-bullhorn', 'bg-purple-50 text-purple-700 hover:bg-purple-100', 'Créer événement'], [route('admin.archives.create'), 'fas fa-archive', 'bg-amber-50 text-amber-700 hover:bg-amber-100', 'Créer archive']] as [$route, $icon, $cls, $label])
-                    <a href="{{ $route }}"
-                        class="{{ $cls }} flex flex-col items-center gap-2 py-5 rounded-2xl font-medium text-sm transition-all hover:-translate-y-1 hover:shadow-md">
-                        <i class="{{ $icon }} text-2xl"></i>{{ $label }}
-                    </a>
-                @endforeach
-            </div>
+                <ul class="px-5 sm:px-6 py-1 divide-y divide-slate-100">
+                    @forelse($rapportsRecents as $rapport)
+                        @php [$libelle, $cls] = $statutsRapport[$rapport->statut] ?? [ucfirst((string) $rapport->statut), 'bg-slate-100 text-slate-700']; @endphp
+                        <li class="flex items-center gap-3 py-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate" title="{{ $rapport->titre }}">
+                                    {{ $rapport->titre }}</p>
+                                <p class="text-xs text-slate-500 truncate">{{ $rapport->stagiaire->user->nom_complet ?? '—' }}</p>
+                            </div>
+                            <span
+                                class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 whitespace-nowrap {{ $cls }}">{{ $libelle }}</span>
+                        </li>
+                    @empty
+                        <li class="py-8 text-center">
+                            <p class="text-sm font-medium text-slate-700">Aucun rapport</p>
+                            <p class="mt-1 text-sm text-slate-500">Les rapports déposés par les stagiaires apparaîtront ici.</p>
+                        </li>
+                    @endforelse
+                </ul>
+            </section>
         </div>
     </div>
 @endsection

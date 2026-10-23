@@ -2,77 +2,115 @@
 @section('titre', 'Nouvelle publication')
 @section('breadcrumb', 'Événements > Créer')
 @section('content')
-    <div class="max-w-2xl mx-auto">
-        <div class="card p-8" data-aos="fade-up">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-bullhorn text-purple-600"></i>
-                </div>
-                <div>
-                    <h2 class="text-slate-800 font-bold text-xl">Nouvelle publication</h2>
-                    <p class="text-slate-400 text-sm">Information, événement ou note</p>
-                </div>
-            </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $champ = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/25';
+        $champErreur = 'w-full rounded-lg border border-red-400 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20';
+        $fichier = 'w-full text-sm text-slate-500 file:mr-3 file:rounded-md file:border-0 file:!bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium file:!text-slate-700 hover:file:!bg-slate-200 file:cursor-pointer';
+        $case = 'h-4 w-4 flex-shrink-0 rounded border-slate-300 accent-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors ' . $focus;
+    @endphp
+
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white border border-brand-100 rounded-xl p-5 sm:p-6">
+            <p class="text-sm text-slate-500 mb-5">Information, événement ou note.</p>
+
             <form action="{{ route('admin.evenements.store') }}" method="POST" enctype="multipart/form-data"
-                class="space-y-5">
+                class="space-y-6">
                 @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Type *</label>
-                        <select name="type" required
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
-                            <option value="information" {{ old('type') === 'information' ? 'selected' : '' }}>Information
-                            </option>
-                            <option value="evenement" {{ old('type') === 'evenement' ? 'selected' : '' }}>Événement</option>
-                            <option value="note" {{ old('type') === 'note' ? 'selected' : '' }}>Note</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Date de l'événement</label>
-                        <input type="datetime-local" name="date_evenement" value="{{ old('date_evenement') }}"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
-                    </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Titre *</label>
-                    <input type="text" name="titre" value="{{ old('titre') }}" required
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Contenu</label>
-                    <textarea name="contenu" rows="5"
-                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-400 transition text-sm resize-none">{{ old('contenu') }}</textarea>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Image</label>
-                        <input type="file" name="image" accept="image/*"
-                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-purple-50 file:text-purple-700 file:font-medium hover:file:bg-purple-100">
+                <!-- Publication -->
+                <fieldset class="space-y-4">
+                    <legend class="text-base font-semibold text-slate-900">Publication</legend>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-slate-700 mb-1">
+                                Type <span class="text-red-700" aria-hidden="true">*</span>
+                            </label>
+                            <select id="type" name="type" required
+                                class="{{ $errors->has('type') ? $champErreur : $champ }}"
+                                @error('type') aria-invalid="true" @enderror>
+                                <option value="information" {{ old('type') === 'information' ? 'selected' : '' }}>Information
+                                </option>
+                                <option value="evenement" {{ old('type') === 'evenement' ? 'selected' : '' }}>Événement</option>
+                                <option value="note" {{ old('type') === 'note' ? 'selected' : '' }}>Note</option>
+                            </select>
+                            @error('type')
+                                <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="date_evenement" class="block text-sm font-medium text-slate-700 mb-1">Date de l'événement</label>
+                            <input type="datetime-local" id="date_evenement" name="date_evenement" value="{{ old('date_evenement') }}"
+                                class="{{ $errors->has('date_evenement') ? $champErreur : $champ }} tabular-nums"
+                                @error('date_evenement') aria-invalid="true" @enderror>
+                            @error('date_evenement')
+                                <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Fichier joint</label>
-                        <input type="file" name="fichier"
-                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-slate-50 file:text-slate-700 file:font-medium hover:file:bg-slate-100">
-                    </div>
-                </div>
 
-                <!-- Destinataires -->
-                <div class="p-5 bg-slate-50 rounded-2xl">
-                    <div class="flex items-center gap-3 mb-3">
+                    <div>
+                        <label for="titre" class="block text-sm font-medium text-slate-700 mb-1">
+                            Titre <span class="text-red-700" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text" id="titre" name="titre" value="{{ old('titre') }}" required
+                            class="{{ $errors->has('titre') ? $champErreur : $champ }}"
+                            @error('titre') aria-invalid="true" @enderror>
+                        @error('titre')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="evenement-contenu" class="block text-sm font-medium text-slate-700 mb-1">Contenu</label>
+                        <textarea id="evenement-contenu" name="contenu" rows="5"
+                            class="{{ $errors->has('contenu') ? $champErreur : $champ }} resize-y">{{ old('contenu') }}</textarea>
+                        @error('contenu')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </fieldset>
+
+                <hr class="border-brand-100">
+
+                <!-- Pièces jointes -->
+                <fieldset>
+                    <legend class="text-base font-semibold text-slate-900 mb-4">Pièces jointes</legend>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="min-w-0">
+                            <label for="image" class="block text-sm font-medium text-slate-700 mb-1">Image</label>
+                            <input type="file" id="image" name="image" accept="image/*" class="{{ $fichier }}">
+                            @error('image')
+                                <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="min-w-0">
+                            <label for="fichier" class="block text-sm font-medium text-slate-700 mb-1">Fichier joint</label>
+                            <input type="file" id="fichier" name="fichier" class="{{ $fichier }}">
+                            @error('fichier')
+                                <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Destinataires (bloc teinté) -->
+                <fieldset class="rounded-lg bg-brand-50 border border-brand-100 p-4 sm:p-5">
+                    <legend class="sr-only">Destinataires</legend>
+                    <p class="text-sm font-semibold text-slate-900 mb-3">Destinataires</p>
+                    <div class="flex items-center gap-3">
                         <input type="checkbox" name="partage_tous" id="partageTous" value="1"
-                            {{ old('partage_tous') ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 rounded">
-                        <label for="partageTous" class="text-sm font-medium text-slate-700 cursor-pointer">
-                            <i class="fas fa-globe mr-1 text-green-500"></i>Partager avec tous les utilisateurs
+                            {{ old('partage_tous') ? 'checked' : '' }} class="{{ $case }}">
+                        <label for="partageTous" class="text-sm font-medium text-slate-900 cursor-pointer">
+                            Partager avec tous les utilisateurs
                         </label>
                     </div>
-                    <div id="destinatairesSelect" class="{{ old('partage_tous') ? 'hidden' : '' }}">
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Destinataires spécifiques :</label>
-                        <select name="destinataires[]" multiple
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-400 transition"
-                            size="6">
+                    <div id="destinatairesSelect" class="mt-4 {{ old('partage_tous') ? 'hidden' : '' }}">
+                        <label for="destinataires" class="block text-sm font-medium text-slate-700 mb-1">Destinataires spécifiques :</label>
+                        <select id="destinataires" name="destinataires[]" multiple aria-describedby="destinataires-aide"
+                            class="{{ $champ }}" size="6">
                             @foreach ($users as $u)
                                 <option value="{{ $u->id }}"
                                     {{ in_array($u->id, (array) old('destinataires', [])) ? 'selected' : '' }}>
@@ -80,17 +118,21 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-xs text-slate-400 mt-1">Ctrl/Cmd pour sélection multiple</p>
+                        <p id="destinataires-aide" class="mt-1 text-xs text-slate-600">Ctrl/Cmd pour sélection multiple</p>
+                        @error('destinataires')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
+                        @error('destinataires.*')
+                            <p class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                        @enderror
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="flex gap-3 pt-2">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-paper-plane mr-2"></i>Publier
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-brand-100">
+                    <a href="{{ route('admin.evenements.index') }}" class="{{ $btnSecondaire }}">Annuler</a>
+                    <button type="submit" class="{{ $btnPrimaire }}">
+                        <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>Publier
                     </button>
-                    <a href="{{ route('admin.evenements.index') }}"
-                        class="px-6 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition text-center">Annuler</a>
                 </div>
             </form>
         </div>

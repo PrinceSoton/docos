@@ -2,121 +2,118 @@
 @section('titre', 'Détail attestation')
 @section('breadcrumb', 'Attestations > Détail')
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-0 space-y-5">
-        <div class="card p-5 sm:p-8" data-aos="fade-up">
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
-                        <i class="fas fa-certificate text-amber-600 text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-slate-800 font-bold text-xl capitalize">{{ $attestation->type }}</h2>
-                        <p class="text-slate-400 text-sm">Demande #{{ $attestation->id }}</p>
-                    </div>
+    @php
+        $focus = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2';
+        $btnPrimaire = 'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors whitespace-nowrap ' . $focus;
+        $btnSecondaire = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors whitespace-nowrap ' . $focus;
+        $btnDanger = 'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors whitespace-nowrap ' . $focus;
+
+        $statuts = [
+            'en_attente' => ['En attente', 'bg-amber-50 text-amber-800'],
+            'valide_mentor' => ['Validé par mentor', 'bg-sky-50 text-sky-800'],
+            'approuve_admin' => ['Approuvé', 'bg-sky-50 text-sky-800'],
+            'envoye' => ['Envoyé', 'bg-emerald-50 text-emerald-800'],
+            'refuse' => ['Refusé', 'bg-red-50 text-red-800'],
+        ];
+        [$libStatut, $clsStatut] = $statuts[$attestation->statut] ?? [$attestation->statut, 'bg-slate-100 text-slate-700'];
+    @endphp
+
+    <div class="max-w-3xl mx-auto space-y-5">
+        <article class="bg-white border border-brand-100 rounded-xl overflow-hidden">
+            <!-- En-tête teinté : type, numéro, statut -->
+            <div class="flex items-start justify-between gap-3 px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100">
+                <div class="min-w-0">
+                    <h2 class="text-base font-semibold text-slate-900 capitalize break-words">{{ $attestation->type }}</h2>
+                    <p class="text-xs text-slate-600 tabular-nums">Demande #{{ $attestation->id }}</p>
                 </div>
-                @php
-                    $badges = [
-                        'en_attente' => 'bg-amber-100 text-amber-700',
-                        'valide_mentor' => 'bg-blue-100 text-blue-700',
-                        'envoye' => 'bg-green-100 text-green-700',
-                        'refuse' => 'bg-red-100 text-red-600',
-                    ];
-                    $labels = [
-                        'en_attente' => 'En attente',
-                        'valide_mentor' => 'Validé par mentor',
-                        'envoye' => 'Envoyé',
-                        'refuse' => 'Refusé',
-                    ];
-                @endphp
-                <span
-                    class="px-4 py-2 rounded-xl text-sm font-bold {{ $badges[$attestation->statut] ?? 'bg-slate-100 text-slate-600' }}">
-                    {{ $labels[$attestation->statut] ?? $attestation->statut }}
-                </span>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-md flex-shrink-0 {{ $clsStatut }}">{{ $libStatut }}</span>
             </div>
 
-            <div class="space-y-4">
-                <div class="p-4 bg-indigo-50 rounded-2xl">
-                    <p class="text-xs text-indigo-400 font-semibold uppercase mb-2">Stagiaire</p>
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-indigo-200 flex items-center justify-center font-bold text-indigo-700">
-                            {{ strtoupper(substr($attestation->stagiaire->user->prenom ?? '', 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800">{{ $attestation->stagiaire->user->nom_complet ?? '—' }}</p>
-                            <p class="text-slate-500 text-sm">{{ $attestation->stagiaire->matricule ?? '' }} —
-                                {{ $attestation->stagiaire->ecole ?: '' }}</p>
-                        </div>
+            <div class="p-5 sm:p-6 space-y-5">
+                <!-- Stagiaire et demande (bloc teinté) -->
+                <dl class="rounded-lg bg-brand-50 border border-brand-100 p-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                    <div class="sm:col-span-2 min-w-0">
+                        <dt class="text-xs text-slate-600">Stagiaire</dt>
+                        <dd class="mt-1 flex items-center gap-2.5 min-w-0">
+                            <span
+                                class="h-9 w-9 rounded-full bg-brand-100 text-brand-800 text-sm font-semibold flex items-center justify-center flex-shrink-0"
+                                aria-hidden="true">{{ strtoupper(substr($attestation->stagiaire->user->prenom ?? '', 0, 1)) }}</span>
+                            <span class="min-w-0">
+                                <span
+                                    class="block text-sm font-medium text-slate-900 break-words">{{ $attestation->stagiaire->user->nom_complet ?? '—' }}</span>
+                                <span class="block text-xs text-slate-600 tabular-nums break-words">{{ $attestation->stagiaire->matricule ?? '' }}
+                                    — {{ $attestation->stagiaire->ecole ?: '' }}</span>
+                            </span>
+                        </dd>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs text-slate-400 uppercase font-medium">Type</p>
-                        <p class="font-bold text-slate-800 capitalize mt-1">{{ $attestation->type }}</p>
+                    <div>
+                        <dt class="text-xs text-slate-600">Type</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-900 capitalize">{{ $attestation->type }}</dd>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs text-slate-400 uppercase font-medium">Demandé le</p>
-                        <p class="font-bold text-slate-800 mt-1">{{ $attestation->created_at->format('d/m/Y à H:i') }}</p>
+                    <div>
+                        <dt class="text-xs text-slate-600">Demandé le</dt>
+                        <dd class="mt-0.5 text-sm font-medium text-slate-900 tabular-nums">
+                            {{ $attestation->created_at->format('d/m/Y à H:i') }}</dd>
                     </div>
                     @if ($attestation->valide_par_mentor)
-                        <div class="p-4 bg-blue-50 rounded-xl">
-                            <p class="text-xs text-blue-400 uppercase font-medium">Validé par mentor</p>
-                            <p class="font-bold text-blue-800 mt-1">{{ $attestation->validePar?->nom_complet ?? '—' }}</p>
-                            <p class="text-blue-500 text-xs">{{ $attestation->valide_le_mentor?->format('d/m/Y') }}</p>
+                        <div class="min-w-0">
+                            <dt class="text-xs text-slate-600">Validé par mentor</dt>
+                            <dd class="mt-0.5 text-sm font-medium text-slate-900 break-words">
+                                {{ $attestation->validePar?->nom_complet ?? '—' }}</dd>
+                            <dd class="text-xs text-slate-600 tabular-nums">{{ $attestation->valide_le_mentor?->format('d/m/Y') }}</dd>
                         </div>
                     @endif
-                    @if ($attestation->envoye_par_admin)
-                        <div class="p-4 bg-green-50 rounded-xl">
-                            <p class="text-xs text-green-400 uppercase font-medium">Envoyé par admin</p>
-                            <p class="font-bold text-green-800 mt-1">{{ $attestation->envoyePar?->nom_complet ?? '—' }}</p>
-                            <p class="text-green-500 text-xs">{{ $attestation->envoye_le?->format('d/m/Y') }}</p>
-                        </div>
-                    @endif
-                </div>
+                </dl>
+
+                @if ($attestation->envoye_par_admin)
+                    <!-- Envoi effectué : accent vert -->
+                    <div class="rounded-lg bg-accent-50 border border-accent-100 p-4">
+                        <p class="text-xs font-medium text-accent-700">Envoyé par admin</p>
+                        <p class="mt-0.5 text-sm font-medium text-slate-900 break-words">
+                            {{ $attestation->envoyePar?->nom_complet ?? '—' }}</p>
+                        <p class="text-xs text-accent-700 tabular-nums">{{ $attestation->envoye_le?->format('d/m/Y') }}</p>
+                    </div>
+                @endif
 
                 @if ($attestation->motif_demande)
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-xs text-slate-400 uppercase font-medium mb-1">Motif de la demande</p>
-                        <p class="text-slate-700 text-sm">{{ $attestation->motif_demande }}</p>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Motif de la demande</h3>
+                        <p class="mt-1 text-sm text-slate-700 break-words whitespace-pre-line">{{ $attestation->motif_demande }}</p>
                     </div>
                 @endif
 
                 @if ($attestation->commentaire)
-                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
-                        <p class="text-xs text-amber-500 uppercase font-medium mb-1">Commentaire</p>
-                        <p class="text-slate-700 text-sm">{{ $attestation->commentaire }}</p>
+                    <div class="rounded-lg bg-brand-50 border border-brand-100 p-4">
+                        <h3 class="text-xs text-slate-600">Commentaire</h3>
+                        <p class="mt-0.5 text-sm text-slate-900 break-words whitespace-pre-line">{{ $attestation->commentaire }}</p>
                     </div>
                 @endif
-            </div>
 
-            <div class="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100">
-                @if (in_array($attestation->statut, ['valide_mentor', 'approuve_admin']))
-                    <a href="{{ route('admin.attestations.uploadForm', $attestation) }}"
-                        class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all hover:-translate-y-0.5">
-                        <i class="fas fa-upload"></i>Envoyer le document
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-5 border-t border-brand-100">
+                    @if (in_array($attestation->statut, ['valide_mentor', 'approuve_admin']))
+                        <a href="{{ route('admin.attestations.uploadForm', $attestation) }}" class="{{ $btnPrimaire }}">
+                            <i class="fas fa-upload text-xs" aria-hidden="true"></i>Envoyer le document
+                        </a>
+                        <form action="{{ route('admin.attestations.destroy', $attestation) }}" method="POST"
+                            id="del-att-{{ $attestation->id }}" class="inline">
+                            @csrf @method('DELETE')
+                            <button type="button" class="btn-delete w-full sm:w-auto {{ $btnDanger }}"
+                                data-form="del-att-{{ $attestation->id }}">
+                                <i class="fas fa-trash text-xs" aria-hidden="true"></i>Rejeter &amp; Supprimer
+                            </button>
+                        </form>
+                    @endif
+                    @if ($attestation->fichier)
+                        <a href="{{ route('admin.attestations.telecharger', $attestation) }}" class="{{ $btnSecondaire }}">
+                            <i class="fas fa-download text-xs" aria-hidden="true"></i>Télécharger
+                        </a>
+                    @endif
+                    <a href="{{ route('admin.attestations.index') }}" class="sm:ml-auto {{ $btnSecondaire }}">
+                        <i class="fas fa-arrow-left text-xs text-slate-400" aria-hidden="true"></i>Retour
                     </a>
-                    <form action="{{ route('admin.attestations.destroy', $attestation) }}" method="POST"
-                        id="del-att-{{ $attestation->id }}" class="inline">
-                        @csrf @method('DELETE')
-                        <button type="button"
-                            class="btn-delete flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium transition hover:shadow-lg"
-                            data-form="del-att-{{ $attestation->id }}">
-                            <i class="fas fa-trash"></i>Rejeter & Supprimer
-                        </button>
-                    </form>
-                @endif
-                @if ($attestation->fichier)
-                    <a href="{{ route('admin.attestations.telecharger', $attestation) }}"
-                        class="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition hover:shadow-lg">
-                        <i class="fas fa-download"></i>Télécharger
-                    </a>
-                @endif
-                <a href="{{ route('admin.attestations.index') }}"
-                    class="flex items-center gap-2 border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition ml-auto">
-                    <i class="fas fa-arrow-left"></i>Retour
-                </a>
+                </div>
             </div>
-        </div>
+        </article>
     </div>
 @endsection
