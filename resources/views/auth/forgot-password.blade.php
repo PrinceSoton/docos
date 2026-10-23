@@ -1,103 +1,76 @@
 @extends('layouts.app')
 @section('titre', 'Mot de passe oublié')
+@php
+    // Fil d'étapes : une fois le lien envoyé, l'étape suivante se passe dans la boîte de réception
+    $lienEnvoye = (bool) session('status');
+    $etapes = [
+        ['Demander le lien', $lienEnvoye ? 'fait' : 'actif'],
+        ["Ouvrir l'e-mail reçu", $lienEnvoye ? 'actif' : 'a_venir'],
+        ['Choisir un nouveau mot de passe', 'a_venir'],
+    ];
+@endphp
+@section('panneau_surtitre', 'Réinitialisation du mot de passe')
+@section('panneau_titre', 'Retrouvez l\'accès à votre espace')
+@section('panneau_texte', 'Indiquez l\'adresse email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.')
 @section('content')
-    <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        <!-- Arrière‑plan -->
-        <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900"></div>
-            <div
-                class="absolute top-0 left-0 w-96 h-96 bg-indigo-500 rounded-full opacity-10 blur-3xl -translate-x-1/2 -translate-y-1/2">
-            </div>
-            <div
-                class="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full opacity-10 blur-3xl translate-x-1/2 translate-y-1/2">
-            </div>
-            <div
-                class="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-400 rounded-full opacity-5 blur-3xl -translate-x-1/2 -translate-y-1/2">
-            </div>
-        </div>
+    <div class="rounded-2xl border border-brand-100 bg-white p-5 sm:p-8 shadow-[0_24px_48px_-28px_rgba(11,37,64,.4)]">
+        <h1 class="text-2xl font-bold tracking-tight text-brand-900">Mot de passe oublié</h1>
+        <p class="mt-1 text-sm text-slate-600">
+            Saisissez votre adresse email. Un lien de réinitialisation vous sera envoyé.
+        </p>
 
-        <div class="w-full max-w-md relative z-10" data-aos="fade-up">
-            <!-- Logo -->
-            <div class="text-center mb-8">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 shadow-2xl mb-4 hover:scale-105 transition-transform duration-300">
-                    <img src="{{ asset('logo.png') }}" alt="DOCOS" class="w-14 h-14 object-contain rounded-xl">
-                </div>
-                <h1 class="text-white font-bold text-3xl tracking-tight">DOCOS</h1>
-                <p class="text-indigo-300 text-sm mt-1">Réinitialisation du mot de passe</p>
+        @if ($errors->any())
+            <div class="auth-erreur mt-5" role="alert">
+                @foreach ($errors->all() as $e)
+                    <p class="flex items-start gap-2">
+                        <i class="fas fa-exclamation-circle mt-0.5 text-red-700" aria-hidden="true"></i>
+                        <span>{{ $e }}</span>
+                    </p>
+                @endforeach
             </div>
+        @endif
 
-            <!-- Carte -->
-            <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-                <h2 class="text-white font-bold text-xl mb-1 text-center">Mot de passe oublié</h2>
-                <p class="text-indigo-300 text-sm text-center mb-6">
-                    Saisissez votre adresse email. Un lien de réinitialisation vous sera envoyé.
+        @if (session('status'))
+            <div class="auth-info mt-5" role="status">
+                <p class="flex items-start gap-2">
+                    <i class="fas fa-envelope-open-text mt-0.5" aria-hidden="true"></i>
+                    <span>{{ session('status') }}</span>
                 </p>
+                <p class="mt-1.5 pl-6 text-accent-700">Ouvrez l'e-mail reçu et suivez le lien pour continuer.</p>
+            </div>
+        @endif
 
-                @if ($errors->any())
-                    <div class="mb-4 p-3 bg-red-500/20 border border-red-400/30 rounded-xl">
-                        @foreach ($errors->all() as $e)
-                            <p class="text-red-200 text-sm">{{ $e }}</p>
-                        @endforeach
-                    </div>
-                @endif
+        <form method="POST" action="{{ route('password.email') }}" class="no-loader mt-6 space-y-5">
+            @csrf
 
-                @if (session('status'))
-                    <div class="mb-4 p-3 bg-green-500/20 border border-green-400/30 rounded-xl">
-                        <p class="text-green-200 text-sm">{{ session('status') }}</p>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('password.email') }}" class="no-loader">
-                    @csrf
-
-                    <div class="mb-5">
-                        <label class="block text-indigo-200 text-sm font-medium mb-2">
-                            <i class="fas fa-envelope mr-2"></i>Adresse email
-                        </label>
-                        <div class="relative">
-                            <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                                class="w-full bg-white/10 border border-white/20 text-white placeholder-indigo-300 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:border-indigo-400 focus:bg-white/15 transition-all duration-200"
-                                placeholder="votre@email.com">
-                            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300 text-sm"></i>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="submitBtn"
-                        class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                        <i class="fas fa-paper-plane"></i>
-                        <span>Envoyer le lien</span>
-                    </button>
-                </form>
-
-                <div class="mt-5 text-center">
-                    <a href="{{ route('login') }}" class="text-indigo-300 hover:text-white text-sm transition">
-                        <i class="fas fa-arrow-left mr-1"></i>Retour à la connexion
-                    </a>
+            <div>
+                <label for="email" class="auth-label">Adresse email</label>
+                <div class="relative">
+                    <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
+                        autocomplete="email" @error('email') aria-invalid="true" @enderror
+                        class="auth-input {{ $errors->has('email') ? 'auth-input-invalide' : '' }}" placeholder="votre@email.com">
+                    <i class="fas fa-envelope auth-icone" aria-hidden="true"></i>
                 </div>
             </div>
 
-            <p class="text-center text-indigo-300/60 text-xs mt-6">
-                © {{ date('Y') }} DOCOS — Système de Gestion des Stagiaires
-            </p>
-        </div>
+            <button type="submit" id="submitBtn" class="auth-btn">
+                <i class="fas fa-paper-plane text-xs" aria-hidden="true"></i>
+                <span>Envoyer le lien</span>
+            </button>
+        </form>
     </div>
+
+    <p class="mt-5 text-center">
+        <a href="{{ route('login') }}" class="auth-lien inline-flex items-center gap-1.5">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>Retour à la connexion
+        </a>
+    </p>
 @endsection
 
 @push('scripts')
     <script>
-        // Animation d'entrée GSAP
-        gsap.from('.max-w-md > *', {
-            y: 30,
-            opacity: 0,
-            duration: .8,
-            stagger: .15,
-            ease: 'power2.out',
-            delay: .3
-        });
-
         // Loader lors de la soumission
-        document.querySelector('form')?.addEventListener('submit', function() {
+        document.querySelector('main form')?.addEventListener('submit', function() {
             const btn = document.getElementById('submitBtn');
             if (btn) {
                 btn.disabled = true;
