@@ -83,7 +83,7 @@
                     </div>
 
                     <!-- En-têtes de colonnes (écrans moyens et plus) -->
-                    <div class="hidden md:grid grid-cols-[minmax(0,1fr)_auto_16rem] gap-4 px-5 sm:px-6 py-2.5 bg-brand-50 border-b border-brand-100 text-xs font-medium text-slate-600"
+                    <div class="hidden xl:grid grid-cols-[minmax(0,1fr)_auto_16rem] gap-4 px-5 sm:px-6 py-2.5 bg-brand-50 border-b border-brand-100 text-xs font-medium text-slate-600"
                         aria-hidden="true">
                         <span>Stagiaire</span>
                         <span class="w-[15.5rem] text-center">Statut</span>
@@ -94,7 +94,7 @@
                         @foreach ($stagiaires as $i => $stag)
                             @php $p = $presencesExistantes->get($stag->id); @endphp
                             <li
-                                class="px-5 sm:px-6 py-4 hover:bg-brand-50/60 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_16rem] gap-3 md:gap-4 md:items-center">
+                                class="px-5 sm:px-6 py-4 hover:bg-brand-50/60 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto_16rem] gap-3 md:gap-4 md:items-center">
                                 <input type="hidden" name="presences[{{ $i }}][stagiaire_id]" value="{{ $stag->id }}">
 
                                 <div class="flex items-center gap-3 min-w-0">
@@ -117,7 +117,7 @@
 
                                 <fieldset>
                                     <legend class="sr-only">Statut de {{ $stag->user->nom_complet }}</legend>
-                                    <div class="grid grid-cols-3 gap-2 md:w-[15.5rem]">
+                                    <div class="grid grid-cols-3 gap-2 xl:w-[15.5rem]">
                                         @foreach (['present' => 'Présent', 'retard' => 'Retard', 'absent' => 'Absent'] as $val => $label)
                                             @php [, $dot, $actif] = $choix[$val]; @endphp
                                             <label class="cursor-pointer">
@@ -141,7 +141,7 @@
                                     <label for="motif-{{ $i }}" class="sr-only">Motif pour
                                         {{ $stag->user->nom_complet }}</label>
                                     <input type="text"
-                                        name="presences[{{ $i }}][motif]"
+                                        name="presences[{{ $i }}][motif]" maxlength="255"
                                         id="motif-{{ $i }}"
                                         value="{{ $p->motif ?? '' }}"
                                         placeholder="Motif si absent / retard..."

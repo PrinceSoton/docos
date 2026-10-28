@@ -126,48 +126,4 @@
     </div>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const projetSelect    = document.getElementById('projetSelect');
-    const stagiaireSelect = document.getElementById('stagiaireSelect');
-
-    // Endpoint unique : /mentor/taches/stagiaires-disponibles
-    const endpoint = '{{ route('mentor.tasks.getStagiairesDisponibles') }}';
-
-    function loadStagiaires(projectId) {
-        stagiaireSelect.innerHTML = '<option value="">-- Chargement... --</option>';
-
-        const url = projectId ? endpoint + '?project_id=' + encodeURIComponent(projectId) : endpoint;
-
-        fetch(url, { headers: { 'Accept': 'application/json' } })
-            .then(r => { if (!r.ok) throw new Error('Erreur réseau'); return r.json(); })
-            .then(data => {
-                stagiaireSelect.innerHTML = '<option value="">-- Sélectionner un stagiaire --</option>';
-                if (data.length === 0) {
-                    stagiaireSelect.innerHTML = '<option value="">Aucun stagiaire disponible</option>';
-                    return;
-                }
-                data.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.nom + ' — ' + s.matricule;
-                    stagiaireSelect.appendChild(opt);
-                });
-
-                // Restaurer la valeur old() si erreur de validation
-                const oldStagiaire = '{{ old('stagiaire_id') }}';
-                if (oldStagiaire) stagiaireSelect.value = oldStagiaire;
-            })
-            .catch(err => {
-                console.error(err);
-                stagiaireSelect.innerHTML = '<option value="">Erreur de chargement</option>';
-            });
-    }
-
-    projetSelect.addEventListener('change', function () {
-        loadStagiaires(this.value);
-    });
-});
-</script>
-@endpush
+@include('mentor.tasks.stagiaire-select-script', ['projectSelectId' => 'projetSelect', 'stagiaireSelectId' => 'stagiaireSelect'])

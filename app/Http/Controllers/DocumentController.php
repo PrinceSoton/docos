@@ -93,9 +93,11 @@ class DocumentController extends Controller
             'fichier'     => 'nullable|file|max:51200',
             'partage_tous'=> 'boolean',
             'partages'    => 'nullable|array',
+            'partages.*'  => 'exists:users,id',
         ]);
 
-        $donnees = $request->only('titre', 'description', 'partage_tous');
+        $donnees = $request->only('titre', 'description');
+        $donnees['partage_tous'] = $request->boolean('partage_tous');
 
         if ($request->hasFile('fichier')) {
             Storage::disk('public')->delete($document->fichier);
@@ -108,6 +110,8 @@ class DocumentController extends Controller
 
         if (!$request->boolean('partage_tous')) {
             $document->partagesAvec()->sync($request->partages ?? []);
+        } else {
+            $document->partagesAvec()->detach();
         }
 
         return redirect()->route('documents.index')->with('succes', 'Document mis à jour.');

@@ -61,12 +61,12 @@
 
                 <section class="bg-white border border-brand-100 rounded-xl overflow-hidden">
                     <div
-                        class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        class="px-5 sm:px-6 py-3.5 bg-brand-50 border-b border-brand-100 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                         <h3 class="text-base font-semibold text-slate-900">
                             {{ $stagiaires->count() }} stagiaire(s)
                             <span class="font-normal text-slate-600">— {{ $date->translatedFormat('l d F Y') }}</span>
                         </h3>
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap gap-2">
                             <button type="button" onclick="toutMarquer('present')" class="flex-1 sm:flex-none {{ $btnPetitSecondaire }}">
                                 <i class="fas fa-check text-slate-400" aria-hidden="true"></i>Tous présents
                             </button>
@@ -77,7 +77,7 @@
                     </div>
 
                     <!-- En-têtes de colonnes (écrans moyens et plus) -->
-                    <div class="hidden md:grid grid-cols-[minmax(0,1fr)_auto_16rem] gap-4 px-5 sm:px-6 py-2.5 bg-brand-50 border-b border-brand-100 text-xs font-medium text-slate-600"
+                    <div class="hidden xl:grid grid-cols-[minmax(0,1fr)_auto_16rem] gap-4 px-5 sm:px-6 py-2.5 bg-brand-50 border-b border-brand-100 text-xs font-medium text-slate-600"
                         aria-hidden="true">
                         <span>Stagiaire</span>
                         <span class="w-[15.5rem] text-center">Statut</span>
@@ -87,7 +87,7 @@
                     <ul class="divide-y divide-slate-100">
                         @foreach ($stagiaires as $i => $stag)
                             @php $p = $presencesExistantes->get($stag->id); @endphp
-                            <li class="px-5 sm:px-6 py-4 hover:bg-slate-50 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_16rem] gap-3 md:gap-4 md:items-center">
+                            <li class="px-5 sm:px-6 py-4 hover:bg-slate-50 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto_16rem] gap-3 md:gap-4 md:items-center">
                                 <input type="hidden" name="presences[{{ $i }}][stagiaire_id]" value="{{ $stag->id }}">
 
                                 <div class="flex items-center gap-3 min-w-0">
@@ -109,7 +109,7 @@
 
                                 <fieldset>
                                     <legend class="sr-only">Statut de {{ $stag->user->nom_complet }}</legend>
-                                    <div class="grid grid-cols-3 gap-2 md:w-[15.5rem]">
+                                    <div class="grid grid-cols-3 gap-2 xl:w-[15.5rem]">
                                         @foreach (['present' => 'Présent', 'retard' => 'Retard', 'absent' => 'Absent'] as $val => $label)
                                             @php [, $dot, $actif] = $choix[$val]; @endphp
                                             <label class="cursor-pointer">
@@ -129,7 +129,7 @@
                                 <div>
                                     <label for="motif-{{ $i }}" class="sr-only">Motif pour
                                         {{ $stag->user->nom_complet }}</label>
-                                    <input type="text" name="presences[{{ $i }}][motif]" id="motif-{{ $i }}"
+                                    <input type="text" name="presences[{{ $i }}][motif]" maxlength="255" id="motif-{{ $i }}"
                                         value="{{ $p->motif ?? '' }}" placeholder="Motif si absent / retard..."
                                         class="{{ $champ }}">
                                 </div>

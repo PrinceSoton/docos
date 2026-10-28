@@ -66,7 +66,7 @@ class PresenceController extends Controller
         }
 
         $request->validate([
-            'motif'        => 'nullable|string|max:500',
+            'motif'        => 'nullable|string|max:255',
             'justificatif' => 'nullable|file|max:10240',
         ]);
 
@@ -148,6 +148,15 @@ class PresenceController extends Controller
         $stagiaire = Auth::user()->stagiaire;
         abort_if($presence->stagiaire_id !== $stagiaire->id, 403);
         return view('stagiaire.presence.show', compact('presence'));
+    }
+
+    public function telechargerPermission(Permission $permission)
+    {
+        abort_if($permission->stagiaire_id !== Auth::user()->stagiaire->id, 403);
+        abort_if(!$permission->justificatif, 404);
+        $chemin = storage_path('app/public/' . $permission->justificatif);
+        abort_unless(file_exists($chemin), 404, 'Fichier introuvable.');
+        return response()->download($chemin);
     }
 
     public function telechargerJustificatif(Presence $presence)

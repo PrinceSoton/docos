@@ -32,6 +32,7 @@ class AttestationManagementController extends Controller
 
     public function upload(Request $request, Attestation $attestation)
     {
+        abort_unless(in_array($attestation->statut, ['valide_mentor', 'approuve_admin']), 403, 'Action non autorisée.');
         $request->validate([
             'fichier'     => 'required|file|max:20480',
             'commentaire' => 'nullable|string',

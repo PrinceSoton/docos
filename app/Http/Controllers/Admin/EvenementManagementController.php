@@ -38,6 +38,7 @@ class EvenementManagementController extends Controller
         ]);
 
         $donnees = $request->only('titre', 'contenu', 'type', 'date_evenement', 'partage_tous');
+        $donnees['partage_tous'] = $request->boolean('partage_tous');
         $donnees['cree_par'] = Auth::id();
 
         if ($request->hasFile('image')) {
@@ -77,11 +78,13 @@ class EvenementManagementController extends Controller
             'date_evenement' => 'nullable|date',
             'partage_tous'   => 'boolean',
             'destinataires'  => 'nullable|array',
+            'destinataires.*'=> 'exists:users,id',
             'image'          => 'nullable|image|max:5120',
             'fichier'        => 'nullable|file|max:20480',
         ]);
 
         $donnees = $request->only('titre', 'contenu', 'type', 'date_evenement', 'partage_tous');
+        $donnees['partage_tous'] = $request->boolean('partage_tous');
 
         if ($request->hasFile('image')) {
             if ($evenement->image) Storage::disk('public')->delete($evenement->image);
@@ -96,6 +99,8 @@ class EvenementManagementController extends Controller
 
         if (!$request->boolean('partage_tous')) {
             $evenement->utilisateurssCibles()->sync($request->destinataires ?? []);
+        } else {
+            $evenement->utilisateurssCibles()->detach();
         }
 
         return redirect()->route('admin.evenements.index')->with('succes', 'Évènement mis à jour.');

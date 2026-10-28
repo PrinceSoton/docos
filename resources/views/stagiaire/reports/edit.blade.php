@@ -32,7 +32,7 @@
                         <label for="type_select" class="block text-sm font-medium text-slate-700 mb-1">Type *</label>
                         <select name="type" id="type_select" required class="{{ $champ }}">
                             @foreach (['journalier' => 'Journalier', 'hebdomadaire' => 'Hebdomadaire', 'mensuel' => 'Mensuel', 'final' => 'Final', 'autre' => 'Autre'] as $v => $l)
-                                <option value="{{ $v }}" {{ $report->type === $v ? 'selected' : '' }}>
+                                <option value="{{ $v }}" {{ old('type', $report->type) === $v ? 'selected' : '' }}>
                                     {{ $l }}</option>
                             @endforeach
                         </select>
@@ -46,7 +46,7 @@
                         <select name="project_id" id="project_id" class="{{ $champ }}">
                             <option value="">-- Aucun --</option>
                             @foreach ($projets as $p)
-                                <option value="{{ $p->id }}" {{ $report->project_id == $p->id ? 'selected' : '' }}>
+                                <option value="{{ $p->id }}" {{ old('project_id', $report->project_id) == $p->id ? 'selected' : '' }}>
                                     {{ $p->titre }}</option>
                             @endforeach
                         </select>
@@ -57,7 +57,7 @@
                 </div>
 
                 <div id="type_autre_div"
-                    style="{{ $report->type == 'autre' && $report->type_autre ? '' : 'display:none;' }}">
+                    style="{{ old('type', $report->type) === 'autre' ? '' : 'display:none;' }}">
                     <label for="type_autre" class="block text-sm font-medium text-slate-700 mb-1">Précisez le type *</label>
                     <input type="text" id="type_autre" name="type_autre" value="{{ old('type_autre', $report->type_autre) }}"
                         class="{{ $champ }}" placeholder="Ex: Rapport technique...">

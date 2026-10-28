@@ -34,11 +34,11 @@
                             <select id="type" name="type" required
                                 class="{{ $errors->has('type') ? $champErreur : $champ }}"
                                 @error('type') aria-invalid="true" @enderror>
-                                <option value="information" {{ $evenement->type === 'information' ? 'selected' : '' }}>
+                                <option value="information" {{ old('type', $evenement->type) === 'information' ? 'selected' : '' }}>
                                     Information</option>
-                                <option value="evenement" {{ $evenement->type === 'evenement' ? 'selected' : '' }}>Événement
+                                <option value="evenement" {{ old('type', $evenement->type) === 'evenement' ? 'selected' : '' }}>Événement
                                 </option>
-                                <option value="note" {{ $evenement->type === 'note' ? 'selected' : '' }}>Note</option>
+                                <option value="note" {{ old('type', $evenement->type) === 'note' ? 'selected' : '' }}>Note</option>
                             </select>
                             @error('type')
                                 <p class="mt-1 text-sm text-red-700">{{ $message }}</p>

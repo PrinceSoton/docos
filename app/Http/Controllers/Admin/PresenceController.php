@@ -20,6 +20,12 @@ class PresenceController extends Controller
 
     public function index(Request $request)
     {
+        $request->validate([
+            'date' => 'nullable|date_format:Y-m-d',
+            'mois' => 'nullable|date_format:Y-m',
+            'annee' => 'nullable|integer|between:1,9999',
+            'stagiaire_id' => 'nullable|integer|exists:stagiaires,id',
+        ]);
         $stagiaires = Stagiaire::with('user')->where('statut', 'en_cours')->get();
         $stagiaire  = null;
         $query = Presence::with('stagiaire.user', 'marquePar');
@@ -69,6 +75,7 @@ class PresenceController extends Controller
     /** Affiche le formulaire de marquage pour une date donnée */
     public function formMarquage(Request $request)
     {
+        $request->validate(['date' => 'nullable|date_format:Y-m-d']);
         $date = $request->filled('date')
             ? Carbon::parse($request->date)
             : Carbon::today();
@@ -105,7 +112,7 @@ class PresenceController extends Controller
             'presences'                 => 'required|array|min:1',
             'presences.*.stagiaire_id'  => 'required|exists:stagiaires,id',
             'presences.*.statut'        => 'required|in:present,retard,absent',
-            'presences.*.motif'         => 'nullable|string|max:500',
+            'presences.*.motif'         => 'nullable|string|max:255',
         ]);
 
         $date = Carbon::parse($request->date);

@@ -23,7 +23,7 @@
     <div class="max-w-6xl mx-auto space-y-5">
 
         <!-- Barre d'outils -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <p class="text-sm text-slate-600">Suivi des présences et validation des permissions</p>
             <a href="{{ route('mentor.presences.formMarquage') }}" class="w-full sm:w-auto {{ $btnPrimaire }}">
                 <i class="fas fa-user-check text-xs" aria-hidden="true"></i>Marquer les présences
@@ -164,7 +164,7 @@
         <!-- Tableau des présences -->
         @if ($presences->count() > 0)
             <section class="{{ $panneau }}">
-                <div class="{{ $enTete }} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="{{ $enTete }} flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <h3 class="text-base font-semibold text-slate-900 min-w-0">
                         @if ($stagiaire)
                             Présences de {{ $stagiaire->user->nom_complet }}

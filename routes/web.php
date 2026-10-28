@@ -271,6 +271,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/marquer', [StagPresence::class, 'marquer'])->name('marquer');
             Route::post('/depart', [StagPresence::class, 'marquerDepart'])->name('depart');
             Route::post('/permission', [StagPresence::class, 'demandePermission'])->name('demandePermission');
+            Route::get('/permissions/{permission}/justificatif', [StagPresence::class, 'telechargerPermission'])->name('telechargerPermission');
             Route::get('/{presence}', [StagPresence::class, 'show'])->name('show');
             Route::get('/{presence}/justificatif', [StagPresence::class, 'telechargerJustificatif'])->name('telechargerJustificatif');
         });
