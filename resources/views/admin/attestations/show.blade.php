@@ -57,7 +57,7 @@
                     </div>
                     @if ($attestation->valide_par_mentor)
                         <div class="min-w-0">
-                            <dt class="text-xs text-slate-600">Validé par mentor</dt>
+                            <dt class="text-xs text-slate-600">{{ $attestation->statut === 'refuse' ? 'Refusé par le mentor' : 'Validé par le mentor' }}</dt>
                             <dd class="mt-0.5 text-sm font-medium text-slate-900 break-words">
                                 {{ $attestation->validePar?->nom_complet ?? '—' }}</dd>
                             <dd class="text-xs text-slate-600 tabular-nums">{{ $attestation->valide_le_mentor?->format('d/m/Y') }}</dd>

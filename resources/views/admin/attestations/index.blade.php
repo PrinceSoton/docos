@@ -54,6 +54,7 @@
                     <option value="">Tous statuts</option>
                     <option value="en_attente">En attente</option>
                     <option value="valide_mentor">Validé mentor</option>
+                    <option value="approuve_admin">Approuvé</option>
                     <option value="envoye">Envoyé</option>
                     <option value="refuse">Refusé</option>
                 </select>
@@ -87,7 +88,7 @@
                                 <th scope="col" class="px-3 py-2.5">Type</th>
                                 <th scope="col" class="px-3 py-2.5">Statut</th>
                                 <th scope="col" class="px-3 py-2.5">Demandé le</th>
-                                <th scope="col" class="px-3 py-2.5">Validé mentor</th>
+                                <th scope="col" class="px-3 py-2.5">Décision mentor</th>
                                 <th scope="col" class="px-5 py-2.5 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -195,7 +196,7 @@
                                         {{ $att->created_at->format('d/m/Y H:i') }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs text-slate-500">Validé mentor</dt>
+                                    <dt class="text-xs text-slate-500">Décision mentor</dt>
                                     <dd class="mt-0.5 font-medium text-slate-900 tabular-nums">
                                         {{ $att->valide_le_mentor ? $att->valide_le_mentor->format('d/m/Y') : '—' }}</dd>
                                 </div>

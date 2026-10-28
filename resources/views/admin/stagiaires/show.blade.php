@@ -211,11 +211,7 @@
                                     {{ $rapport->titre }}</p>
                                 <p class="text-xs text-slate-500 tabular-nums">{{ $rapport->created_at->format('d/m/Y') }}</p>
                             </div>
-                            <a href="{{ route('admin.presences.index', ['stagiaire_id' => $stagiaire->id]) }}"
-                                class="flex-shrink-0 rounded-md hover:opacity-80 {{ $focus }}"
-                                title="Statut : {{ $libelle }}">
-                                <span class="{{ $badge }} {{ $cls }}">{{ $libelle }}</span>
-                            </a>
+                            <span class="flex-shrink-0 {{ $badge }} {{ $cls }}">{{ $libelle }}</span>
                         </li>
                     @empty
                         <li class="py-6 text-center">

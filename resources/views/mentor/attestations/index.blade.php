@@ -40,6 +40,7 @@
                         <option value="">Tous statuts</option>
                         <option value="en_attente">En attente</option>
                         <option value="valide_mentor">Validé</option>
+                        <option value="approuve_admin">Approuvé</option>
                         <option value="refuse">Refusé</option>
                         <option value="envoye">Envoyé</option>
                     </select>
