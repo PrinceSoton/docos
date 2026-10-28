@@ -146,11 +146,11 @@
                                 <label for="statut" class="{{ $label }}">Statut {!! $requis !!}</label>
                                 <select id="statut" name="statut" required class="{{ $champ('statut') }}"
                                     @error('statut') aria-invalid="true" aria-describedby="statut-erreur" @enderror>
-                                    <option value="en_cours" {{ $stagiaire->statut === 'en_cours' ? 'selected' : '' }}>En cours
+                                    <option value="en_cours" {{ old('statut', $stagiaire->statut) === 'en_cours' ? 'selected' : '' }}>En cours
                                     </option>
-                                    <option value="termine" {{ $stagiaire->statut === 'termine' ? 'selected' : '' }}>Terminé
+                                    <option value="termine" {{ old('statut', $stagiaire->statut) === 'termine' ? 'selected' : '' }}>Terminé
                                     </option>
-                                    <option value="suspendu" {{ $stagiaire->statut === 'suspendu' ? 'selected' : '' }}>Suspendu
+                                    <option value="suspendu" {{ old('statut', $stagiaire->statut) === 'suspendu' ? 'selected' : '' }}>Suspendu
                                     </option>
                                 </select>
                                 @error('statut')
@@ -164,7 +164,7 @@
                                     <option value="">-- Aucun --</option>
                                     @foreach ($mentors as $mentor)
                                         <option value="{{ $mentor->user_id }}"
-                                            {{ $stagiaire->mentor_id == $mentor->user_id ? 'selected' : '' }}>
+                                            {{ old('mentor_id', $stagiaire->mentor_id) == $mentor->user_id ? 'selected' : '' }}>
                                             {{ $mentor->user->nom_complet }}
                                         </option>
                                     @endforeach

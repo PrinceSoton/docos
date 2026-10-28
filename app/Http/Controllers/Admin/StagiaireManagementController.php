@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\BienvenueStagiaire;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class StagiaireManagementController extends Controller
 {
@@ -47,7 +48,7 @@ class StagiaireManagementController extends Controller
             'niveau_etude'=> 'nullable|string|max:100',
             'date_debut'  => 'required|date',
             'date_fin'    => 'required|date|after:date_debut',
-            'mentor_id'   => 'nullable|exists:users,id',
+            'mentor_id'   => ['nullable', Rule::exists('users', 'id')->where('role', 'mentor')],
             'description' => 'nullable|string',
             'cv'          => 'nullable|file|mimes:pdf,doc,docx|max:5120',
             'photo'       => 'nullable|image|max:2048',
@@ -121,7 +122,7 @@ class StagiaireManagementController extends Controller
             'niveau_etude'=> 'nullable|string|max:100',
             'date_debut'  => 'required|date',
             'date_fin'    => 'required|date|after:date_debut',
-            'mentor_id'   => 'nullable|exists:users,id',
+            'mentor_id'   => ['nullable', Rule::exists('users', 'id')->where('role', 'mentor')],
             'statut'      => 'required|in:en_cours,termine,suspendu',
             'description' => 'nullable|string',
             'cv'          => 'nullable|file|mimes:pdf,doc,docx|max:5120',
