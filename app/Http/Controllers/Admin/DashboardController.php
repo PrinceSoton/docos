@@ -23,7 +23,7 @@ class DashboardController extends Controller
             'stagiaires_actifs'=> Stagiaire::where('statut', 'en_cours')->count(),
             'total_projets'    => Project::count(),
             'rapports_en_attente' => Report::where('statut', 'soumis')->count(),
-            'attestations_en_attente' => Attestation::where('statut', 'valide_mentor')->count(),
+            'attestations_en_attente' => Attestation::whereIn('statut', ['valide_mentor', 'approuve_admin'])->count(),
             'presences_aujourd_hui' => Presence::whereDate('date', today())->count(),
         ];
 

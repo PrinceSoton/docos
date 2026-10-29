@@ -39,7 +39,7 @@
                         <label for="project_id" class="block text-sm font-medium text-slate-700 mb-1">
                             Projet <span class="text-xs font-normal text-slate-500">(optionnel)</span>
                         </label>
-                        <select id="project_id" name="project_id" required class="{{ $champ }}">
+                        <select id="project_id" name="project_id" class="{{ $champ }}">
                             <option value="">-- Aucun projet (tâche indépendante) --</option>
                             @foreach ($projets as $p)
                                 <option value="{{ $p->id }}"
@@ -140,3 +140,5 @@
         </div>
     </div>
 @endsection
+
+@include('mentor.tasks.stagiaire-select-script', ['projectSelectId' => 'project_id', 'stagiaireSelectId' => 'stagiaire_id'])

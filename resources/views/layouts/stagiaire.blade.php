@@ -427,7 +427,7 @@
                     ];
                 @endphp
                 @foreach ($routes as [$route, $icon, $label])
-                    @php $actif = request()->routeIs($route); @endphp
+                    @php $actif = request()->routeIs(str_ends_with($route, '.index') ? substr($route, 0, -5) . '*' : $route); @endphp
                     <a href="{{ route($route) }}" class="sidebar-item {{ $actif ? 'active' : '' }}"
                         @if ($actif) aria-current="page" @endif>
                         <i class="fas fa-{{ $icon }}" aria-hidden="true"></i>
@@ -438,7 +438,8 @@
 
             <!-- Pied de menu -->
             <div class="py-3 border-t border-brand-100 flex-shrink-0">
-                <a href="{{ route('profile.index') }}" class="sidebar-item">
+                <a href="{{ route('profile.index') }}" class="sidebar-item {{ request()->routeIs('profile.*') ? 'active' : '' }}"
+                    @if (request()->routeIs('profile.*')) aria-current="page" @endif>
                     <i class="fas fa-user-cog" aria-hidden="true"></i>
                     <span>Mon Profil</span>
                 </a>

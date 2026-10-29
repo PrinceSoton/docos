@@ -38,9 +38,9 @@
                         <select id="type" name="type" required
                             class="{{ $errors->has('type') ? $champErreur : $champ }}"
                             @error('type') aria-invalid="true" @enderror>
-                            <option value="ferie" {{ $calendar->type === 'ferie' ? 'selected' : '' }}>Jour férié</option>
-                            <option value="sejour" {{ $calendar->type === 'sejour' ? 'selected' : '' }}>Jour de séjour</option>
-                            <option value="autre" {{ $calendar->type === 'autre' ? 'selected' : '' }}>Autre</option>
+                            <option value="ferie" {{ old('type', $calendar->type) === 'ferie' ? 'selected' : '' }}>Jour férié</option>
+                            <option value="sejour" {{ old('type', $calendar->type) === 'sejour' ? 'selected' : '' }}>Jour de séjour</option>
+                            <option value="autre" {{ old('type', $calendar->type) === 'autre' ? 'selected' : '' }}>Autre</option>
                         </select>
                         @error('type')
                             <p class="mt-1 text-sm text-red-700">{{ $message }}</p>

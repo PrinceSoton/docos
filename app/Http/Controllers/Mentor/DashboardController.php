@@ -19,13 +19,17 @@ class DashboardController extends Controller
         $stagiaires = Stagiaire::with('user')
             ->where('mentor_id', $mentorId)
             ->where('statut', 'en_cours')->get();
+        $stagiaireIds = Stagiaire::where('mentor_id', $mentorId)->pluck('id');
 
         $stats = [
             'stagiaires'       => $stagiaires->count(),
-            'projets'          => Project::where('mentor_id', $mentorId)->count(),
-            'rapports_soumis'  => Report::whereIn('stagiaire_id', $stagiaires->pluck('id'))->where('statut', 'soumis')->count(),
-            'permissions_en_attente' => Permission::whereIn('stagiaire_id', $stagiaires->pluck('id'))->where('statut', 'en_attente')->count(),
-            'attestations_a_valider' => Attestation::whereIn('stagiaire_id', $stagiaires->pluck('id'))->where('statut', 'en_attente')->count(),
+            'projets'          => Project::where(function ($query) use ($mentorId) {
+                $query->where('mentor_id', $mentorId)
+                    ->orWhereHas('mentors', fn ($mentors) => $mentors->where('user_id', $mentorId));
+            })->count(),
+            'rapports_soumis'  => Report::whereIn('stagiaire_id', $stagiaireIds)->where('statut', 'soumis')->count(),
+            'permissions_en_attente' => Permission::whereIn('stagiaire_id', $stagiaireIds)->where('statut', 'en_attente')->count(),
+            'attestations_a_valider' => Attestation::whereIn('stagiaire_id', $stagiaireIds)->where('statut', 'en_attente')->count(),
         ];
 
         $avancementStagiaires = $stagiaires->map(function ($stag) {
@@ -36,11 +40,11 @@ class DashboardController extends Controller
         });
 
         $rapportsRecents = Report::with('stagiaire.user')
-            ->whereIn('stagiaire_id', $stagiaires->pluck('id'))
+            ->whereIn('stagiaire_id', $stagiaireIds)
             ->where('statut', 'soumis')->latest()->limit(5)->get();
 
         $permissionsEnAttente = Permission::with('stagiaire.user')
-            ->whereIn('stagiaire_id', $stagiaires->pluck('id'))
+            ->whereIn('stagiaire_id', $stagiaireIds)
             ->where('statut', 'en_attente')->get();
 
         return view('mentor.dashboard', compact('stats', 'avancementStagiaires', 'rapportsRecents', 'permissionsEnAttente'));

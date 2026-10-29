@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
@@ -57,9 +58,9 @@ class ProjectController extends Controller
             'statut'             => 'required|in:en_attente,en_cours,termine,suspendu',
             'priorite'           => 'required|in:faible,normale,haute,urgente',
             'stagiaires'         => 'required|array|min:1',
-            'stagiaires.*'       => 'exists:stagiaires,id',
+            'stagiaires.*'       => ['integer', Rule::exists('stagiaires', 'id')->where('mentor_id', Auth::id())->where('statut', 'en_cours')],
             'collaborateurs'     => 'nullable|array',
-            'collaborateurs.*'   => 'exists:users,id',
+            'collaborateurs.*'   => [Rule::exists('users', 'id')->where('role', 'mentor')],
         ]);
 
         DB::transaction(function () use ($request) {
@@ -147,6 +148,13 @@ class ProjectController extends Controller
     {
         abort_unless($project->hasAccess(Auth::user()), 403);
 
+        // Même périmètre que les stagiaires proposés dans le formulaire de modification.
+        $mentorIds = $project->mentors()->pluck('users.id');
+        $stagiairesAccessibles = Stagiaire::where(function ($query) use ($mentorIds, $project) {
+            $query->whereIn('mentor_id', $mentorIds)
+                ->orWhereIn('id', $project->stagiaires()->pluck('stagiaires.id'));
+        })->pluck('id')->all();
+
         $request->validate([
             'titre'              => 'required|string|max:200',
             'description'        => 'nullable|string',
@@ -155,9 +163,9 @@ class ProjectController extends Controller
             'statut'             => 'required|in:en_attente,en_cours,termine,suspendu',
             'priorite'           => 'required|in:faible,normale,haute,urgente',
             'stagiaires'         => 'required|array|min:1',
-            'stagiaires.*'       => 'exists:stagiaires,id',
+            'stagiaires.*'       => [Rule::exists('stagiaires', 'id')->whereIn('id', $stagiairesAccessibles)],
             'collaborateurs'     => 'nullable|array',
-            'collaborateurs.*'   => 'exists:users,id',
+            'collaborateurs.*'   => [Rule::exists('users', 'id')->where('role', 'mentor')],
         ]);
 
         DB::transaction(function () use ($request, $project) {

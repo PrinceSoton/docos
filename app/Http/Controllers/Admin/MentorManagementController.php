@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\BienvenueMentor;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class MentorManagementController extends Controller
 {
@@ -121,7 +122,7 @@ class MentorManagementController extends Controller
     {
         $request->validate([
             'stagiaire_id' => 'required|exists:stagiaires,id',
-            'mentor_id'    => 'required|exists:users,id',
+            'mentor_id'    => ['required', Rule::exists('users', 'id')->where('role', 'mentor')],
         ]);
 
         Stagiaire::findOrFail($request->stagiaire_id)

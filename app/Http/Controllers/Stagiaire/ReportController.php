@@ -8,6 +8,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
 {
@@ -31,7 +32,7 @@ class ReportController extends Controller
         'titre'      => 'required|string|max:200',
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-        'project_id' => 'nullable|exists:projects,id',
+        'project_id' => ['nullable', Rule::exists('projects', 'id')->whereIn('id', Auth::user()->stagiaire->projects()->pluck('projects.id')->all())],
         'fichier'    => 'required|file|max:20480',
     ];
     $request->validate($rules);
@@ -120,7 +121,7 @@ class ReportController extends Controller
         'titre'      => 'required|string|max:200',
         'description'=> 'nullable|string',
         'type'       => 'required|in:journalier,hebdomadaire,mensuel,final,autre',
-        'project_id' => 'nullable|exists:projects,id',
+        'project_id' => ['nullable', Rule::exists('projects', 'id')->whereIn('id', $stagiaire->projects()->pluck('projects.id')->all())],
         'fichier'    => 'nullable|file|max:20480',
     ];
     $request->validate($rules);

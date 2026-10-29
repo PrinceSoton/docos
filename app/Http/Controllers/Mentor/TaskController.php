@@ -147,8 +147,12 @@ class TaskController extends Controller
         $projets = $this->projetsAccessibles();
 
         // Stagiaires disponibles selon le contexte
-        if ($task->project_id) {
-            $stagiaires = $task->project->stagiaires()->with('user')->get();
+        $projectId = old('project_id', $task->project_id);
+        if ($projectId) {
+            $project = Project::find($projectId);
+            $stagiaires = $project && $project->hasAccess(Auth::user())
+                ? $project->stagiaires()->with('user')->get()
+                : collect();
         } else {
             $stagiaires = Stagiaire::with('user')
                 ->where('mentor_id', Auth::id())

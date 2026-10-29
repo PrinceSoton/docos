@@ -56,7 +56,7 @@
             </div>
 
             <div
-                class="mt-4 grid grid-cols-1 md:grid-cols-2 border-t border-slate-100 divide-y divide-slate-100 md:divide-y-0 md:divide-x">
+                class="mt-4 grid grid-cols-1 xl:grid-cols-2 border-t border-slate-100 divide-y divide-slate-100 xl:divide-y-0 xl:divide-x">
 
                 <!-- Arrivée -->
                 <div class="p-5 sm:p-6">
@@ -215,10 +215,10 @@
 
         <!-- Demande de permission -->
         <section class="bg-white border border-brand-100 rounded-xl overflow-hidden lg:col-start-3 lg:row-start-2">
-            <div class="{{ $enTete }} flex items-center justify-between gap-3">
+            <div class="{{ $enTete }} flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-base font-semibold text-slate-900">Permissions</h3>
-                <button type="button" onclick="togglePermission()" aria-controls="permissionForm"
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors {{ $focus }}">
+                <button type="button" onclick="togglePermission()" aria-controls="permissionForm" aria-expanded="{{ $permissionOuverte ? 'true' : 'false' }}"
+                    class="inline-flex shrink-0 whitespace-nowrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors {{ $focus }}">
                     <i class="fas fa-plus text-xs text-slate-400" aria-hidden="true"></i>Nouvelle demande
                 </button>
             </div>
@@ -241,12 +241,12 @@
                 <form action="{{ route('stagiaire.presence.demandePermission') }}" method="POST"
                     enctype="multipart/form-data" class="space-y-4">
                     @csrf
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 lg:grid-cols-1 gap-4">
                         <div>
                             <label for="perm-debut" class="block text-sm font-medium text-slate-700 mb-1">Date de début
                                 *</label>
                             <input type="date" name="date_debut" id="perm-debut" required
-                                min="{{ now()->addDays(1)->format('Y-m-d') }}" value="{{ old('date_debut') }}"
+                                min="{{ now()->addDays(2)->format('Y-m-d') }}" value="{{ old('date_debut') }}"
                                 class="{{ $champ }}">
                             @if ($permissionOuverte)
                                 @error('date_debut')
@@ -324,7 +324,7 @@
                             </p>
                         @endif
                         @if ($perm->justificatif)
-                            <a href="{{ route('stagiaire.presence.telechargerJustificatif', $perm->id) }}" download
+                            <a href="{{ route('stagiaire.presence.telechargerPermission', $perm) }}" download
                                 class="mt-2 {{ $lienFichier }}">
                                 <i class="fas fa-download" aria-hidden="true"></i>Télécharger le justificatif
                             </a>
@@ -446,6 +446,7 @@
             <div class="px-5 sm:px-6 py-4 border-t border-brand-100">{{ $presences->links() }}</div>
         </section>
     </div>
+<noscript><style>#presenceForm, #permissionForm { display: block !important; }</style></noscript>
 @endsection
 @push('scripts')
     <script>
@@ -460,6 +461,7 @@
         function togglePermission() {
             const form = document.getElementById('permissionForm');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            document.querySelector('[aria-controls="permissionForm"]').setAttribute('aria-expanded', form.style.display === 'block' ? 'true' : 'false');
         }
         document.getElementById('search')?.addEventListener('input', function() {
             const val = this.value.toLowerCase();

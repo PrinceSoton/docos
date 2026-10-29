@@ -107,17 +107,18 @@
                                 <label for="role" class="{{ $label }}">Rôle {!! $requis !!}</label>
                                 <select id="role" name="role" required class="{{ $champ }} {{ $bord('role') }}"
                                     @error('role') aria-invalid="true" aria-describedby="role-erreur" @enderror>
-                                    <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrateur</option>
-                                    <option value="mentor" {{ $user->role === 'mentor' ? 'selected' : '' }}>Mentor</option>
-                                    <option value="stagiaire" {{ $user->role === 'stagiaire' ? 'selected' : '' }}>Stagiaire</option>
+                                    <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Administrateur</option>
+                                    <option value="mentor" {{ old('role', $user->role) === 'mentor' ? 'selected' : '' }}>Mentor</option>
+                                    <option value="stagiaire" {{ old('role', $user->role) === 'stagiaire' ? 'selected' : '' }}>Stagiaire</option>
                                 </select>
                                 @error('role')
                                     <p id="role-erreur" class="mt-1 text-sm text-red-700">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div class="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5">
+                                <input type="hidden" name="actif" value="0">
                                 <input type="checkbox" name="actif" id="actif" value="1"
-                                    {{ $user->actif ? 'checked' : '' }} class="{{ $case }}">
+                                    {{ old('actif', $user->actif) ? 'checked' : '' }} class="{{ $case }}">
                                 <label for="actif" class="text-sm font-medium text-slate-700">Compte actif</label>
                             </div>
                         </div>
@@ -140,6 +141,8 @@
                     </fieldset>
                 </div>
 
+                @include('admin.users.role-fields')
+
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-slate-100">
                     <a href="{{ route('admin.users.index') }}" class="{{ $btnSecondaire }}">Annuler</a>
                     <button type="submit" class="{{ $btnPrimaire }}">
@@ -150,3 +153,5 @@
         </div>
     </div>
 @endsection
+
+@include('admin.users.role-fields-script')

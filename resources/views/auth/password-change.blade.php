@@ -89,6 +89,10 @@
                 <span id="submitBtnText">Enregistrer le nouveau mot de passe</span>
             </button>
         </form>
+        <form action="{{ route('logout') }}" method="POST" class="mt-5 text-center">
+            @csrf
+            <button type="submit" class="auth-lien">Se déconnecter</button>
+        </form>
     </div>
 @endsection
 

@@ -34,7 +34,7 @@
         </div>
 
         <!-- Liste des demandes -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
             @forelse($attestations as $att)
                 @php
                     [$libStatut, $clsStatut] = $statuts[$att->statut] ?? [ucfirst(str_replace('_', ' ', (string) $att->statut)), 'bg-slate-100 text-slate-700'];
@@ -58,10 +58,12 @@
                         <ol class="grid grid-cols-3 gap-2" aria-label="Étapes de la demande">
                             @foreach ([['Demande', 0], ['Mentor', 1], ['Reçu', 2]] as [$etapeLabel, $i])
                                 @php
-                                    $done =
-                                        (in_array($att->statut, ['valide_mentor', 'approuve_admin', 'envoye']) && $i <= 1) ||
-                                        ($att->statut === 'envoye' && $i <= 2);
-                                    $echec = $refuse && $i === 0;
+                                    $done = match ($i) {
+                                        0 => true, // La demande existe déjà : son dépôt est terminé.
+                                        1 => in_array($att->statut, ['valide_mentor', 'approuve_admin', 'envoye']),
+                                        2 => $att->statut === 'envoye',
+                                    };
+                                    $echec = $refuse && $i === 1;
                                     $dot = $echec ? 'bg-red-500' : ($done ? 'bg-emerald-500' : 'bg-slate-300');
                                     $etat = $echec ? 'refusée' : ($done ? 'terminée' : 'à venir');
                                 @endphp

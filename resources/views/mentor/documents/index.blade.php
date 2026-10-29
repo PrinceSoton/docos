@@ -16,14 +16,14 @@
 <div class="max-w-6xl mx-auto space-y-5">
 
     <!-- Résumé, recherche et ajout (sur le fond de page) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <p class="text-sm text-slate-600">Gérez et partagez vos fichiers.</p>
         <div class="flex flex-col sm:flex-row gap-2">
             @if ($mesDocs->isNotEmpty())
                 <input type="search" id="searchDocs" placeholder="Rechercher un document..."
                     aria-label="Rechercher dans mes documents" class="w-full sm:w-64 {{ $champ }}">
             @endif
-            <a href="{{ route('documents.create') }}" class="{{ $btnPrimaire }}">
+            <a href="{{ route('documents.create') }}" class="{{ $btnPrimaire }} whitespace-nowrap">
                 <i class="fas fa-plus text-xs" aria-hidden="true"></i>Nouveau document
             </a>
         </div>

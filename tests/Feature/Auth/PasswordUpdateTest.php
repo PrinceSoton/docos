@@ -17,16 +17,16 @@ class PasswordUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->put('/password', [
-                'current_password' => 'password',
+            ->from(route('profile.index'))
+            ->put(route('profile.password'), [
+                'ancien_mot_de_passe' => 'password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.index'));
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
@@ -37,15 +37,15 @@ class PasswordUpdateTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->put('/password', [
-                'current_password' => 'wrong-password',
+            ->from(route('profile.index'))
+            ->put(route('profile.password'), [
+                'ancien_mot_de_passe' => 'wrong-password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
 
         $response
-            ->assertSessionHasErrorsIn('updatePassword', 'current_password')
-            ->assertRedirect('/profile');
+            ->assertSessionHasErrors('ancien_mot_de_passe')
+            ->assertRedirect(route('profile.index'));
     }
 }

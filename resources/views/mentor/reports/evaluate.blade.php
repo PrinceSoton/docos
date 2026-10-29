@@ -77,13 +77,11 @@
                 <div>
                     <label for="noteRange" class="block text-sm font-medium text-slate-700 mb-1">Note sur 20 <span class="font-normal text-slate-500">(optionnel)</span></label>
                     <div class="flex items-center gap-4 rounded-lg bg-brand-50 border border-brand-100 px-4 py-3">
-                        <input type="range" name="note" min="0" max="20"
-                            value="{{ old('note', $report->note ?? 10) }}" id="noteRange"
-                            oninput="document.getElementById('noteVal').textContent=this.value"
-                            class="flex-1 h-2 cursor-pointer accent-brand-800 {{ $focus }}">
-                        <p class="flex-shrink-0 text-sm text-slate-600 tabular-nums" aria-live="polite">
-                            <span id="noteVal" class="text-lg font-semibold text-slate-900">{{ old('note', $report->note ?? 10) }}</span>/20
-                        </p>
+                        <input type="number" name="note" min="0" max="20" step="1"
+                            value="{{ old('note', $report->note) }}" id="noteRange"
+                            aria-describedby="note-aide"
+                            class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 {{ $focus }}">
+                        <p id="note-aide" class="text-sm text-slate-600">Sur 20. Laissez vide pour ne pas attribuer de note.</p>
                     </div>
                     @error('note')
                         <p class="mt-1 text-xs text-red-700">{{ $message }}</p>

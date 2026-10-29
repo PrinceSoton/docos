@@ -27,12 +27,14 @@ class AttestationController extends Controller
     public function validate(Attestation $attestation)
     {
         abort_if($attestation->stagiaire->mentor_id !== Auth::id(), 403);
+        abort_unless($attestation->statut === 'en_attente', 403, 'Demande déjà traitée.');
         return view('mentor.attestations.validate', compact('attestation'));
     }
 
     public function doValidate(Request $request, Attestation $attestation)
     {
         abort_if($attestation->stagiaire->mentor_id !== Auth::id(), 403);
+        abort_unless($attestation->statut === 'en_attente', 403, 'Demande déjà traitée.');
         $request->validate([
             'statut'      => 'required|in:valide_mentor,refuse',
             'commentaire' => 'nullable|string',
